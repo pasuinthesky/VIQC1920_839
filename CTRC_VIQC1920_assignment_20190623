@@ -1,0 +1,40 @@
+void driveStraightDistance(int tenthsOfIn, int masterPower)
+{
+  int tickGoal = (42 * tenthsOfIn) / 10;
+ 
+  //This will count up the total encoder ticks despite the fact that the encoders are constantly reset.
+  int totalTicks = 0;
+ 
+  //Initialise slavePower as masterPower - 5 so we don't get huge error for the first few iterations. The
+  //-5 value is based off a rough guess of how much the motors are different, which prevents the robot from
+  //veering off course at the start of the function.
+  int slavePower = masterPower - 5; 
+ 
+  int error = 0;
+ 
+  int kp = 5;
+ 
+  SensorValue[leftEncoder] = 0;
+  SensorValue[rightEncoder] = 0;
+ 
+  //Monitor 'totalTicks', instead of the values of the encoders which are constantly reset.
+  while(abs(totalTicks) < tickGoal)
+  {
+    //Proportional algorithm to keep the robot going straight.
+    motor[leftServo] = masterPower;
+    motor[rightServo] = slavePower;
+ 
+    error = SensorValue[leftEncoder] - SensorValue[rightEncoder];
+ 
+    slavePower += error / kp;
+ 
+    SensorValue[leftEncoder] = 0;
+    SensorValue[rightEncoder] = 0;
+ 
+    wait1Msec(100);
+ 
+    totalTicks = SensorValue[leftEncoder];
+  }
+  motor[leftServo] = 0; // Stop the loop once the encoders have counted up the correct number of encoder ticks.
+  motor[rightServo] = 0;  
+}
