@@ -11,7 +11,7 @@
 #define TAIL_SPEED 60
 #define CLAW_SPEED 100
 
-#define CLAW_OPEN -10
+#define CLAW_OPEN -20
 #define CLAW_CLOSE -170
 #define CLAW_DELTA 25
 
@@ -43,6 +43,19 @@ int iDriveMapping[101] = {
 int iTurnMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
+10,10,10,10,10,11,11,12,14,16,
+18,19,19,20,20,20,20,20,20,20,
+20,20,20,20,20,21,21,22,24,26,
+28,29,29,30,30,30,30,30,30,30,
+30,30,30,30,30,31,31,32,34,36,
+38,39,39,40,40,40,40,40,40,40,
+40,40,40,40,40,41,41,42,44,46,
+50,54,58,60,62,64,64,64,64,64,64};
+
+/*
+int iTurnMapping[101] = {
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
 30,30,30,30,30,30,30,30,30,30,
 30,30,30,30,30,31,32,33,34,36,
 38,40,40,40,40,40,40,42,46,48,
@@ -51,7 +64,7 @@ int iTurnMapping[101] = {
 60,60,60,60,60,60,60,60,60,60,
 60,60,60,62,62,63,63,63,63,63,
 64,64,64,64,64,64,64,64,64,64,64};
-
+*/
 
 task main()
 {
@@ -129,12 +142,18 @@ task main()
 			if ( abs(getMotorEncoder(clawMotor) - CLAW_OPEN) < CLAW_DELTA )
 			{
 				setMotorTarget(clawMotor,CLAW_CLOSE,100);
-				wait1Msec(500);
+				wait1Msec( abs( CLAW_CLOSE - CLAW_OPEN ) * ARM_WAIT_RATIO );
 			}
 			else
 			{
 				setMotorTarget(clawMotor,CLAW_OPEN,100);
-				wait1Msec(500);
+				wait1Msec( abs( CLAW_CLOSE - CLAW_OPEN ) * ARM_WAIT_RATIO );
+				if ( getMotorEncoder(armMotor) > ( iArmLv[2] - ARM_DELTA ) )
+				{
+					setMotorSpeed(leftMotor,-100);
+					setMotorSpeed(rightMotor,-100);
+					wait1Msec(400);
+				}
 			}
 		}
 	}
