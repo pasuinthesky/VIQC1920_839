@@ -24,7 +24,7 @@
 
 
 int iChA_filtered=0, iChC_filtered=0;
-
+//
 int iArmLv[4] = {0, 150, 375, 545};
 
 int iDriveMapping[101] = {
@@ -39,7 +39,7 @@ int iDriveMapping[101] = {
 60,62,64,66,68,70,72,74,76,78,
 84,88,92,96,100,100,100,100,100,100,100};
 
-
+// each number is a channel c reading, for example, the 20th 0 is actually a reading of 20
 int iTurnMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
@@ -68,7 +68,7 @@ int iTurnMapping[101] = {
 
 task main()
 {
-
+// move every thing to ready position
 	setMotorSpeed(clawMotor, 100);
 	setMotorSpeed(tailMotor, -100);
 	setMotorSpeed(armMotor, -100);
@@ -83,7 +83,7 @@ task main()
 
 	repeat (forever)
 	{
-
+		//this issplit arcade with idrivemapping as going forward and iturnmapping as chc, or turning
 		iChA_filtered=iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		iChC_filtered=iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 		//iChC_filtered=iDriveMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC))/GEAR_RATIO
@@ -92,7 +92,7 @@ task main()
 		setMotorSpeed(rightMotor,(iChA_filtered-iChC_filtered)/1);
 
 
-
+		//this sees if it is up or down, and then goes to the opposite direction(one button)
 		if (getJoystickValue(BtnLDown)==1)
 		{
 			if ( abs(getMotorEncoder(tailMotor) - TAIL_DOWN) < TAIL_DELTA )
@@ -107,7 +107,7 @@ task main()
 			}
 		}
 
-
+//
     if (getJoystickValue(BtnRUp)== 1)
 		{
 			for (int i=0;i<3;i=i+1)
@@ -138,11 +138,19 @@ task main()
 		}
 
 		if (getJoystickValue(BtnLUp)==1)
+// checks the level before opening if on low r high platform then back up after
 		{
 			if ( abs(getMotorEncoder(clawMotor) - CLAW_OPEN) < CLAW_DELTA )
 			{
 				setMotorTarget(clawMotor,CLAW_CLOSE,100);
 				wait1Msec( abs( CLAW_CLOSE - CLAW_OPEN ) * ARM_WAIT_RATIO );
+				if ( getMotorEncoder(armMotor) < ( iArmLv[1] - ARM_DELTA ) )
+				{
+					setMotorTarget(armMotor,iArmLv[1],100);
+					setMotorSpeed(leftMotor,0);
+					setMotorSpeed(rightMotor,0);
+					wait1Msec( abs( iArmLv[1] - getMotorEncoder(armMotor) ) * ARM_WAIT_RATIO );
+				}
 			}
 			else
 			{
@@ -153,7 +161,11 @@ task main()
 					setMotorSpeed(leftMotor,-100);
 					setMotorSpeed(rightMotor,-100);
 					wait1Msec(400);
+					setMotorSpeed(leftMotor,0);
+					setMotorSpeed(rightMotor,0);
 				}
+				setMotorTarget(armMotor,iArmLv[0],100);
+				wait1Msec( abs( getMotorEncoder(armMotor) - iArmLv[0] ) * ARM_WAIT_RATIO );
 			}
 		}
 	}
