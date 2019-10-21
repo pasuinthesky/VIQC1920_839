@@ -1,3 +1,4 @@
+#pragma config(Sensor, port8,  LED,       sensorVexIQ_LED)
 #pragma config(Motor,  motor1,          leftMotor,     tmotorVexIQ, PIDControl, driveLeft, encoder)
 #pragma config(Motor,  motor6,          rightMotor,    tmotorVexIQ, PIDControl, reversed, driveRight, encoder)
 #pragma config(Motor,  motor7,          clawMotor,     tmotorVexIQ, PIDControl, encoder)
@@ -11,12 +12,12 @@
 #define TAIL_SPEED 60
 #define CLAW_SPEED 100
 
-#define CLAW_OPEN -20
+#define CLAW_OPEN -60
 #define CLAW_CLOSE -170
 #define CLAW_DELTA 25
 
-#define TAIL_UP 580
-#define TAIL_DOWN 365
+#define TAIL_UP 750
+#define TAIL_DOWN 360
 #define TAIL_DELTA 25
 
 #define ARM_DELTA 25
@@ -25,7 +26,7 @@
 
 int iChA_filtered=0, iChC_filtered=0;
 //
-int iArmLv[4] = {0, 150, 375, 545};
+int iArmLv[4] = {40, 150, 375, 545};
 
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
@@ -66,9 +67,22 @@ int iTurnMapping[101] = {
 64,64,64,64,64,64,64,64,64,64,64};
 */
 
+task flashLed()
+{
+	while( true )
+	{
+		setTouchLEDRGB(LED, 0, 255, 0);
+		sleep( 500 );
+		setTouchLEDRGB(LED, 0, 255, 255);
+		sleep( 500 );
+	}
+}
+
 task main()
 {
 // move every thing to ready position
+
+
 	setMotorSpeed(clawMotor, 100);
 	setMotorSpeed(tailMotor, -100);
 	setMotorSpeed(armMotor, -100);
@@ -77,12 +91,15 @@ task main()
 	resetMotorEncoder(tailMotor);
 	resetMotorEncoder(armMotor);
 
-	setMotorTarget(clawMotor, -10, 50);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(tailMotor, TAIL_DOWN, 100);
-	setMotorTarget(armMotor, 10, 50);
+	setMotorTarget(armMotor, iArmLv[0], 100);
+
+	startTask( flashLed );
 
 	repeat (forever)
 	{
+
 		//this issplit arcade with idrivemapping as going forward and iturnmapping as chc, or turning
 		iChA_filtered=iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		iChC_filtered=iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
@@ -168,5 +185,6 @@ task main()
 				wait1Msec( abs( getMotorEncoder(armMotor) - iArmLv[0] ) * ARM_WAIT_RATIO );
 			}
 		}
+		wait1Msec(20);
 	}
 }
