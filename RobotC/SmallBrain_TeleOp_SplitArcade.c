@@ -12,7 +12,7 @@
 #define TAIL_SPEED 60
 #define CLAW_SPEED 100
 
-#define CLAW_OPEN -60
+#define CLAW_OPEN -45
 #define CLAW_CLOSE -170
 #define CLAW_DELTA 25
 
@@ -94,6 +94,7 @@ task main()
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(tailMotor, TAIL_DOWN, 100);
 	setMotorTarget(armMotor, iArmLv[0], 100);
+	wait(0.5);
 
 	startTask( flashLed );
 
@@ -123,6 +124,8 @@ task main()
 				wait1Msec( ( TAIL_UP - TAIL_DOWN) * ARM_WAIT_RATIO );
 			}
 		}
+		else
+			setMotorSpeed(tailMotor,0);
 
 //
     if (getJoystickValue(BtnRUp)== 1)
@@ -185,6 +188,9 @@ task main()
 				wait1Msec( abs( getMotorEncoder(armMotor) - iArmLv[0] ) * ARM_WAIT_RATIO );
 			}
 		}
+		else
+			setMotorSpeed(clawMotor,0);
+
 		wait1Msec(20);
 	}
 }
