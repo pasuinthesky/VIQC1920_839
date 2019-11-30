@@ -12,21 +12,21 @@
 #define TAIL_SPEED 60
 #define CLAW_SPEED 100
 
-#define CLAW_OPEN -45
-#define CLAW_CLOSE -170
-#define CLAW_DELTA 25
+#define CLAW_OPEN -120
+#define CLAW_CLOSE -450
+#define CLAW_DELTA 65
 
-#define TAIL_UP 750
-#define TAIL_DOWN 360
-#define TAIL_DELTA 25
+#define TAIL_UP 2000
+#define TAIL_DOWN 960
+#define TAIL_DELTA 65
 
-#define ARM_DELTA 25
-#define ARM_WAIT_RATIO 2.5
+#define ARM_DELTA 65
+#define MS_PER_ENCODER_UNIT 1
 
 
 int iChA_filtered=0, iChC_filtered=0;
 //
-int iArmLv[4] = {40, 150, 375, 545};
+int iArmLv[4] = {105, 400, 1050, 1455};
 
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
@@ -67,6 +67,9 @@ int iTurnMapping[101] = {
 64,64,64,64,64,64,64,64,64,64,64};
 */
 
+int tailTarget;
+bool tailMoving = false, armMoving = false;
+
 task flashLed()
 {
 	while( true )
@@ -78,10 +81,29 @@ task flashLed()
 	}
 }
 
+task moveTail()
+{
+	tailMoving = true;
+	setMotorTarget( tailMotor, tailTarget, 100 );
+	wait1Msec( abs( TAIL_UP - TAIL_DOWN ) * MS_PER_ENCODER_UNIT );
+	tailMoving = false;
+	EndTimeSlice();
+}
+
+task returnArm()
+{
+	armMoving = true;
+	setMotorTarget(armMotor,iArmLv[0],100);
+	wait1Msec( abs( getMotorEncoder(armMotor) - iArmLv[0] ) * MS_PER_ENCODER_UNIT );
+	armMoving = false;
+	EndTimeSlice();
+}
+
 task main()
 {
 // move every thing to ready position
 
+	setMotorEncoderUnits(encoderCounts);
 
 	setMotorSpeed(clawMotor, 100);
 	setMotorSpeed(tailMotor, -100);
@@ -94,7 +116,7 @@ task main()
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(tailMotor, TAIL_DOWN, 100);
 	setMotorTarget(armMotor, iArmLv[0], 100);
-	wait(0.5);
+	wait(0.7);
 
 	startTask( flashLed );
 
@@ -115,17 +137,31 @@ task main()
 		{
 			if ( abs(getMotorEncoder(tailMotor) - TAIL_DOWN) < TAIL_DELTA )
 			{
+				/*
 				setMotorTarget(tailMotor,TAIL_UP,100);
-				wait1Msec( ( TAIL_UP - TAIL_DOWN) * ARM_WAIT_RATIO );
+				wait1Msec( ( TAIL_UP - TAIL_DOWN) * MS_PER_ENCODER_UNIT );
+				*/
+				if ( ! tailMoving )
+				{
+					tailTarget = TAIL_UP;
+					startTask(moveTail);
+				}
 			}
 			else
 			{
+				/*
 				setMotorTarget(tailMotor,TAIL_DOWN,100);
-				wait1Msec( ( TAIL_UP - TAIL_DOWN) * ARM_WAIT_RATIO );
+				wait1Msec( ( TAIL_UP - TAIL_DOWN) * MS_PER_ENCODER_UNIT );
+				*/
+				if ( ! tailMoving )
+				{
+					tailTarget = TAIL_DOWN;
+					startTask(moveTail);
+				}
 			}
 		}
-		else
-			setMotorSpeed(tailMotor,0);
+		else if ( ! tailMoving )
+			setMotorSpeed( tailMotor, 0 );
 
 //
     if (getJoystickValue(BtnRUp)== 1)
@@ -135,7 +171,7 @@ task main()
 				if ( getMotorEncoder(armMotor) < ( iArmLv[i+1] - ARM_DELTA ) )
 				{
 					setMotorTarget(armMotor,iArmLv[i+1],100);
-					wait1Msec( ( iArmLv[i+1] - iArmLv[i] ) * ARM_WAIT_RATIO );
+					wait1Msec( ( iArmLv[i+1] - iArmLv[i] ) * MS_PER_ENCODER_UNIT );
 					break;
 				}
 			}
@@ -147,14 +183,14 @@ task main()
 				if ( getMotorEncoder(armMotor) > ( iArmLv[i-1] + ARM_DELTA ) )
 				{
 					setMotorTarget(armMotor,iArmLv[i-1],100);
-					wait1Msec( ( iArmLv[i] - iArmLv[i-1] ) * ARM_WAIT_RATIO );
+					wait1Msec( ( iArmLv[i] - iArmLv[i-1] ) * MS_PER_ENCODER_UNIT );
 					break;
 				}
 			}
 		}
-		else
+		else if ( ! armMoving )
 		{
-			setMotorSpeed(armMotor, 0);
+			setMotorSpeed( armMotor, 0 );
 		}
 
 		if (getJoystickValue(BtnLUp)==1)
@@ -163,19 +199,19 @@ task main()
 			if ( abs(getMotorEncoder(clawMotor) - CLAW_OPEN) < CLAW_DELTA )
 			{
 				setMotorTarget(clawMotor,CLAW_CLOSE,100);
-				wait1Msec( abs( CLAW_CLOSE - CLAW_OPEN ) * ARM_WAIT_RATIO );
+				wait1Msec( abs( CLAW_CLOSE - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
 				if ( getMotorEncoder(armMotor) < ( iArmLv[1] - ARM_DELTA ) )
 				{
 					setMotorTarget(armMotor,iArmLv[1],100);
 					setMotorSpeed(leftMotor,0);
 					setMotorSpeed(rightMotor,0);
-					wait1Msec( abs( iArmLv[1] - getMotorEncoder(armMotor) ) * ARM_WAIT_RATIO );
+					wait1Msec( abs( iArmLv[1] - getMotorEncoder(armMotor) ) * MS_PER_ENCODER_UNIT );
 				}
 			}
 			else
 			{
 				setMotorTarget(clawMotor,CLAW_OPEN,100);
-				wait1Msec( abs( CLAW_CLOSE - CLAW_OPEN ) * ARM_WAIT_RATIO );
+				wait1Msec( abs( CLAW_CLOSE - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
 				if ( getMotorEncoder(armMotor) > ( iArmLv[2] - ARM_DELTA ) )
 				{
 					setMotorSpeed(leftMotor,-100);
@@ -184,8 +220,10 @@ task main()
 					setMotorSpeed(leftMotor,0);
 					setMotorSpeed(rightMotor,0);
 				}
-				setMotorTarget(armMotor,iArmLv[0],100);
-				wait1Msec( abs( getMotorEncoder(armMotor) - iArmLv[0] ) * ARM_WAIT_RATIO );
+				if ( ! armMoving )
+				{
+					startTask(returnArm);
+				}
 			}
 		}
 		else
