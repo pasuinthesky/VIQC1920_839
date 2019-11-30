@@ -26,7 +26,7 @@
 
 int iChA_filtered=0, iChC_filtered=0;
 //
-int iArmLv[4] = {105, 400, 1050, 1455};
+int iArmLv[4] = {105, 400, 1000, 1455};
 
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
