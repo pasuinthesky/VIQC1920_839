@@ -36,6 +36,7 @@
 
 #define ARM_DELTA 65
 #define MS_PER_ENCODER_UNIT 1
+#define MS_PER_DEGREE_ROBOT_TURN 12
 
 
 int currentCount, pickUpTrigger, targetHeading, cubeLevel;
@@ -78,7 +79,9 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 	resetMotorEncoder(leftMotor);
 	resetMotorEncoder(rightMotor);
 
-	while ( currentCount < targetCount )
+	clearTimer( T2 );
+
+	while ( currentCount < targetCount && time1[T2] < ( targetCount * MS_PER_ENCODER_UNIT * 100 / MIN_SPEED ) )
 	{
 		error = getGyroDegreesFloat(Gyro) - targetHeading;
 		integral = integral + error;
@@ -161,10 +164,12 @@ task pick_up_cube()
 void turnDecel( int inputHeading, int turnStyle, float Ki, float Kp, int baseSpeed, int delta )
 {
 	float error = 0, integral = 0, output;
+	int degreeTurning = abs( getGyroDegrees( Gyro ) - inputHeading );
 
 	targetHeading = inputHeading;
+	clearTimer( T3 );
 
-	while ( abs( getGyroDegreesFloat(Gyro) - targetHeading ) > delta )
+	while ( abs( getGyroDegreesFloat(Gyro) - targetHeading ) > delta && time1[T3] < ( degreeTurning * MS_PER_DEGREE_ROBOT_TURN * 100 / MIN_SPEED ) )
 	{
 		error = getGyroDegreesFloat(Gyro) - targetHeading;
 		integral = integral + error;
@@ -320,8 +325,9 @@ task main()
 	Initialize();
 	targetHeading = 0;
 
-	//goStraightDecel(100, 90, 0.0026, 0.5, 40);
+	turnDecel( -175, LEFT_WHEEL_TURN, 0, 0.3, 20, 2 );
+	goStraightDecel(100, 90, 0.0026, 0.5, 40);
 
-	blueCube_NOT_DONE_YET();
+	//blueCube_NOT_DONE_YET();
 
 }
