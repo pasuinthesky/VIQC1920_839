@@ -192,7 +192,7 @@ void GreencubeHigh()
 	goStraightDecel(10, 30, 0.003, 0.5, 30);
 
 	turnDecel(180, 0, 0.45, 5, 2);
-	wait( 2.5 );
+	wait( 1.5 );
 /*
 	while (true)
 		displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
@@ -216,6 +216,8 @@ void greenCubeLow()
 
 	//goStraightDecel(43, 90, 0.003, 0.6, 40);
 	drop();
+
+	goStraightDecel(50, -70, 0.0026, 0.5, 15);
 }
 
 void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour, int blink)
@@ -233,7 +235,8 @@ void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour,
 		setTouchLEDBlinkTime(LED, blinkTimeOn, blinkTimeOff);
 	}
 
-
+	wait(0.3);
+	resetGyro(Gyro);
 }
 
 void blueCube_NOT_DONE_YET()
@@ -259,6 +262,14 @@ void blueCube_NOT_DONE_YET()
 	goStraightDecel(200, 100, 0.003, 0.6, 20);
 }
 
+void reset()
+{
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	setMotorTarget(tailMotor, TAIL_DOWN, 100);
+	setMotorTarget(armMotor, iArmLv[0], 100);
+	wait(0.7);
+}
+
 task main()
 {
 	setMotorEncoderUnits(encoderCounts);
@@ -271,16 +282,19 @@ task main()
 	resetMotorEncoder(tailMotor);
 	resetMotorEncoder(armMotor);
 
-	setMotorTarget(clawMotor, CLAW_OPEN, 100);
-	setMotorTarget(tailMotor, TAIL_DOWN, 100);
-	setMotorTarget(armMotor, iArmLv[0], 100);
-	wait(0.7);
+	reset();
 
 	Initialize();
 	targetHeading = 0;
 
 	//goStraightDecel(100, 90, 0.0026, 0.5, 40);
+	LEDBusiness(colorGreen, 0, 0, 0, 0);
+	greenCubeLow();
 
-GreencubeHigh();
+	LEDBusiness(colorBlue, 0, 0, 0, 0);
+	greenCubeLow();
+	LEDBusiness(colorViolet, 0, 0, 0, 0);
+	GreencubeHigh();
+	//blueCube_NOT_DONE_YET();
 
 }
