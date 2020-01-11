@@ -235,7 +235,10 @@ void greenCubeLeftHighRight()
 	drop();
 
 	turnDecel( -133, ON_SPOT_TURN, 0, 0.6, 5,  2);
-
+/*
+	while (true)
+		displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
+*/
 	goStraightDecel(60, 100, 0.0026, 0.5, 5);
 	turnDecel(0, RIGHT_WHEEL_TURN, 0, 0.45, 20, 5);
 

@@ -60,7 +60,6 @@ void reset_gyro_timer_encoder()
 
 }
 
-
 float cmToEncoderUnit(float distance)
 {
 	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
@@ -102,9 +101,6 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 		setMotorSpeed(rightMotor, motorSpeed - output);
 
 		currentCount = abs( getMotorEncoder(leftMotor) + getMotorEncoder(rightMotor) ) / 2;
-//		writeDebugStreamLine("%d:  %f,  %f,  %f,  %f,  %f", time1[T1], error, integral, output, motorSpeed, currentCount);
-//		writeDebugStreamLine("%d: error %d, integral %d, output %d, motorSpeed %d, currentCount %d", time1[T1], error, integral, output, motorSpeed, currentCount);
-//		displayCenteredBigTextLine(3, "%d, %d", currentCount, targetCount);
 		displayCenteredBigTextLine(3, "%d, %d", getGyroDegrees(Gyro), targetHeading);
 		wait1Msec(WAIT_CYCLE);
 	}
@@ -146,11 +142,6 @@ void drop()
 		setMotorSpeed(rightMotor,0);
 	}
 	startTask(returnArm);
-}
-
-task task_drop()
-{
-	drop();
 }
 
 task pick_up_cube()
@@ -211,38 +202,6 @@ void turnDecel( int inputHeading, int turnStyle, float Ki, float Kp, int baseSpe
 		setMotorSpeed(rightMotor, 0);
 }
 
-// 5, wait 2 secs, 25( reduce motor speed ), 30, grab, turn slighjtly less than 90
-void GreencubeHigh()
-{
-	goStraightDecel(54, 90, 0.0026, 0.5, 20);
-	turnDecel( 90, ON_SPOT_TURN, 0, 0.6, 5,  2);
-
-	goStraightDecel(5, 100, 0.0026, 0.5, 5);
-	//wait( 2 );
-
-	//goStraightDecel(25, 60, 0.0026, 0.5, 40);
-	goStraightDecel(25, 60, 0.0026, 0.5, 60);
-
-	//goStraightDecel(5, 30, 0.0026, 0.5, 40);
-
-
-	pickUpTrigger = 4; cubeLevel = 3;
-	startTask(pick_up_cube);
-	goStraightDecel(10, 30, 0.003, 0.5, 30);
-
-	turnDecel(180, ON_SPOT_TURN, 0, 0.45, 8, 2);
-	wait( 1 );
-/*
-	while (true)
-		displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
-*/
-
-	goStraightDecel(20, 90, 0.003, 0.5, 40);
-	goStraightDecel(7, 30, 0.003, 0.5, 0);
-	drop();
-
-}
-
 void greenCubeLow()
 {
 	goStraightDecel(18, 90, 0.0026, 0.5, 20);
@@ -258,59 +217,52 @@ void greenCubeLow()
 
 }
 
-void greenCubeLowHigh1()
+
+void greenCubeLeftHighRight()
 {
-	goStraightDecel(18, 90, 0.0026, 0.5, 20);
+	greenCubeLow();
 
-	pickUpTrigger = 3; cubeLevel = 2;
-	startTask( pick_up_cube );
-	goStraightDecel(20, 30, 0.0026, 0.5, 0);
+	turnDecel( -45, RIGHT_WHEEL_TURN, 0, 0.45, 20,  2);
 
-	goStraightDecel(28, 60, 0.003, 0.6, 30);
-
-	clawAction( CLAW_OPEN );
-
-	startTask(returnArm);
-	goStraightDecel(11, -90, 0.003, 0.6, 30);
-
-	turnDecel( 90, ON_SPOT_TURN, 0, 0.6, 5,  2);
-
-	goStraightDecel(5, 100, 0.0026, 0.5, 5);
-	//wait( 2 );
-
-	//goStraightDecel(25, 60, 0.0026, 0.5, 40);
-	goStraightDecel(25, 60, 0.0026, 0.5, 60);
-
-	//goStraightDecel(5, 30, 0.0026, 0.5, 40);
-
-
-	pickUpTrigger = 4; cubeLevel = 3;
-	startTask(pick_up_cube);
-	goStraightDecel(10, 30, 0.003, 0.5, 30);
-	wait1Msec(300);
-
-	turnDecel(178, ON_SPOT_TURN, 0, 0.35, 8, 3);
-	displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
-	wait( 1 );
-
+	goStraightDecel(40, 100, 0.0026, 0.5, 5);
+	turnDecel(-90, LEFT_WHEEL_TURN, 0, 0.45, 20, 2);
+	goStraightDecel(20, 80, 0.0026, 0.5, 5);
+	turnDecel(-180, ON_SPOT_TURN, 0, 0.6, 5, 2);
 /*
 	while (true)
 		displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
 */
+	pickUpTrigger = 4; cubeLevel = 3;
+	startTask(pick_up_cube);
+	goStraightDecel(38, 30, 0.003, 0.5, 30);
+	goStraightDecel(20, 70, 0.003, 0.5, 30);
 
-	goStraightDecel(20, 90, 0.003, 0.5, 40);
-	goStraightDecel(7, 30, 0.003, 0.5, 0);
+	drop();
+	goStraightDecel(5, -60, 0.003, 0.5, 30);
+
+	turnDecel( -135, ON_SPOT_TURN, 0, 0.6, 5,  2);
+
+	goStraightDecel(50, 100, 0.0026, 0.5, 30);
+
+	turnDecel(-90, RIGHT_WHEEL_TURN, 0, 0.45, 20, 5);
+	goStraightDecel(18, 80, 0.0026, 0.5, 40);
+	turnDecel	(0, ON_SPOT_TURN, 0, 0.3, 5, 2);
+
+
+	pickUpTrigger = 10; cubeLevel = 2;
+	startTask(pick_up_cube);
+	goStraightDecel(20, 30, 0.003, 0.5, 30);
+	goStraightDecel(30, 100, 0.003, 0.5, 30);
+
 	drop();
 
-	startTask(returnArm);
-	goStraightDecel(5, -100, 0.0026, 0.5, 0);
 }
 
 void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour, int blink)
 {
 
 	timeStamp = time1[T1];
-	displayCenteredBigTextLine( 3, "%f", timeStamp );
+	displayCenteredTextLine( 3, "%f", timeStamp );
 
 	if (blink == 0)
 	{
@@ -330,6 +282,156 @@ void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour,
 	targetHeading = 0;
 }
 
+void cornerCubes()
+{
+	goStraightDecel(48, 90, 0.0026, 0.5, 20);
+	turnDecel( -132, ON_SPOT_TURN, 0, 0.6, 5, 2 );
+
+	pickUpTrigger = 23; cubeLevel = 1;
+	startTask( pick_up_cube );
+	goStraightDecel(24, 90, 0.0026, 0.5, 20);
+
+	turnDecel( -200, RIGHT_WHEEL_TURN, 0, 0.3, 20, 2 );
+
+	goStraightDecel(45, -90, 0.0026, 0.5, 20);
+
+	tailTarget = TAIL_UP;
+	startTask( moveTail );
+	turnDecel( -237, ON_SPOT_TURN, 0, 0.3, 5, 2 );
+	goStraightDecel(195, 100, 0.003, 0.6, 30);
+
+	drop();
+	goStraightDecel(10, -60, 0.003, 0.6, 20);
+
+	turnDecel( -145, LEFT_WHEEL_TURN, 0, 0.3, 20, 2 );
+
+	goStraightDecel(70, -100, 0.003, 0.6, 0);
+
+	tailTarget = TAIL_DOWN;
+	startTask( moveTail );
+	turnDecel( -170, LEFT_WHEEL_TURN, 0, 0.25, 20, 2 );
+
+	goStraightDecel(20, -100, 0.003, 0.6, 0);
+
+	targetHeading = -190;
+	goStraightDecel(10, 40, 0.0026, 0.5, 0);
+
+	pickUpTrigger = 28.5; cubeLevel = 2;
+	startTask( pick_up_cube );
+	goStraightDecel( 30, 90, 0.0026, 0.5, 30 );
+
+	goStraightDecel( 20, -90, 0.0026, 0.5, 10 );
+	turnDecel( -225, RIGHT_WHEEL_TURN, 0, 0.3, 20, 2 );
+	goStraightDecel( 10, -60, 0.003, 0.6, 10 );
+
+	turnDecel( -230, RIGHT_WHEEL_TURN, 0, 0.3, 5, 2 );
+	goStraightDecel( 5, -90, 0.003, 0.6, 30 );
+
+	setMotorTarget(armMotor,iArmLv[1],100);
+
+
+	wait1Msec( abs( getMotorEncoder(armMotor) - iArmLv[1] ) * MS_PER_ENCODER_UNIT );
+
+	tailTarget = TAIL_UP;
+	startTask( moveTail );
+	turnDecel( -120, TWO_WHEEL_TURN, 0.001, 0.3, 30, 2 );
+	goStraightDecel( 165, 100, 0.003, 0.6, 20 );
+
+	drop();
+	goStraightDecel( 10, -60, 0.003, 0.6, 20 );
+
+	turnDecel( -220, RIGHT_WHEEL_TURN, 0, 0.3, 20, 2 );
+
+	goStraightDecel( 50, -90, 0.003, 0.6, 20 );
+
+	turnDecel( -200, RIGHT_WHEEL_TURN, 0, 0.3, 30, 5 );
+	tailTarget = TAIL_DOWN;
+	startTask( moveTail );
+	goStraightDecel( 25, -50, 0.003, 0.6, 0 );
+
+	goStraightDecel( 25, 100, 0.026, 0.5, 0 );
+
+}
+
+void cornerCubes2()
+{
+	goStraightDecel(48, 90, 0.0026, 0.5, 20);
+	turnDecel( -132, ON_SPOT_TURN, 0, 0.6, 5, 2 );
+
+	pickUpTrigger = 22.5; cubeLevel = 1;
+	startTask( pick_up_cube );
+	goStraightDecel(24, 90, 0.0026, 0.5, 30);
+
+	turnDecel( -200, RIGHT_WHEEL_TURN, 0, 0.3, 20, 2 );
+
+	goStraightDecel(45, -90, 0.0026, 0.5, 20);
+
+	tailTarget = TAIL_UP;
+	startTask( moveTail );
+	turnDecel( -237, ON_SPOT_TURN, 0, 0.3, 5, 2 );
+	goStraightDecel(195, 100, 0.003, 0.6, 30);
+
+	drop();
+	goStraightDecel(10, -60, 0.003, 0.6, 20);
+
+	iArmLv[0] = 560;
+	iArmLv[1] = 750;
+	startTask( returnArm );
+
+	turnDecel( -145, LEFT_WHEEL_TURN, 0, 0.3, 20, 2 );
+
+	goStraightDecel(70, -90, 0.003, 0.6, 0);
+
+	tailTarget = TAIL_DOWN;
+	startTask( moveTail );
+	turnDecel( -170, LEFT_WHEEL_TURN, 0, 0.25, 20, 2 );
+
+	setMotorSpeed(leftMotor,-100);
+	setMotorSpeed(rightMotor,-100);
+	wait1Msec(800);
+	setMotorSpeed(leftMotor,0);
+	setMotorSpeed(rightMotor,0);
+
+//	waitUntil( getTouchLEDValue(LED) == 1 );
+
+	turnDecel( -180, ON_SPOT_TURN, 0, 0.3, 20, 2 );
+
+	pickUpTrigger = 36; cubeLevel = 1;
+	startTask( pick_up_cube );
+	goStraightDecel( 38, 90, 0.0026, 0.5, 30 );
+
+	turnDecel( -225, ON_SPOT_TURN, 0, 0.3, 60, 2 );
+//	waitUntil( getTouchLEDValue(LED) == 1 );
+
+	goStraightDecel( 40, -90, 0.003, 0.6, 10 );
+
+	//waitUntil( getTouchLEDValue(LED) == 1 );
+	tailTarget = TAIL_UP;
+	startTask( moveTail );
+	turnDecel( -120, TWO_WHEEL_TURN, 0.001, 0.3, 30, 2 );
+	goStraightDecel( 165, 100, 0.003, 0.6, 20 );
+
+	drop();
+	goStraightDecel( 10, -60, 0.003, 0.6, 20 );
+
+	turnDecel( -220, RIGHT_WHEEL_TURN, 0, 0.3, 20, 2 );
+
+	goStraightDecel( 55, -90, 0.003, 0.6, 20 );
+
+	turnDecel( -210, RIGHT_WHEEL_TURN, 0, 0.3, 30, 5 );
+	tailTarget = TAIL_DOWN;
+	startTask( moveTail );
+	goStraightDecel( 18, -100, 0.003, 0.6, 0 );
+
+	goStraightDecel( 25, 100, 0.026, 0.5, 0 );
+
+
+//	while (true)
+		//displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
+
+
+}
+
 void reset_arm_tail_claw()
 {
 	setMotorTarget( clawMotor, CLAW_OPEN, 100 );
@@ -338,108 +440,8 @@ void reset_arm_tail_claw()
 	wait( 0.7 );
 }
 
-void top_right_to_bottom_left()
-{
-	goStraightDecel(50, 100, 0.0026, 0.5, 20);
-	turnDecel(-42, ON_SPOT_TURN, 0, 0.6, 5, 2);
-
-	pickUpTrigger = 20; cubeLevel = 1;
-	startTask( pick_up_cube );
-	goStraightDecel(23, 90, 0.0026, 0.5, 30);
-
-	turnDecel(-245, ON_SPOT_TURN, 0, 0.3, 5, 2);
-	goStraightDecel(150, 100, 0.0028, 0.6, 0 );
-
-	startTask(task_drop);
-
-	setMotorSpeed(leftMotor, 100);
-	setMotorSpeed(rightMotor, 100);
-	wait1Msec(600);
-	goStraightDecel(20, -100, 0.0028, 0.6, 0 );
-}
-
-void two_left_to_top_right()
-{
-	goStraightDecel(50, 100, 0.0026, 0.5, 20);
-	turnDecel(42, ON_SPOT_TURN, 0, 0.6, 5, 2);
-
-	pickUpTrigger = 20; cubeLevel = 1;
-	startTask( pick_up_cube );
-	goStraightDecel(23, 90, 0.0026, 0.5, 40);
-
-	goStraightDecel(30, -90, 0.0026, 0.5, 20);
-
-	turnDecel(-55, ON_SPOT_TURN, 0, 0.3, 8, 2);
-	goStraightDecel(60, -100, 0.0028, 0.6, 0);
-
-	tailTarget = TAIL_UP;
-	startTask(moveTail);
-
-	targetHeading = -75;
-	goStraightDecel(30, 100, 0.0028, 0.6, 20);
-	turnDecel(-75, ON_SPOT_TURN, 0, 0.3, 10, 2);
-
-	goStraightDecel(160, 100, 0.0028, 0.6, 0);
-	turnDecel(-65, ON_SPOT_TURN, 0, 0.5, 30, 2);
-
-	setMotorSpeed(leftMotor, 100);
-	setMotorSpeed(rightMotor, 100);
-	wait1Msec(500);
-
-	startTask(task_drop);
-
-	goStraightDecel(10, -100, 0.0028, 0.6, 0);
-
-	turnDecel(30, LEFT_WHEEL_TURN, 0, 0.5, 30, 2);
-	goStraightDecel(40, -100, 0.0028, 0.6, 0);
-
-	turnDecel(10, RIGHT_WHEEL_TURN, 0, 0.5, 30, 2);
-
-	tailTarget = TAIL_DOWN;
-	startTask(moveTail);
-
-	setMotorSpeed(leftMotor, -100);
-	setMotorSpeed(rightMotor, -100);
-	wait1Msec(500);
-
-	goStraightDecel(15, 100, 0.0026, 0.5, 0);
-
-	}
-
-
-void last_bonus()
-{
-	setMotorSpeed(leftMotor, 100);
-	setMotorSpeed(rightMotor, 100);
-	wait1Msec(150);
-
-	setMotorSpeed(leftMotor, -100);
-	wait1Msec(350);
-
-	goStraightDecel(17, -100, 0.0025, 0.5, 0);
-
-	tailTarget = TAIL_UP;
-	startTask(moveTail);
-	turnDecel(70, ON_SPOT_TURN, 0, 0.3, 10, 2);
-
-	goStraightDecel(150, 100, 0.0028, 0.6, 0);
-
-	turnDecel(215, ON_SPOT_TURN, 0, 0.3, 20, 5);
-	goStraightDecel(20, -100, 0.0028, 0.6, 0);
-
-	tailTarget = TAIL_DOWN;
-	startTask(moveTail);
-
-	setMotorSpeed(leftMotor, -100);
-	setMotorSpeed(rightMotor, -100);
-	wait1Msec(500);
-
-	goStraightDecel(10, 100, 0.0028, 0.6, 0);
-}
-
 task main()
 {
-	clearTimer(timer1);
 	setMotorEncoderUnits( encoderCounts );
 
 	setMotorSpeed( clawMotor, 100 );
@@ -451,28 +453,15 @@ task main()
 	resetMotorEncoder( armMotor );
 
 	reset_arm_tail_claw();
-
 	reset_gyro_timer_encoder();
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
-	clearTimer( T1 );
-	greenCubeLow();
+	greenCubeLeftHighRight();
 
-	goStraightDecel( 40, -100, 0.0026, 0.5, 0 );
-
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
-	greenCubeLowHigh1();
+	goStraightDecel(40, -100, 0.0026, 0.5, 0);
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
-	top_right_to_bottom_left();
-
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
-	two_left_to_top_right();
-
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
-	last_bonus();
-
-
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
+	cornerCubes2();
+	reset_arm_tail_claw();
 
 }

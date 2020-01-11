@@ -289,7 +289,7 @@ void greenCubeLowHigh1()
 	goStraightDecel(10, 30, 0.003, 0.5, 30);
 	wait1Msec(300);
 
-	turnDecel(178, ON_SPOT_TURN, 0, 0.35, 8, 3);
+	turnDecel(180, ON_SPOT_TURN, 0, 0.35, 8, 3);
 	displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
 	wait( 1 );
 
@@ -341,7 +341,7 @@ void reset_arm_tail_claw()
 void top_right_to_bottom_left()
 {
 	goStraightDecel(50, 100, 0.0026, 0.5, 20);
-	turnDecel(-42, ON_SPOT_TURN, 0, 0.6, 5, 2);
+	turnDecel(-45, ON_SPOT_TURN, 0, 0.6, 5, 2);
 
 	pickUpTrigger = 20; cubeLevel = 1;
 	startTask( pick_up_cube );
@@ -375,11 +375,10 @@ void two_left_to_top_right()
 	tailTarget = TAIL_UP;
 	startTask(moveTail);
 
-	targetHeading = -75;
-	goStraightDecel(30, 100, 0.0028, 0.6, 20);
-	turnDecel(-75, ON_SPOT_TURN, 0, 0.3, 10, 2);
+	goStraightDecel(30, 100, 0.0028, 0.6, 0);
+	turnDecel(-75, ON_SPOT_TURN, 0, 0.5, 10, 2);
 
-	goStraightDecel(160, 100, 0.0028, 0.6, 0);
+	goStraightDecel(165, 100, 0.0028, 0.6, 0);
 	turnDecel(-65, ON_SPOT_TURN, 0, 0.5, 30, 2);
 
 	setMotorSpeed(leftMotor, 100);
@@ -400,31 +399,25 @@ void two_left_to_top_right()
 
 	setMotorSpeed(leftMotor, -100);
 	setMotorSpeed(rightMotor, -100);
-	wait1Msec(500);
+	wait1Msec(700);
 
-	goStraightDecel(15, 100, 0.0026, 0.5, 0);
+	goStraightDecel(20, 100, 0.0026, 0.5, 0);
 
-	}
+}
 
 
 void last_bonus()
 {
-	setMotorSpeed(leftMotor, 100);
-	setMotorSpeed(rightMotor, 100);
-	wait1Msec(150);
-
-	setMotorSpeed(leftMotor, -100);
-	wait1Msec(350);
-
-	goStraightDecel(17, -100, 0.0025, 0.5, 0);
+	turnDecel(70, ON_SPOT_TURN, 0, 0.3, 30, 2);
+	goStraightDecel(15, -100, 0.0025, 0.5, 0);
 
 	tailTarget = TAIL_UP;
 	startTask(moveTail);
+	//turnDecel(80, ON_SPOT_TURN, 0, 0.3, 30, 5);
 	turnDecel(70, ON_SPOT_TURN, 0, 0.3, 10, 2);
-
 	goStraightDecel(150, 100, 0.0028, 0.6, 0);
 
-	turnDecel(215, ON_SPOT_TURN, 0, 0.3, 20, 5);
+	turnDecel(225, ON_SPOT_TURN, 0, 0.3, 20, 5);
 	goStraightDecel(20, -100, 0.0028, 0.6, 0);
 
 	tailTarget = TAIL_DOWN;
@@ -437,9 +430,9 @@ void last_bonus()
 	goStraightDecel(10, 100, 0.0028, 0.6, 0);
 }
 
+
 task main()
 {
-	clearTimer(timer1);
 	setMotorEncoderUnits( encoderCounts );
 
 	setMotorSpeed( clawMotor, 100 );
@@ -471,8 +464,5 @@ task main()
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	last_bonus();
-
-
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 
 }
