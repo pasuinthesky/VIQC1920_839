@@ -20,9 +20,11 @@
 #define RIGHT_WHEEL_TURN 2
 #define TWO_WHEEL_TURN 3
 
-#define ARM_SPEED 100
-#define TAIL_SPEED 60
-#define CLAW_SPEED 100
+#define TASK_CLAW_CLOSE 0
+#define TASK_CLAW_OPEN 1
+#define TASK_TAIL_UP 2
+#define TASK_TAIL_DOWN 3
+#define TASK_RETURN_ARM 4
 
 #define CLAW_OPEN -120
 #define CLAW_CLOSE -450
@@ -36,30 +38,60 @@
 #define MS_PER_ENCODER_UNIT 1
 #define MS_PER_DEGREE_ROBOT_TURN 12
 
+#define GYRO_SAMPLEING_SECONDS 10
+#define ACCEPTABLE_DRIFT_RANGE 0.08
 
+float fGyroDriftRate;
 int currentCount, pickUpTrigger, targetHeading, cubeLevel;
 int iArmLv[4] = {105, 400, 1100, 1455};
 
-int tailTarget;
+int taskAction;
 float timeStamp;
 
-void reset_gyro_timer_encoder()
-// Prepare robot
+void setGyroStable()
 {
-	wait(1);
-	resetGyro(Gyro);
+	fGyroDriftRate = 100;
 
-	clearTimer(T1);
+	while (fGyroDriftRate > ACCEPTABLE_DRIFT_RANGE)
+	{
+		setTouchLEDColor(LED,colorRed);
+		setTouchLEDBlinkTime(LED, 14,6);
+		wait(3);
+		setTouchLEDBlinkTime(LED, 0,1);
+		wait(2);
 
-	resetMotorEncoder(leftMotor);
-	resetMotorEncoder(rightMotor);
-	setMotorBrakeMode(leftMotor, motorHold);
-	setMotorBrakeMode(rightMotor, motorHold);
+		setTouchLEDColor(LED,colorGreen);
+		setTouchLEDBlinkTime(LED, 8, 12);
 
-	targetHeading = 0;
+		resetGyro(Gyro);
+		clearTimer(T4);
+		wait(GYRO_SAMPLEING_SECONDS);
+
+		fGyroDriftRate = getGyroDegreesFloat(Gyro) / GYRO_SAMPLEING_SECONDS;
+
+		if (fGyroDriftRate < ACCEPTABLE_DRIFT_RANGE)
+			setTouchLEDColor(LED, colorGreen);
+		else
+			setTouchLEDColor(LED, colorRed);
+
+		setTouchLEDBlinkTime(LED, 4, 4);
+		wait(1);
+		setTouchLEDColor(LED,colorNone);
+		setTouchLEDBlinkTime(LED, 1, 0);
+	}
 
 }
 
+float getGyroStable()
+{
+	return getGyroDegreesFloat(Gyro) - fGyroDriftRate * time1[T4] / 1000;
+}
+
+void resetGyroStable()
+{
+	resetGyro(Gyro);
+	clearTimer(T4);
+}
 
 float cmToEncoderUnit(float distance)
 {
@@ -85,7 +117,7 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 
 	while ( currentCount < targetCount && time1[T2] < ( targetCount * MS_PER_ENCODER_UNIT * 100 / MIN_SPEED ) )
 	{
-		error = getGyroDegreesFloat(Gyro) - targetHeading;
+		error = getGyroStable() - targetHeading;
 		integral = integral + error;
 		output = error * Kp + integral * Ki;
 
@@ -105,18 +137,18 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 //		writeDebugStreamLine("%d:  %f,  %f,  %f,  %f,  %f", time1[T1], error, integral, output, motorSpeed, currentCount);
 //		writeDebugStreamLine("%d: error %d, integral %d, output %d, motorSpeed %d, currentCount %d", time1[T1], error, integral, output, motorSpeed, currentCount);
 //		displayCenteredBigTextLine(3, "%d, %d", currentCount, targetCount);
-		displayCenteredBigTextLine(3, "%d, %d", getGyroDegrees(Gyro), targetHeading);
+		displayCenteredBigTextLine(3, "%d, %d", getGyroStable(), targetHeading);
 		wait1Msec(WAIT_CYCLE);
 	}
 		setMotorSpeed(leftMotor, 0);
 		setMotorSpeed(rightMotor, 0);
 }
 
-task moveTail()
+void tailAction(int tailTarget)
 {
 	setMotorTarget( tailMotor, tailTarget, 100 );
 	wait1Msec( abs( TAIL_UP - TAIL_DOWN ) * MS_PER_ENCODER_UNIT );
-	EndTimeSlice();
+	setMotorSpeed( tailMotor, 0 );
 }
 
 void clawAction(int clawTarget)
@@ -126,10 +158,33 @@ void clawAction(int clawTarget)
 	setMotorSpeed( clawMotor, 0 );
 }
 
-task returnArm()
+void returnArm()
 {
 	setMotorTarget(armMotor,iArmLv[0],100);
 	wait1Msec( abs( getMotorEncoder(armMotor) - iArmLv[0] ) * MS_PER_ENCODER_UNIT );
+	setMotorSpeed(armMotor, 0);
+}
+
+task simple_action()
+{
+	switch(taskAction)
+	{
+		case TASK_CLAW_CLOSE:
+			clawAction(CLAW_CLOSE);
+			break;
+		case TASK_CLAW_OPEN:
+			clawAction(CLAW_OPEN);
+			break;
+		case TASK_TAIL_UP:
+			tailAction(TAIL_UP);
+			break;
+		case TASK_TAIL_DOWN:
+			tailAction(TAIL_DOWN);
+			break;
+		case TASK_RETURN_ARM:
+			returnArm();
+			break;
+	}
 	EndTimeSlice();
 }
 
@@ -145,12 +200,14 @@ void drop()
 		setMotorSpeed(leftMotor,0);
 		setMotorSpeed(rightMotor,0);
 	}
-	startTask(returnArm);
+	taskAction = TASK_RETURN_ARM;
+	startTask(simple_action);
 }
 
 task task_drop()
 {
 	drop();
+	EndTimeSlice();
 }
 
 task pick_up_cube()
@@ -173,14 +230,14 @@ task pick_up_cube()
 void turnDecel( int inputHeading, int turnStyle, float Ki, float Kp, int baseSpeed, int delta )
 {
 	float error = 0, integral = 0, output;
-	int degreeTurning = abs( getGyroDegrees( Gyro ) - inputHeading );
+	int degreeTurning = abs( getGyroStable() - inputHeading );
 
 	targetHeading = inputHeading;
 	clearTimer( T3 );
 
-	while ( abs( getGyroDegreesFloat(Gyro) - targetHeading ) > delta && time1[T3] < ( degreeTurning * MS_PER_DEGREE_ROBOT_TURN * 100 / MIN_SPEED ) )
+	while ( abs( getGyroStable() - targetHeading ) > delta && time1[T3] < ( degreeTurning * MS_PER_DEGREE_ROBOT_TURN * 100 / MIN_SPEED ) )
 	{
-		error = getGyroDegreesFloat(Gyro) - targetHeading;
+		error = getGyroStable() - targetHeading;
 		integral = integral + error;
 		output = error * Kp + integral * Ki;
 
@@ -211,38 +268,6 @@ void turnDecel( int inputHeading, int turnStyle, float Ki, float Kp, int baseSpe
 		setMotorSpeed(rightMotor, 0);
 }
 
-// 5, wait 2 secs, 25( reduce motor speed ), 30, grab, turn slighjtly less than 90
-void GreencubeHigh()
-{
-	goStraightDecel(54, 90, 0.0026, 0.5, 20);
-	turnDecel( 90, ON_SPOT_TURN, 0, 0.6, 5,  2);
-
-	goStraightDecel(5, 100, 0.0026, 0.5, 5);
-	//wait( 2 );
-
-	//goStraightDecel(25, 60, 0.0026, 0.5, 40);
-	goStraightDecel(25, 60, 0.0026, 0.5, 60);
-
-	//goStraightDecel(5, 30, 0.0026, 0.5, 40);
-
-
-	pickUpTrigger = 4; cubeLevel = 3;
-	startTask(pick_up_cube);
-	goStraightDecel(10, 30, 0.003, 0.5, 30);
-
-	turnDecel(180, ON_SPOT_TURN, 0, 0.45, 8, 2);
-	wait( 1 );
-/*
-	while (true)
-		displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
-*/
-
-	goStraightDecel(20, 90, 0.003, 0.5, 40);
-	goStraightDecel(7, 30, 0.003, 0.5, 0);
-	drop();
-
-}
-
 void greenCubeLow()
 {
 	goStraightDecel(18, 90, 0.0026, 0.5, 20);
@@ -270,39 +295,34 @@ void greenCubeLowHigh1()
 
 	clawAction( CLAW_OPEN );
 
-	startTask(returnArm);
+	taskAction = TASK_RETURN_ARM;
+	startTask(simple_action);
 	goStraightDecel(11, -90, 0.003, 0.6, 30);
 
 	turnDecel( 90, ON_SPOT_TURN, 0, 0.6, 5,  2);
+	clawAction(CLAW_CLOSE);
+	taskAction = TASK_CLAW_OPEN;
+	startTask(simple_action);
 
 	goStraightDecel(5, 100, 0.0026, 0.5, 5);
-	//wait( 2 );
 
-	//goStraightDecel(25, 60, 0.0026, 0.5, 40);b
 	goStraightDecel(25, 60, 0.0026, 0.5, 60);
-
-	//goStraightDecel(5, 30, 0.0026, 0.5, 40);
-
 
 	pickUpTrigger = 4; cubeLevel = 3;
 	startTask(pick_up_cube);
 	goStraightDecel(10, 30, 0.003, 0.5, 30);
 	wait1Msec(300);
 
-	turnDecel(170, ON_SPOT_TURN, 0, 0.35, 8, 3);
-	displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
-	wait( 1 );
-
-/*
-	while (true)
-		displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
-*/
+	turnDecel(180, ON_SPOT_TURN, 0, 0.35, 8, 3);
+	displayCenteredBigTextLine( 3, "%d, %d", getGyroStable(), targetHeading );
+	wait1Msec(300);
 
 	goStraightDecel(20, 90, 0.003, 0.5, 40);
 	goStraightDecel(7, 30, 0.003, 0.5, 0);
 	drop();
 
-	startTask(returnArm);
+	taskAction = TASK_RETURN_ARM;
+	startTask(simple_action);
 	goStraightDecel(5, -100, 0.0026, 0.5, 0);
 }
 
@@ -326,16 +346,8 @@ void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour,
 	}
 
 	wait(0.3);
-	resetGyro(Gyro);
+	resetGyroStable();
 	targetHeading = 0;
-}
-
-void reset_arm_tail_claw()
-{
-	setMotorTarget( clawMotor, CLAW_OPEN, 100 );
-	setMotorTarget( tailMotor, TAIL_DOWN, 100 );
-	setMotorTarget( armMotor, iArmLv[0], 100 );
-	wait( 0.7 );
 }
 
 void top_right_to_bottom_left()
@@ -347,8 +359,8 @@ void top_right_to_bottom_left()
 	startTask( pick_up_cube );
 	goStraightDecel(23, 90, 0.0026, 0.5, 30);
 
-	turnDecel(-245, ON_SPOT_TURN, 0, 0.3, 5, 2);
-	goStraightDecel(150, 100, 0.0028, 0.6, 0 );
+	turnDecel(-240, ON_SPOT_TURN, 0, 0.3, 5, 2);
+	goStraightDecel(145, 100, 0.0028, 0.6, 0 );
 
 	startTask(task_drop);
 
@@ -369,11 +381,11 @@ void two_left_to_top_right()
 
 	goStraightDecel(30, -90, 0.0026, 0.5, 20);
 
-	turnDecel(-55, ON_SPOT_TURN, 0, 0.3, 8, 2);
+	turnDecel(-60, ON_SPOT_TURN, 0, 0.3, 8, 2);
 	goStraightDecel(60, -100, 0.0028, 0.6, 0);
 
-	tailTarget = TAIL_UP;
-	startTask(moveTail);
+	taskAction = TASK_TAIL_UP;
+	startTask(simple_action);
 
 	targetHeading = -75;
 	goStraightDecel(30, 100, 0.0028, 0.6, 20);
@@ -393,10 +405,10 @@ void two_left_to_top_right()
 	turnDecel(30, LEFT_WHEEL_TURN, 0, 0.5, 30, 2);
 	goStraightDecel(40, -100, 0.0028, 0.6, 0);
 
-	turnDecel(10, RIGHT_WHEEL_TURN, 0, 0.5, 30, 2);
+	turnDecel(5, RIGHT_WHEEL_TURN, 0, 0.5, 30, 2);
 
-	tailTarget = TAIL_DOWN;
-	startTask(moveTail);
+	taskAction = TASK_TAIL_DOWN;
+	startTask(simple_action);
 
 	setMotorSpeed(leftMotor, -100);
 	setMotorSpeed(rightMotor, -100);
@@ -418,17 +430,17 @@ void last_bonus()
 
 	goStraightDecel(17, -100, 0.0025, 0.5, 0);
 
-	tailTarget = TAIL_UP;
-	startTask(moveTail);
+	taskAction = TASK_TAIL_UP;
+	startTask(simple_action);
 	turnDecel(70, ON_SPOT_TURN, 0, 0.3, 10, 2);
 
 	goStraightDecel(150, 100, 0.0028, 0.6, 0);
 
-	turnDecel(215, ON_SPOT_TURN, 0, 0.3, 20, 5);
+	turnDecel(-145, ON_SPOT_TURN, 0, 0.3, 20, 5);
 	goStraightDecel(20, -100, 0.0028, 0.6, 0);
 
-	tailTarget = TAIL_DOWN;
-	startTask(moveTail);
+	taskAction = TASK_TAIL_DOWN;
+	startTask(simple_action);
 
 	setMotorSpeed(leftMotor, -100);
 	setMotorSpeed(rightMotor, -100);
@@ -437,11 +449,28 @@ void last_bonus()
 	goStraightDecel(10, 100, 0.0028, 0.6, 0);
 }
 
+void square()
+{
+	int i;
+
+	goStraightDecel(40, 100, 0.0028, 0.3, 30);
+	for (i=1;i<=4;i++)
+	{
+		goStraightDecel(40, 60, 0.0028, 0.3, 30);
+		turnDecel(90*i, ON_SPOT_TURN, 0, 0.3, 5, 2);
+		while (getTouchLEDValue(LED) == 0)
+		{
+			displayCenteredBigTextLine( 3, "%d, %d", getGyroStable(), getGyroDegrees(Gyro) );
+		}
+	}
+}
+
+
 task main()
 {
-	clearTimer(timer1);
 	setMotorEncoderUnits( encoderCounts );
 
+	// Define 0 point for claw, tail, and arm.
 	setMotorSpeed( clawMotor, 100 );
 	setMotorSpeed( tailMotor, -100 );
 	setMotorSpeed( armMotor, -100 );
@@ -450,15 +479,36 @@ task main()
 	resetMotorEncoder( tailMotor );
 	resetMotorEncoder( armMotor );
 
-	reset_arm_tail_claw();
+	// Get claw, tail, and arm ready for the game
+	setMotorTarget( clawMotor, CLAW_OPEN, 100 );
+	setMotorTarget( tailMotor, TAIL_DOWN, 100 );
+	setMotorTarget( armMotor, iArmLv[0], 100 );
+	wait( 0.7 );
 
-	reset_gyro_timer_encoder();
+	setTouchLEDColor(LED,colorOrange);
+	waitUntil(getTouchLEDValue(LED) == 1);
 
+	// Collect gyro drifting rate, and reset gyro
+	setGyroStable();
+	targetHeading = 0;
+
+	// Get drive train ready for the game
+	resetMotorEncoder(leftMotor);
+	resetMotorEncoder(rightMotor);
+	setMotorBrakeMode(leftMotor, motorHold);
+	setMotorBrakeMode(rightMotor, motorHold);
+
+	// On the mark
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	clearTimer( T1 );
+	//square();
 	greenCubeLow();
 
-	goStraightDecel( 40, -100, 0.0026, 0.5, 0 );
+	setMotorSpeed(leftMotor, -100);
+	setMotorSpeed(rightMotor, -100);
+	wait(1.3);
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	greenCubeLowHigh1();
@@ -472,15 +522,6 @@ task main()
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	last_bonus();
 
-
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
-
-
-
-
-
-
-
-
 
 }
