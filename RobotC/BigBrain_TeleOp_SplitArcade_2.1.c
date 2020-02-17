@@ -25,7 +25,7 @@ bool overwriteScooper = false;
 #define LIFT_LEVELS 5
 int iLiftLevel[LIFT_LEVELS] = {15 ,400, 1100, 1435, 1830}; //pickup_inside, pickup_outside/transport,low_inside,low_outside,,high_inside
 
-int iScoopPos[4] = { -150, 250, 815, 1000 }; //pick_cube, keep_ball, ready_ball, score_ball
+int iScoopPos[4] = { -150, 250, 815, 1000 }; //pick_cube, keep_ball/release cube, ready_ball, score_ball
 
 int iChA_filtered=0, iChC_filtered=0, turnNumber = 0;
 
@@ -126,7 +126,7 @@ void scooper_preset()
 	if (getJoystickValue (BtnFUp) == 1)
 	{
 		if (abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2])) < SCOOPER_DELTA )
-		{
+		{//Scoop Balls
 			turnNumber++;
 			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1],100);
 			wait1Msec( abs( iScoopPos[2] - iScoopPos[1] + ENCODER_UNIT_PER_SCOOP_ROUND ) * MS_PER_ENCODER_UNIT );
@@ -138,23 +138,29 @@ void scooper_preset()
 			}
 		}
 		else
-		{
+		{//Score Balls
+			overwriteDrive = true;
+			setMotorSpeed(leftMotor,0);
+			setMotorSpeed(rightMotor,0);
+
 			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[3],100);
 			wait1Msec( abs( iScoopPos[3] - iScoopPos[1] ) * MS_PER_ENCODER_UNIT );
 			wait1Msec(100);
 			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2],100);
 			wait1Msec( abs( iScoopPos[3] - iScoopPos[2] ) * MS_PER_ENCODER_UNIT );
+
+			overwriteDrive = false;
 		}
 	}
 	else if ( ( getJoystickValue (BtnFDown) == 1 ) )
 	{
 		if (abs(getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[0])) < SCOOPER_DELTA )
-		{
+		{//Release Cube
 			setMotorTarget(scoopMotor,(turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND)+iScoopPos[1],100);
 			wait1Msec( abs( iScoopPos[1] - iScoopPos[0] ) * MS_PER_ENCODER_UNIT );
 		}
 		else
-		{
+		{//Pickup Cube
 			setMotorTarget(scoopMotor,(turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND)+iScoopPos[0],100);
 			wait1Msec( abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[0]) ) * MS_PER_ENCODER_UNIT );
 		}
@@ -202,7 +208,7 @@ task task_claw()
 	{
 		if (getJoystickValue(BtnLUp)==1 && time1[T2] > 1000 )
 		{
-			if ( abs(getMotorEncoder(clawMotor) - CLAW_CLOSE) < CLAW_DELTA)
+			if ( abs(getMotorEncoder(clawMotor) - CLAW_CLOSE) < CLAW_DELTA*5 )
 			{
 				clawTarget = CLAW_OPEN;
 				clearTimer(T2);
