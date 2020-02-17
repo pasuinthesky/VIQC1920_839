@@ -13,7 +13,7 @@
 #define ARM_DELTA 25
 #define MS_PER_ENCODER_UNIT 1
 #define ENCODER_UNIT_PER_SCOOP_ROUND 1920
-#define FLIP_UP 1200
+#define FLIP_UP 1250
 #define FLIP_DOWN 900
 
 bool overwriteDrive = false;
@@ -25,7 +25,7 @@ bool overwriteScooper = false;
 #define LIFT_LEVELS 5
 int iLiftLevel[LIFT_LEVELS] = {15 ,400, 1100, 1435, 1830}; //pickup_inside, pickup_outside/transport,low_inside,low_outside,,high_inside
 
-int iScoopPos[4] = { -150, 250, 815, 1000 }; //pick_cube, keep_ball/release cube, ready_ball, score_ball
+int iScoopPos[4] = { -150, 250, 815, 1000 }; //pick_cube, keep_ball/release cube, ready_to_scoop_ball, score_ball
 
 int iChA_filtered=0, iChC_filtered=0, turnNumber = 0;
 
@@ -257,6 +257,41 @@ void flip()
 	overwriteLift = false;
 }
 
+void trick1()
+{
+	overwriteDrive = true;
+	overwriteScooper = true;
+
+	setMotorSpeed(leftMotor, -40);
+	setMotorSpeed(rightMotor, 40);
+	wait1Msec(300);
+
+	setMotorSpeed(leftMotor, 60);
+	setMotorSpeed(rightMotor, 60);
+	wait1Msec(800);
+
+	turnNumber++;
+	setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[0],100);
+
+	setMotorSpeed(leftMotor, 60);
+	setMotorSpeed(rightMotor, 60);
+	wait1Msec(500);
+
+	setMotorSpeed(leftMotor, -60);
+	setMotorSpeed(rightMotor, 60);
+	wait1Msec(300);
+
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
+
+	setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1],100);
+	wait1Msec( abs( iScoopPos[1] - iScoopPos[0] ) * MS_PER_ENCODER_UNIT );
+
+	overwriteDrive = false;
+	overwriteScooper = false;
+
+}
+
 task main()
 {
 	setMotorEncoderUnits(encoderCounts);
@@ -280,6 +315,9 @@ task main()
 	startTask(task_lift);
 	startTask(task_claw);
 	clearTimer(T1);
+
+	waitUntil(getJoystickValue(BtnLDown) == 1);
+	trick1();
 
  	repeat (forever)
 	{
