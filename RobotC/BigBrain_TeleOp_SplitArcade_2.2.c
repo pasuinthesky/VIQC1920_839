@@ -22,8 +22,8 @@ bool overwriteLift = false;
 bool overwriteScooper = false;
 
 
-#define LIFT_LEVELS 4
-int iLiftLevel[LIFT_LEVELS] = {15 ,400, 1100, 1830}; //pickup_inside, pickup_outside/transport,low_inside,low_outside,,high_inside
+#define LIFT_LEVELS 5
+int iLiftLevel[LIFT_LEVELS] = {15 ,400, 1100, 1435, 1830}; //pickup_inside, pickup_outside/transport,low_inside,low_outside,,high_inside
 
 int iScoopPos[4] = { -150, 250, 815, 1000 }; //pick_cube, keep_ball/release cube, ready_to_scoop_ball, score_ball
 
@@ -34,9 +34,9 @@ int iDriveDirection = 1;
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,20,20,20,20,20,
-20,20,20,20,20,30,30,30,30,30,
-30,30,30,30,30,30,30,30,30,30,
+10,10,10,10,10,10,10,10,10,10,
+10,10,10,10,10,10,10,10,10,10,
+20,20,20,20,20,20,20,20,20,20,
 30,30,30,30,30,30,30,30,30,30,
 40,40,40,40,40,40,40,40,40,40,
 50,50,50,50,50,50,50,50,50,50,
@@ -46,10 +46,10 @@ int iDriveMapping[101] = {
 int iTurnMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,20,20,20,20,20,
-20,20,20,20,20,20,20,20,20,20,
-20,20,20,20,20,20,20,20,20,20,
-30,30,30,30,30,30,30,30,30,30,
+10,10,10,10,10,11,11,12,14,16,
+18,19,19,20,20,20,20,20,20,20,
+20,20,20,20,20,21,21,22,24,26,
+28,29,29,30,30,30,30,30,30,30,
 30,30,30,30,30,31,31,32,34,36,
 38,39,39,40,40,40,40,40,40,40,
 40,40,40,40,40,41,41,42,44,46,
@@ -193,7 +193,7 @@ task task_scooper()
 		if (! overwriteScooper)
 		{
 			scooper_preset();
-			//scooper_manual();
+		//scooper_manual();
 		}
 
 		wait1Msec(20);
@@ -223,33 +223,11 @@ task task_claw()
 		if (! overwriteClaw)
 		{
 			if ( abs(getMotorEncoder(clawMotor) - clawTarget) > CLAW_DELTA )
-			{
 				setMotorTarget(clawMotor,clawTarget,100);
-				//do preset here
-			}
-			else {
-				if(clawTarget == CLAW_OPEN){
-					if(getMotorEncoder(liftMotorL)<=iLiftLevel[1]){
-						setMotorTarget(liftMotorL,iLiftLevel[1], 100);
-						setMotorTarget(liftMotorR,iLiftLevel[1], 100);
-					}
-				}
-				else {
-					if(getMotorEncoder(liftMotorL)>=iLiftLevel[2]){
-						setMotorSpeed(leftMotor, -100);
-						setMotorSpeed(rightMotor, -100);
-						wait1Msec(400);
-						setMotorSpeed(leftMotor, 0);
-						setMotorSpeed(rightMotor, 0);
-						setMotorSpeed(liftMotorL,-100);
-						setMotorSpeed(liftMotorR,-100);
-						wait1Msec(abs(iLiftLevel[0]-iLiftLevel[3])*MS_PER_ENCODER_UNIT+200);
-						setMotorSpeed(liftMotorL,0);
-						setMotorSpeed(liftMotorR,0);
-					}
-				}
-			}
+			else
+				setMotorSpeed(clawMotor,0);
 		}
+
 		wait1Msec(20);
 	}
 }
@@ -258,13 +236,11 @@ void flip()
 {
 	overwriteDrive = true;
 	overwriteLift = true;
-	overwriteClaw = true;
 
 	setMotorSpeed(leftMotor,-40);
 	setMotorSpeed(rightMotor,-40);
 	setMotorTarget(liftMotorL,FLIP_UP,100);
 	setMotorTarget(liftMotorR,FLIP_UP,100);
-	setMotorTarget(clawMotor,CLAW_OPEN,100);
 	wait1Msec(700);
 
 	setMotorTarget(liftMotorL,FLIP_DOWN,100);
@@ -275,12 +251,10 @@ void flip()
 	setMotorSpeed(rightMotor,60);
 	setMotorTarget(liftMotorL,FLIP_DOWN,100);
 	setMotorTarget(liftMotorR,FLIP_DOWN,100);
-	setMotorTarget(clawMotor,CLAW_CLOSE,100);
 	wait1Msec(600);
 
 	overwriteDrive = false;
 	overwriteLift = false;
-	overwriteClaw = false;
 }
 
 void trick1()
@@ -288,8 +262,8 @@ void trick1()
 	overwriteDrive = true;
 	overwriteScooper = true;
 
-	setMotorSpeed(leftMotor, -40);
-	setMotorSpeed(rightMotor, 40);
+	setMotorSpeed(leftMotor, 40);
+	setMotorSpeed(rightMotor, -40);
 	wait1Msec(300);
 
 	setMotorSpeed(leftMotor, 60);
@@ -303,8 +277,8 @@ void trick1()
 	setMotorSpeed(rightMotor, 60);
 	wait1Msec(500);
 
-	setMotorSpeed(leftMotor, -60);
-	setMotorSpeed(rightMotor, 60);
+	setMotorSpeed(leftMotor, 60);
+	setMotorSpeed(rightMotor, -60);
 	wait1Msec(300);
 
 	setMotorSpeed(leftMotor, 0);
@@ -345,15 +319,15 @@ task main()
 	waitUntil(getJoystickValue(BtnLDown) == 1);
 	trick1();
 
-	repeat (forever)
+ 	repeat (forever)
 	{
 		if (getJoystickValue(BtnEDown) == 1 && time1[T1] > 1000 )
 		{
-			iDriveDirection = iDriveDirection * (-1);
-			clearTimer(T1);
+				iDriveDirection = iDriveDirection * (-1);
+				clearTimer(T1);
 		}
 
-		if (getJoystickValue(BtnLDown) == 1)
+		if (getJoystickValue(BtnEUp) == 1)
 			flip();
 
 		iChA_filtered=iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA))*iDriveDirection;
