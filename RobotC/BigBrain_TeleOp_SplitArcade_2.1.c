@@ -34,9 +34,9 @@ int iDriveDirection = 1;
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,10,10,10,10,10,
-10,10,10,10,10,10,10,10,10,10,
-20,20,20,20,20,20,20,20,20,20,
+10,10,10,10,10,20,20,20,20,20,
+20,20,20,20,20,30,30,30,30,30,
+30,30,30,30,30,30,30,30,30,30,
 30,30,30,30,30,30,30,30,30,30,
 40,40,40,40,40,40,40,40,40,40,
 50,50,50,50,50,50,50,50,50,50,
@@ -46,10 +46,10 @@ int iDriveMapping[101] = {
 int iTurnMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,11,11,12,14,16,
-18,19,19,20,20,20,20,20,20,20,
-20,20,20,20,20,21,21,22,24,26,
-28,29,29,30,30,30,30,30,30,30,
+10,10,10,10,10,20,20,20,20,20,
+20,20,20,20,20,20,20,20,20,20,
+20,20,20,20,20,20,20,20,20,20,
+30,30,30,30,30,30,30,30,30,30,
 30,30,30,30,30,31,31,32,34,36,
 38,39,39,40,40,40,40,40,40,40,
 40,40,40,40,40,41,41,42,44,46,
@@ -236,11 +236,13 @@ void flip()
 {
 	overwriteDrive = true;
 	overwriteLift = true;
+	overwriteClaw = true;
 
 	setMotorSpeed(leftMotor,-40);
 	setMotorSpeed(rightMotor,-40);
 	setMotorTarget(liftMotorL,FLIP_UP,100);
 	setMotorTarget(liftMotorR,FLIP_UP,100);
+	setMotorTarget(clawMotor,CLAW_OPEN,100);
 	wait1Msec(700);
 
 	setMotorTarget(liftMotorL,FLIP_DOWN,100);
@@ -251,10 +253,12 @@ void flip()
 	setMotorSpeed(rightMotor,60);
 	setMotorTarget(liftMotorL,FLIP_DOWN,100);
 	setMotorTarget(liftMotorR,FLIP_DOWN,100);
+	setMotorTarget(clawMotor,CLAW_CLOSE,100);
 	wait1Msec(600);
 
 	overwriteDrive = false;
 	overwriteLift = false;
+	overwriteClaw = false;
 }
 
 void trick1()
@@ -299,7 +303,7 @@ task main()
 	setMotorSpeed(liftMotorR, -100);
 	setMotorSpeed(clawMotor, -50);
 	setMotorSpeed(scoopMotor, -60);
-	wait(2);
+	wait1Msec(2000);
 	setMotorSpeed(liftMotorL, 0);	resetMotorEncoder(liftMotorL);
 	setMotorSpeed(liftMotorR, 0);	resetMotorEncoder(liftMotorR);
 	setMotorSpeed(clawMotor, 0);	resetMotorEncoder(clawMotor);
@@ -309,7 +313,7 @@ task main()
 	setMotorTarget(clawMotor, CLAW_CLOSE, 100);
 	setMotorTarget(liftMotorL, FLIP_UP, 100);
 	setMotorTarget(liftMotorR, FLIP_UP, 100);
-	wait(1);
+	wait1Msec(1000);
 
 	startTask(task_scooper);
 	startTask(task_lift);
@@ -327,7 +331,7 @@ task main()
 				clearTimer(T1);
 		}
 
-		if (getJoystickValue(BtnEUp) == 1)
+		if (getJoystickValue(BtnLDown) == 1)
 			flip();
 
 		iChA_filtered=iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA))*iDriveDirection;
