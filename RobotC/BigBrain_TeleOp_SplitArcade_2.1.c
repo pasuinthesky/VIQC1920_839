@@ -29,7 +29,7 @@ int iScoopPos[4] = { -150, 250, 815, 1000 }; //pick_cube, keep_ball/release cube
 
 int iChA_filtered=0, iChC_filtered=0, turnNumber = 0;
 
-int iDriveDirection = 1;
+int iDriveDirection = -1;
 
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
@@ -325,12 +325,13 @@ task main()
 
  	repeat (forever)
 	{
+/*
 		if (getJoystickValue(BtnEDown) == 1 && time1[T1] > 1000 )
 		{
 				iDriveDirection = iDriveDirection * (-1);
 				clearTimer(T1);
 		}
-
+*/
 		if (getJoystickValue(BtnLDown) == 1)
 			flip();
 
