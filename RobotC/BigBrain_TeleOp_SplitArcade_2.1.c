@@ -139,15 +139,18 @@ void scooper_preset()
 		}
 		else
 		{//Score Balls
-			setMotorSpeed(leftMotor,0);
-			setMotorSpeed(rightMotor,0);
+			overwriteDrive = true;
+			setMotorSpeed(leftMotor,30);
+			setMotorSpeed(rightMotor,30);
 
 			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[3],100);
 			wait1Msec( abs( iScoopPos[3] - iScoopPos[1] ) * MS_PER_ENCODER_UNIT );
 			wait1Msec(100);
+			setMotorSpeed(leftMotor,0);
+			setMotorSpeed(rightMotor,0);
 			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2],100);
 			wait1Msec( abs( iScoopPos[3] - iScoopPos[2] ) * MS_PER_ENCODER_UNIT );
-
+			overwriteDrive = false;
 		}
 	}
 	else if ( ( getJoystickValue (BtnFDown) == 1 ) )
