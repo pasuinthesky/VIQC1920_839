@@ -160,6 +160,8 @@ void scooper_preset()
 		else
 		{//Pickup Cube
 			overwriteDrive = true;
+			setMotorTarget(scoopMotor,(turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND)+iScoopPos[1],100);
+			wait1Msec( abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1]) ) * MS_PER_ENCODER_UNIT - 240 );
 			setMotorSpeed(leftMotor, 100);
 			setMotorSpeed(rightMotor, 100);
 			wait1Msec(240);//basically 400 over 100 over 60, which turns into 240. the basic idea is 400/(100/60), so u can also see it as 400/100*60
