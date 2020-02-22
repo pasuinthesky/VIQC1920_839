@@ -32,28 +32,28 @@ int iChA_filtered=0, iChC_filtered=0, turnNumber = 0;
 int iDriveDirection = -1;
 
 int iDriveMapping[101] = {
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,20,20,20,20,20,
-20,20,20,20,20,30,30,30,30,30,
-30,30,30,30,30,30,30,30,30,30,
-30,30,30,30,30,30,30,30,30,30,
-40,40,40,40,40,40,40,40,40,40,
-50,50,50,50,50,50,50,50,50,50,
-60,62,64,66,68,70,72,74,76,78,
-84,88,92,96,100,100,100,100,100,100,100};
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,20,20,20,20,20,
+	20,20,20,20,20,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	40,40,40,40,40,40,40,40,40,40,
+	50,50,50,50,50,50,50,50,50,50,
+	60,62,64,66,68,70,72,74,76,78,
+	84,88,92,96,100,100,100,100,100,100,100};
 
 int iTurnMapping[101] = {
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,20,20,20,20,20,
-20,20,20,20,20,20,20,20,20,20,
-20,20,20,20,20,20,20,20,20,20,
-30,30,30,30,30,30,30,30,30,30,
-30,30,30,30,30,31,31,32,34,36,
-38,39,39,40,40,40,40,40,40,40,
-40,40,40,40,40,41,41,42,44,46,
-50,54,58,60,62,64,64,64,64,64,64};
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,31,31,32,34,36,
+	38,39,39,40,40,40,40,40,40,40,
+	40,40,40,40,40,41,41,42,44,46,
+	50,54,58,60,62,64,64,64,64,64,64};
 
 
 void lift_manual()
@@ -139,7 +139,6 @@ void scooper_preset()
 		}
 		else
 		{//Score Balls
-			overwriteDrive = true;
 			setMotorSpeed(leftMotor,0);
 			setMotorSpeed(rightMotor,0);
 
@@ -149,7 +148,6 @@ void scooper_preset()
 			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2],100);
 			wait1Msec( abs( iScoopPos[3] - iScoopPos[2] ) * MS_PER_ENCODER_UNIT );
 
-			overwriteDrive = false;
 		}
 	}
 	else if ( ( getJoystickValue (BtnFDown) == 1 ) )
@@ -161,8 +159,18 @@ void scooper_preset()
 		}
 		else
 		{//Pickup Cube
+			overwriteDrive = true;
+			setMotorSpeed(leftMotor, 100);
+			setMotorSpeed(rightMotor, 100);
+			wait1Msec(240);//basically 400 over 100 over 60, which turns into 240. the basic idea is 400/(100/60), so u can also see it as 400/100*60
+			setMotorSpeed(leftMotor, -100);
+			setMotorSpeed(rightMotor, -100);
+			wait1Msec(10);
+			setMotorSpeed(leftMotor, -60);
+			setMotorSpeed(rightMotor, -60);
 			setMotorTarget(scoopMotor,(turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND)+iScoopPos[0],100);
 			wait1Msec( abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[0]) ) * MS_PER_ENCODER_UNIT );
+			overwriteDrive = false;
 		}
 	}
 	else
@@ -193,7 +201,7 @@ task task_scooper()
 		if (! overwriteScooper)
 		{
 			scooper_preset();
-		//scooper_manual();
+			//scooper_manual();
 		}
 
 		wait1Msec(20);
@@ -206,7 +214,7 @@ task task_claw()
 
 	repeat(forever)
 	{
-		if (getJoystickValue(BtnLUp)==1 && time1[T2] > 1000 )
+		if (getJoystickValue(BtnLUp)==1 && time1[T2] > 500 )
 		{
 			if ( abs(getMotorEncoder(clawMotor) - CLAW_CLOSE) < CLAW_DELTA*5 )
 			{
@@ -320,18 +328,20 @@ task main()
 	startTask(task_claw);
 	clearTimer(T1);
 
+	/*
 	waitUntil(getJoystickValue(BtnLDown) == 1);
 	trick1();
+	*/
 
- 	repeat (forever)
+	repeat (forever)
 	{
-/*
+		/*
 		if (getJoystickValue(BtnEDown) == 1 && time1[T1] > 1000 )
 		{
-				iDriveDirection = iDriveDirection * (-1);
-				clearTimer(T1);
+		iDriveDirection = iDriveDirection * (-1);
+		clearTimer(T1);
 		}
-*/
+		*/
 		if (getJoystickValue(BtnLDown) == 1)
 			flip();
 
