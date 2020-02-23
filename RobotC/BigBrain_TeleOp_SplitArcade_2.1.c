@@ -224,6 +224,7 @@ task task_claw()
 			if ( abs(getMotorEncoder(clawMotor) - CLAW_CLOSE) < CLAW_DELTA*5 )
 			{
 				clawTarget = CLAW_OPEN;
+
 				clearTimer(T2);
 			}
 			else
@@ -251,23 +252,22 @@ void flip()
 	overwriteLift = true;
 	overwriteClaw = true;
 
-	setMotorSpeed(leftMotor,-40);
-	setMotorSpeed(rightMotor,-40);
+	setMotorSpeed(leftMotor,-60);
+	setMotorSpeed(rightMotor,-60);
 	setMotorTarget(liftMotorL,FLIP_UP,100);
 	setMotorTarget(liftMotorR,FLIP_UP,100);
 	setMotorTarget(clawMotor,CLAW_OPEN,100);
-	wait1Msec(700);
+	wait1Msec(400);
 
 	setMotorTarget(liftMotorL,FLIP_DOWN,100);
 	setMotorTarget(liftMotorR,FLIP_DOWN,100);
-	wait1Msec(200);
+	wait1Msec(300);
 
-	setMotorSpeed(leftMotor,60);
-	setMotorSpeed(rightMotor,60);
+	setMotorSpeed(leftMotor,100);
+	setMotorSpeed(rightMotor,100);
 	setMotorTarget(liftMotorL,FLIP_DOWN,100);
 	setMotorTarget(liftMotorR,FLIP_DOWN,100);
-	setMotorTarget(clawMotor,CLAW_CLOSE,100);
-	wait1Msec(600);
+	wait1Msec(450);
 
 	overwriteDrive = false;
 	overwriteLift = false;
