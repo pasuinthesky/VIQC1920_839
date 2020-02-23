@@ -13,8 +13,10 @@
 #define ARM_DELTA 25
 #define MS_PER_ENCODER_UNIT 1
 #define ENCODER_UNIT_PER_SCOOP_ROUND 1920
-#define FLIP_UP 1250
-#define FLIP_DOWN 900
+#define FLIP_UP_LIFT 1250
+#define FLIP_DOWN_LIFT 900
+#define FLIP_UP_SCOOPER -40
+#define FLIP_DOWN_SCOOPER 0
 
 bool overwriteDrive = false;
 bool overwriteClaw = false;
@@ -224,7 +226,6 @@ task task_claw()
 			if ( abs(getMotorEncoder(clawMotor) - CLAW_CLOSE) < CLAW_DELTA*5 )
 			{
 				clawTarget = CLAW_OPEN;
-
 				clearTimer(T2);
 			}
 			else
@@ -246,7 +247,7 @@ task task_claw()
 	}
 }
 
-void flip()
+void flip_by_lift()
 {
 	overwriteDrive = true;
 	overwriteLift = true;
@@ -254,24 +255,51 @@ void flip()
 
 	setMotorSpeed(leftMotor,-60);
 	setMotorSpeed(rightMotor,-60);
-	setMotorTarget(liftMotorL,FLIP_UP,100);
-	setMotorTarget(liftMotorR,FLIP_UP,100);
+	setMotorTarget(liftMotorL,FLIP_UP_LIFT,100);
+	setMotorTarget(liftMotorR,FLIP_UP_LIFT,100);
 	setMotorTarget(clawMotor,CLAW_OPEN,100);
 	wait1Msec(400);
 
-	setMotorTarget(liftMotorL,FLIP_DOWN,100);
-	setMotorTarget(liftMotorR,FLIP_DOWN,100);
+	setMotorTarget(liftMotorL,FLIP_DOWN_LIFT,100);
+	setMotorTarget(liftMotorR,FLIP_DOWN_LIFT,100);
 	wait1Msec(300);
 
 	setMotorSpeed(leftMotor,100);
 	setMotorSpeed(rightMotor,100);
-	setMotorTarget(liftMotorL,FLIP_DOWN,100);
-	setMotorTarget(liftMotorR,FLIP_DOWN,100);
+	setMotorTarget(liftMotorL,FLIP_DOWN_LIFT,100);
+	setMotorTarget(liftMotorR,FLIP_DOWN_LIFT,100);
 	wait1Msec(450);
 
 	overwriteDrive = false;
 	overwriteLift = false;
 	overwriteClaw = false;
+}
+
+void flip_by_scooper()
+{
+	if (abs(getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1])) > SCOOPER_DELTA )
+		return;
+
+	overwriteDrive = true;
+	overwriteScooper = true;
+
+	setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+FLIP_UP_SCOOPER,100);
+	wait1Msec(abs(iScoopPos[1]-FLIP_UP_SCOOPER)*MS_PER_ENCODER_UNIT);
+
+	setMotorSpeed(leftMotor,60);
+	setMotorSpeed(rightMotor,60);
+	wait1Msec(300);
+
+	setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1],100);
+	wait1Msec(abs(iScoopPos[1]-FLIP_UP_SCOOPER)*MS_PER_ENCODER_UNIT);
+
+	setMotorSpeed(leftMotor,-60);
+	setMotorSpeed(rightMotor,-60);
+	setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1],100);
+	wait1Msec(600);
+
+	overwriteDrive = false;
+	overwriteScooper = false;
 }
 
 void trick1()
@@ -324,8 +352,8 @@ task main()
 
 	setMotorTarget(scoopMotor, iScoopPos[2], 100);
 	setMotorTarget(clawMotor, CLAW_CLOSE, 100);
-	setMotorTarget(liftMotorL, FLIP_UP, 100);
-	setMotorTarget(liftMotorR, FLIP_UP, 100);
+	setMotorTarget(liftMotorL, FLIP_UP_LIFT, 100);
+	setMotorTarget(liftMotorR, FLIP_UP_LIFT, 100);
 	wait1Msec(1000);
 
 	startTask(task_scooper);
@@ -348,7 +376,7 @@ task main()
 		}
 		*/
 		if (getJoystickValue(BtnLDown) == 1)
-			flip();
+			flip_by_scooper();
 
 		iChA_filtered=iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA))*iDriveDirection;
 		iChC_filtered=iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
