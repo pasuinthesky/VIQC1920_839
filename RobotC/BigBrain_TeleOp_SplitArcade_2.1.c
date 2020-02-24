@@ -10,7 +10,7 @@
 #define CLAW_OPEN 50
 #define CLAW_DELTA 20
 #define SCOOPER_DELTA 35
-#define ARM_DELTA 25
+#define LIFT_DELTA 25
 #define MS_PER_ENCODER_UNIT 1
 #define ENCODER_UNIT_PER_SCOOP_ROUND 1920
 #define FLIP_UP_LIFT 1250
@@ -83,7 +83,7 @@ void lift_preset()
 	{
 		for (int i=0;i<LIFT_LEVELS-1;i=i+1)
 		{
-			if ( getMotorEncoder(liftMotorL) < ( iLiftLevel[i+1] - ARM_DELTA ) )
+			if ( getMotorEncoder(liftMotorL) < ( iLiftLevel[i+1] - LIFT_DELTA ) )
 			{
 				setMotorTarget(liftMotorL,iLiftLevel[i+1],100);
 				setMotorTarget(liftMotorR, iLiftLevel[i+1], 100);
@@ -96,7 +96,7 @@ void lift_preset()
 	{
 		for (int i=LIFT_LEVELS-1;i>0;i=i-1)
 		{
-			if ( getMotorEncoder(liftMotorL) > ( iLiftLevel[i-1] + ARM_DELTA ) )
+			if ( getMotorEncoder(liftMotorL) > ( iLiftLevel[i-1] + LIFT_DELTA ) )
 			{
 				setMotorTarget(liftMotorL,iLiftLevel[i-1],100);
 				setMotorTarget(liftMotorR, iLiftLevel[i-1],100);
