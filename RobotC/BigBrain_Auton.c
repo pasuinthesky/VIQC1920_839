@@ -302,6 +302,88 @@ task pick_up_cube()
 	EndTimeSlice();
 }
 
+void right_low_green_two_blue()
+{
+	goStraightDecel(5, -60, 0.007, 0.6, 30);
+
+	pickUpTrigger = 4; liftLevel = 3; clawTarget = CLAW_CLOSE;
+	startTask( pick_up_cube );
+
+	goStraightDecel(10, -30, 0.007, 0.6, 0);
+	setMotorTarget(liftMotorL, iLiftLevel[liftLevel],100);
+	setMotorTarget(liftMotorR, iLiftLevel[liftLevel],100);
+
+	goStraightDecel(55, -40, 0.007, 0.6, 0);
+
+	clawAction(CLAW_OPEN);
+
+	goStraightDecel(5, 30, 0.007, 0.6, 0);
+	setMotorTarget(clawMotor, CLAW_CLOSE,30);
+	setMotorTarget(liftMotorL, iLiftLevel[1],100);
+	setMotorTarget(liftMotorR, iLiftLevel[1],100);
+	turnDecel(110, ON_SPOT_TURN, 0, 0.25, 5, 20);
+
+	goStraightDecel(20, 30, 0.007, 0.6, 0);
+	setMotorTarget(scoopMotor, iScoopPos[0], 100);
+	goStraightDecel(10, 30, 0.007, 0.6, 0);
+
+	turnDecel(180, ON_SPOT_TURN, 0, 0.3, 5, 10);
+
+	goStraightDecel(65, -100, 0.007, 0.6, 0);
+
+	clawAction(CLAW_OPEN);
+
+	wait1Msec(1000);
+
+	clawAction(CLAW_CLOSE);
+
+}
+
+void left_low_green_high_green()
+{
+	goStraightDecel(5, -60, 0.007, 0.6, 30);
+
+	pickUpTrigger = 4; liftLevel = 3; clawTarget = CLAW_CLOSE;
+	startTask( pick_up_cube );
+
+	goStraightDecel(10, -30, 0.007, 0.6, 0);
+	setMotorTarget(liftMotorL, iLiftLevel[liftLevel],100);
+	setMotorTarget(liftMotorR, iLiftLevel[liftLevel],100);
+
+	goStraightDecel(55, -40, 0.007, 0.6, 0);
+
+	clawAction(CLAW_OPEN);
+
+	goStraightDecel(10, 30, 0.007, 0.6, 0);
+
+	setMotorTarget(clawMotor, CLAW_CLOSE,30);
+	setMotorTarget(liftMotorL, iLiftLevel[0],100);
+	setMotorTarget(liftMotorR, iLiftLevel[0],100);
+	turnDecel(-90, ON_SPOT_TURN, 0, 0.25, 5, 20);
+
+	goStraightDecel(30, -40, 0.007, 0.6, 30);
+	turnDecel(-140, ON_SPOT_TURN, 0, 0.25, 10, 10);
+
+	goStraightDecel(20, -40, 0.007, 0.6, 30);
+	pickUpTrigger = 4; liftLevel = 4; clawTarget = CLAW_OPEN;
+	startTask( pick_up_cube );
+	goStraightDecel(60, -40, 0.007, 0.6, 30);
+	turnDecel(-230, ON_SPOT_TURN, 0, 0.25, 10, 10);
+
+	goStraightDecel(23, -40, 0.007, 0.6, 30);
+
+	clawAction(CLAW_CLOSE);
+
+	setMotorTarget(liftMotorL,iLiftLevel[1],50);
+	setMotorTarget(liftMotorR,iLiftLevel[1],50);
+	goStraightDecel(15, 100, 0.007, 0.6, 30);
+}
+
+void two_red_two_blue()
+{
+
+}
+
 task main()
 {
 
@@ -348,37 +430,12 @@ task main()
 	turnDecel(90, ON_SPOT_TURN, 0, 0.25, 3, 20);
 */
 
-	goStraightDecel(5, -60, 0.007, 0.6, 30);
+	right_low_green_two_blue();
+	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 
-	pickUpTrigger = 4; liftLevel = 3; clawTarget = CLAW_CLOSE;
-	startTask( pick_up_cube );
+	left_low_green_high_green();
+	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 
-	goStraightDecel(10, -30, 0.007, 0.6, 0);
-	setMotorTarget(liftMotorL, iLiftLevel[liftLevel],100);
-	setMotorTarget(liftMotorR, iLiftLevel[liftLevel],100);
-
-	goStraightDecel(55, -40, 0.007, 0.6, 0);
-
-	clawAction(CLAW_OPEN);
-
-	goStraightDecel(5, 30, 0.007, 0.6, 0);
-	setMotorTarget(clawMotor, CLAW_CLOSE,30);
-	setMotorTarget(liftMotorL, iLiftLevel[1],100);
-	setMotorTarget(liftMotorR, iLiftLevel[1],100);
-	turnDecel(110, ON_SPOT_TURN, 0, 0.25, 5, 20);
-
-	goStraightDecel(20, 30, 0.007, 0.6, 0);
-	scooperAction(SCOOPER_PICKUP_CUBE);
-	goStraightDecel(10, 30, 0.007, 0.6, 0);
-
-	turnDecel(180, ON_SPOT_TURN, 0, 0.3, 5, 10);
-
-	goStraightDecel(100, -100, 0.007, 0.6, 0);
-
-	clawAction(CLAW_OPEN);
-
-	wait1Msec(2000);
-
-	clawAction(CLAW_CLOSE);
+	two_red_two_blue();
 
 }
