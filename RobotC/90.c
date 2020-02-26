@@ -46,7 +46,7 @@ float timeStamp;
 void reset_gyro_timer_encoder()
 // Prepare robot
 {
-	wait(1);
+	wait1Msec(1);
 	resetGyro(Gyro);
 
 	clearTimer(T1);
@@ -211,14 +211,14 @@ void turnDecel( int inputHeading, int turnStyle, float Ki, float Kp, int baseSpe
 		setMotorSpeed(rightMotor, 0);
 }
 
-// 5, wait 2 secs, 25( reduce motor speed ), 30, grab, turn slighjtly less than 90
+// 5, wait1Msec 2 secs, 25( reduce motor speed ), 30, grab, turn slighjtly less than 90
 void GreencubeHigh()
 {
 	goStraightDecel(54, 90, 0.0026, 0.5, 20);
 	turnDecel( 90, ON_SPOT_TURN, 0, 0.6, 5,  2);
 
 	goStraightDecel(5, 100, 0.0026, 0.5, 5);
-	//wait( 2 );
+	//wait1Msec( 2 );
 
 	//goStraightDecel(25, 60, 0.0026, 0.5, 40);
 	goStraightDecel(25, 60, 0.0026, 0.5, 60);
@@ -231,7 +231,7 @@ void GreencubeHigh()
 	goStraightDecel(10, 30, 0.003, 0.5, 30);
 
 	turnDecel(180, ON_SPOT_TURN, 0, 0.45, 8, 2);
-	wait( 1 );
+	wait1Msec( 1 );
 /*
 	while (true)
 		displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
@@ -276,7 +276,7 @@ void greenCubeLowHigh1()
 	turnDecel( 90, ON_SPOT_TURN, 0, 0.6, 5,  2);
 
 	goStraightDecel(5, 100, 0.0026, 0.5, 5);
-	//wait( 2 );
+	//wait1Msec( 2 );
 
 	//goStraightDecel(25, 60, 0.0026, 0.5, 40);b
 	goStraightDecel(25, 60, 0.0026, 0.5, 60);
@@ -291,7 +291,7 @@ void greenCubeLowHigh1()
 
 	turnDecel(170, ON_SPOT_TURN, 0, 0.35, 8, 3);
 	displayCenteredBigTextLine( 3, "%d, %d", getGyroDegrees(Gyro), targetHeading );
-	wait( 1 );
+	wait1Msec( 1 );
 
 /*
 	while (true)
@@ -325,7 +325,7 @@ void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour,
 		setTouchLEDBlinkTime(LED, blinkTimeOn, blinkTimeOff);
 	}
 
-	wait(0.3);
+	wait1Msec(0.3);
 	resetGyro(Gyro);
 	targetHeading = 0;
 }
@@ -335,7 +335,7 @@ void reset_arm_tail_claw()
 	setMotorTarget( clawMotor, CLAW_OPEN, 100 );
 	setMotorTarget( tailMotor, TAIL_DOWN, 100 );
 	setMotorTarget( armMotor, iArmLv[0], 100 );
-	wait( 0.7 );
+	wait1Msec( 0.7 );
 }
 
 void top_right_to_bottom_left()
@@ -445,7 +445,7 @@ task main()
 	setMotorSpeed( clawMotor, 100 );
 	setMotorSpeed( tailMotor, -100 );
 	setMotorSpeed( armMotor, -100 );
-	wait(2);
+	wait1Msec(2);
 	resetMotorEncoder( clawMotor );
 	resetMotorEncoder( tailMotor );
 	resetMotorEncoder( armMotor );

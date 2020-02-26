@@ -56,16 +56,16 @@ void setGyroStable()
 	{
 		setTouchLEDColor(LED,colorRed);
 		setTouchLEDBlinkTime(LED, 14,6);
-		wait(3);
+		wait1Msec(3);
 		setTouchLEDBlinkTime(LED, 0,1);
-		wait(2);
+		wait1Msec(2);
 
 		setTouchLEDColor(LED,colorGreen);
 		setTouchLEDBlinkTime(LED, 8, 12);
 
 		resetGyro(Gyro);
 		clearTimer(T4);
-		wait(GYRO_SAMPLEING_SECONDS);
+		wait1Msec(GYRO_SAMPLEING_SECONDS);
 
 		fGyroDriftRate = getGyroDegreesFloat(Gyro) / GYRO_SAMPLEING_SECONDS;
 
@@ -75,7 +75,7 @@ void setGyroStable()
 			setTouchLEDColor(LED, colorRed);
 
 		setTouchLEDBlinkTime(LED, 4, 4);
-		wait(1);
+		wait1Msec(1);
 		setTouchLEDColor(LED,colorNone);
 		setTouchLEDBlinkTime(LED, 1, 0);
 	}
@@ -345,7 +345,7 @@ void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour,
 		setTouchLEDBlinkTime(LED, blinkTimeOn, blinkTimeOff);
 	}
 
-	wait(0.3);
+	wait1Msec(0.3);
 	resetGyroStable();
 	targetHeading = 0;
 }
@@ -465,16 +465,23 @@ void square()
 	}
 }
 
+float nBatteryLevelVolt(){
+	float BattLevel = nImmediateBatteryLevel/1000;
+	return(BattLevel);
+}
 
 task main()
 {
+	if(nBatteryLevelVolt()<7.8){
+		LEDBusiness(colorRed, 0, 0, 0, 0);
+	}
 	setMotorEncoderUnits( encoderCounts );
 
 	// Define 0 point for claw, tail, and arm.
 	setMotorSpeed( clawMotor, 100 );
 	setMotorSpeed( tailMotor, -100 );
 	setMotorSpeed( armMotor, -100 );
-	wait(2);
+	wait1Msec(2);
 	resetMotorEncoder( clawMotor );
 	resetMotorEncoder( tailMotor );
 	resetMotorEncoder( armMotor );
@@ -483,7 +490,7 @@ task main()
 	setMotorTarget( clawMotor, CLAW_OPEN, 100 );
 	setMotorTarget( tailMotor, TAIL_DOWN, 100 );
 	setMotorTarget( armMotor, iArmLv[0], 100 );
-	wait( 0.7 );
+	wait1Msec( 0.7 );
 
 	setTouchLEDColor(LED,colorOrange);
 	waitUntil(getTouchLEDValue(LED) == 1);
@@ -506,7 +513,7 @@ task main()
 
 	setMotorSpeed(leftMotor, -100);
 	setMotorSpeed(rightMotor, -100);
-	wait(1.3);
+	wait1Msec(1.3);
 	setMotorSpeed(leftMotor, 0);
 	setMotorSpeed(rightMotor, 0);
 
