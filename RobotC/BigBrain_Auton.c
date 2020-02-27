@@ -56,23 +56,23 @@ int iScoopPos[4] = { -300, 280, 815, 1000 }; //pick_cube, keep_ball/release cube
 int turnNumber = 0;
 
 void iCheckBattLevel(float min, float closemin){
-        float nBattLevel = 0;
-        float BattLevel = 0;
-        for(int i = 0; i<1000; i++){
-                BattLevel = BattLevel+(nImmediateBatteryLevel/1000);
-                wait1Msec(10);
-        }
-        nBattLevel = BattLevel/1000;
-        displayCenteredBigTextLine(3, "%f", nBattLevel);
-        if(nBattLevel<min){
-                setTouchLEDRGB(LED,255, 0, 0);
-                waitUntil(getTouchLEDValue(LED)==1);
-                setTouchLEDColor(LED, colorNone);
-                }else if(nBattLevel<=closemin){
-                setTouchLEDRGB(LED,255, 125, 125);
-                waitUntil(getTouchLEDValue(LED)==1);
-                setTouchLEDColor(LED, colorNone);
-        }
+	float nBattLevel = 0;
+	float BattLevel = 0;
+	for(int i = 0; i<1000; i++){
+		BattLevel = BattLevel+(nImmediateBatteryLevel/1000);
+		wait1Msec(10);
+	}
+	nBattLevel = BattLevel/1000;
+	displayCenteredBigTextLine(3, "%f", nBattLevel);
+	if(nBattLevel<min){
+		setTouchLEDRGB(LED,255, 0, 0);
+		waitUntil(getTouchLEDValue(LED)==1);
+		setTouchLEDColor(LED, colorNone);
+		}else if(nBattLevel<=closemin){
+		setTouchLEDRGB(LED,255, 125, 125);
+		waitUntil(getTouchLEDValue(LED)==1);
+		setTouchLEDColor(LED, colorNone);
+	}
 }
 
 void setGyroStable()
@@ -148,7 +148,7 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 		integral = integral + error;
 		output = error * Kp + integral * Ki;
 
-    if ( currentCount < ( targetCount - slowZone ) )
+		if ( currentCount < ( targetCount - slowZone ) )
 		{
 			motorSpeed = maxSpeed;
 		}
@@ -161,14 +161,14 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 		setMotorSpeed(rightMotor, motorSpeed - output);
 
 		currentCount = abs( getMotorEncoder(leftMotor) + getMotorEncoder(rightMotor) ) / 2;
-//		writeDebugStreamLine("%d:  %f,  %f,  %f,  %f,  %f", time1[T1], error, integral, output, motorSpeed, currentCount);
-//		writeDebugStreamLine("%d: error %d, integral %d, output %d, motorSpeed %d, currentCount %d", time1[T1], error, integral, output, motorSpeed, currentCount);
-//		displayCenteredBigTextLine(3, "%d, %d", currentCount, targetCount);
+		//		writeDebugStreamLine("%d:  %f,  %f,  %f,  %f,  %f", time1[T1], error, integral, output, motorSpeed, currentCount);
+		//		writeDebugStreamLine("%d: error %d, integral %d, output %d, motorSpeed %d, currentCount %d", time1[T1], error, integral, output, motorSpeed, currentCount);
+		//		displayCenteredBigTextLine(3, "%d, %d", currentCount, targetCount);
 		displayCenteredBigTextLine(3, "%d, %d", getGyroStable(), targetHeading);
 		wait1Msec(WAIT_CYCLE);
 	}
-		setMotorSpeed(leftMotor, 0);
-		setMotorSpeed(rightMotor, 0);
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
 }
 
 void turnDecel( int inputHeading, int turnStyle, float Ki, float Kp, int baseSpeed, int delta )
@@ -187,29 +187,29 @@ void turnDecel( int inputHeading, int turnStyle, float Ki, float Kp, int baseSpe
 
 		switch ( turnStyle )
 		{
-			case ON_SPOT_TURN:
-				setMotorSpeed(leftMotor, sgn(error) * baseSpeed + output);
-				setMotorSpeed(rightMotor, -sgn(error) * baseSpeed - output);
-				break;
-			case LEFT_WHEEL_TURN:
-				setMotorSpeed(leftMotor, sgn(error) * baseSpeed + output);
-				setMotorSpeed(rightMotor, 0);
-				break;
-			case RIGHT_WHEEL_TURN:
-				setMotorSpeed(leftMotor, 0);
-				setMotorSpeed(rightMotor, -sgn(error) * baseSpeed - output);
-				break;
-			case TWO_WHEEL_TURN:
-				setMotorSpeed(leftMotor, baseSpeed + output);
-				setMotorSpeed(rightMotor, baseSpeed - output);
-				break;
+		case ON_SPOT_TURN:
+			setMotorSpeed(leftMotor, sgn(error) * baseSpeed + output);
+			setMotorSpeed(rightMotor, -sgn(error) * baseSpeed - output);
+			break;
+		case LEFT_WHEEL_TURN:
+			setMotorSpeed(leftMotor, sgn(error) * baseSpeed + output);
+			setMotorSpeed(rightMotor, 0);
+			break;
+		case RIGHT_WHEEL_TURN:
+			setMotorSpeed(leftMotor, 0);
+			setMotorSpeed(rightMotor, -sgn(error) * baseSpeed - output);
+			break;
+		case TWO_WHEEL_TURN:
+			setMotorSpeed(leftMotor, baseSpeed + output);
+			setMotorSpeed(rightMotor, baseSpeed - output);
+			break;
 		}
 
 		//writeDebugStreamLine("%d:  %d,  %d,  %d", time1[T1], error, integral, output);
 		wait1Msec(WAIT_CYCLE);
 	}
-		setMotorSpeed(leftMotor, 0);
-		setMotorSpeed(rightMotor, 0);
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
 }
 
 void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour, int blink)
@@ -262,9 +262,9 @@ task pick_up_cube()
 	writeDebugStreamLine( "%f: %f, %f", time1[T1], currentCount, cmToEncoderUnit( pickUpTrigger ) );
 	currentCount = 0;
 	while ( currentCount < cmToEncoderUnit( pickUpTrigger ) )
-		{
-			writeDebugStreamLine( "%f: %f, %f", time1[T1], currentCount, cmToEncoderUnit( pickUpTrigger ) );
-			wait1Msec( WAIT_CYCLE );
+	{
+		writeDebugStreamLine( "%f: %f, %f", time1[T1], currentCount, cmToEncoderUnit( pickUpTrigger ) );
+		wait1Msec( WAIT_CYCLE );
 	}
 
 	clawAction( clawTarget );
