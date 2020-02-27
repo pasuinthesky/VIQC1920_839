@@ -46,7 +46,6 @@
 float fGyroDriftRate;
 int currentCount, pickUpTrigger, clawTarget, targetHeading, liftLevel;
 
-int taskAction;
 float timeStamp;
 
 #define LIFT_LEVELS 5
@@ -55,6 +54,26 @@ int iLiftLevel[LIFT_LEVELS] = {15 ,420, 1100, 1500, 1830}; //pickup_inside, pick
 int iScoopPos[4] = { -300, 280, 815, 1000 }; //pick_cube, keep_ball/release cube, ready_to_scoop_ball, score_ball
 
 int turnNumber = 0;
+
+void iCheckBattLevel(float min, float closemin){
+        float nBattLevel = 0;
+        float BattLevel = 0;
+        for(int i = 0; i<1000; i++){
+                BattLevel = BattLevel+(nImmediateBatteryLevel/1000);
+                wait1Msec(10);
+        }
+        nBattLevel = BattLevel/1000;
+        displayCenteredBigTextLine(3, "%f", nBattLevel);
+        if(nBattLevel<min){
+                setTouchLEDRGB(LED,255, 0, 0);
+                waitUntil(getTouchLEDValue(LED)==1);
+                setTouchLEDColor(LED, colorNone);
+                }else if(nBattLevel<=closemin){
+                setTouchLEDRGB(LED,255, 125, 125);
+                waitUntil(getTouchLEDValue(LED)==1);
+                setTouchLEDColor(LED, colorNone);
+        }
+}
 
 void setGyroStable()
 {
@@ -224,64 +243,18 @@ void clawAction(int targetName)
 	setMotorSpeed( clawMotor, 0 );
 }
 
-void scooperAction(int actionName)
+void scoreBalls()
 {
-	switch(actionName)
-	{
-		case SCOOPER_SCOOP_BALL:
-			if (abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2])) < SCOOPER_DELTA )
-			{
-				turnNumber++;
-				setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1],100);
-				wait1Msec( abs( iScoopPos[2] - iScoopPos[1] + ENCODER_UNIT_PER_SCOOP_ROUND ) * MS_PER_ENCODER_UNIT );
-				if ( abs(getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1])) > SCOOPER_DELTA ) // bounce back if not get to the scooped position
-				{
-					turnNumber--;
-					setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2],100);
-					wait1Msec( abs( iScoopPos[2] - iScoopPos[1] + ENCODER_UNIT_PER_SCOOP_ROUND ) * MS_PER_ENCODER_UNIT );
-				}
-			}
-			break;
+	setMotorSpeed(leftMotor,30);
+	setMotorSpeed(rightMotor,30);
 
-		case SCOOPER_SCORE_BALL:
-			setMotorSpeed(leftMotor,30);
-			setMotorSpeed(rightMotor,30);
-
-			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[3],100);
-			wait1Msec( abs( iScoopPos[3] - iScoopPos[1] ) * MS_PER_ENCODER_UNIT );
-			wait1Msec(100);
-			setMotorSpeed(leftMotor,0);
-			setMotorSpeed(rightMotor,0);
-			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2],100);
-			wait1Msec( abs( iScoopPos[3] - iScoopPos[2] ) * MS_PER_ENCODER_UNIT );
-
-			break;
-
-		case SCOOPER_PICKUP_CUBE:
-			setMotorTarget(scoopMotor,(turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND)+iScoopPos[1],100);
-			wait1Msec( abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1]) ) * MS_PER_ENCODER_UNIT - 240 );
-			setMotorSpeed(leftMotor, 100);
-			setMotorSpeed(rightMotor, 100);
-			wait1Msec(240);//basically 400 over 100 over 60, which turns into 240. the basic idea is 400/(100/60), so u can also see it as 400/100*60
-			setMotorSpeed(leftMotor, -100);
-			setMotorSpeed(rightMotor, -100);
-			wait1Msec(10);
-			setMotorSpeed(leftMotor, -60);
-			setMotorSpeed(rightMotor, -60);
-			setMotorTarget(scoopMotor,(turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND)+iScoopPos[0],100);
-			wait1Msec( abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[0]) ) * MS_PER_ENCODER_UNIT );
-
-			break;
-
-		case SCOOPER_RELEASE_CUBE:
-			if (abs(getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[0])) < SCOOPER_DELTA )
-			{
-				setMotorTarget(scoopMotor,(turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND)+iScoopPos[1],100);
-				wait1Msec( abs( iScoopPos[1] - iScoopPos[0] ) * MS_PER_ENCODER_UNIT );
-			}
-
-			break;
-	}
+	setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[3],100);
+	wait1Msec( abs( iScoopPos[3] - iScoopPos[1] ) * MS_PER_ENCODER_UNIT );
+	wait1Msec(100);
+	setMotorSpeed(leftMotor,0);
+	setMotorSpeed(rightMotor,0);
+	setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2],100);
+	wait1Msec( abs( iScoopPos[3] - iScoopPos[2] ) * MS_PER_ENCODER_UNIT );
 }
 
 task pick_up_cube()
@@ -323,24 +296,22 @@ void right_low_green_two_blue()
 	setMotorTarget(liftMotorR, iLiftLevel[1],100);
 	turnDecel(110, ON_SPOT_TURN, 0, 0.25, 5, 20);
 
-	goStraightDecel(20, 30, 0.007, 0.6, 0);
+	goStraightDecel(25, 60, 0.007, 0.6, 0);
 	setMotorTarget(scoopMotor, iScoopPos[0], 100);
-	goStraightDecel(10, 30, 0.007, 0.6, 0);
+	goStraightDecel(10, -40, 0.007, 0.6, 0);
 
-	turnDecel(180, ON_SPOT_TURN, 0, 0.3, 5, 10);
+	turnDecel(185, ON_SPOT_TURN, 0, 0.3, 5, 10);
 
 	goStraightDecel(65, -100, 0.007, 0.6, 0);
 
 	clawAction(CLAW_OPEN);
 
-	wait1Msec(1000);
-
-	clawAction(CLAW_CLOSE);
-
 }
 
 void left_low_green_high_green()
 {
+	setMotorTarget(scoopMotor, iScoopPos[1], 100);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	goStraightDecel(5, -60, 0.007, 0.6, 30);
 
 	pickUpTrigger = 4; liftLevel = 3; clawTarget = CLAW_CLOSE;
@@ -379,8 +350,77 @@ void left_low_green_high_green()
 	goStraightDecel(15, 100, 0.007, 0.6, 30);
 }
 
-void two_red_two_blue()
+void two_red_two_blue_on_left()
 {
+	setMotorTarget(scoopMotor, iScoopPos[1], 100);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	setMotorTarget(liftMotorL,iLiftLevel[1],100);
+	setMotorTarget(liftMotorR,iLiftLevel[1],100);
+	turnDecel(-35, ON_SPOT_TURN, 0, 0.5, 20, 10);
+	turnDecel(-80, RIGHT_WHEEL_TURN, 0, 0.3, 10, 10);
+
+	goStraightDecel(20, 90, 0.007, 0.6, 0);
+	setMotorTarget(scoopMotor, iScoopPos[0]+170, 100);
+	goStraightDecel(10, -100, 0.007, 0.6, 0);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	turnDecel(-135, ON_SPOT_TURN, 0, 0.5, 10, 10);
+	goStraightDecel(45, 90, 0.007, 0.6, 30);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	turnDecel(-15, ON_SPOT_TURN, 0, 0.5, 20, 10);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+	goStraightDecel(5, 100, 0.007, 0.6, 0);
+	goStraightDecel(33, -100, 0.007, 0.6, 0);
+}
+
+void two_red_right()
+{
+	setMotorTarget(scoopMotor, iScoopPos[3], 100);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	setMotorTarget(liftMotorL,iLiftLevel[0],100);
+	setMotorTarget(liftMotorR,iLiftLevel[0],100);
+	goStraightDecel(20, -90, 0.007, 0.6, 0);
+
+	turnDecel(85, ON_SPOT_TURN, 0, 0.5, 20, 10);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	goStraightDecel(30, 90, 0.007, 0.6, 0);
+	turnNumber++;
+	setMotorTarget(scoopMotor, iScoopPos[1]+ENCODER_UNIT_PER_SCOOP_ROUND*turnNumber, 100);
+	goStraightDecel(20, -60, 0.007, 0.6, 30);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	turnDecel(45, ON_SPOT_TURN, 0, 0.5, 20, 10);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	goStraightDecel(20, 90, 0.007, 0.6, 0);
+
+	scoreBalls();
+
+	goStraightDecel(15, -90, 0.007, 0.6, 0);
+
+	turnDecel(-55, ON_SPOT_TURN, 0, 0.5, 20, 10);
+
+	goStraightDecel(35, -100, 0.007, 0.6, 0);
+	turnDecel(-10, ON_SPOT_TURN, 0, 0.5, 20, 10);
+
+	setMotorSpeed(leftMotor, -100);
+	setMotorSpeed(rightMotor, -100);
+	wait1Msec(800);
+
+	setMotorSpeed(leftMotor, 100);
+	setMotorSpeed(rightMotor, 100);
+	wait1Msec(300);
+
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
 
 }
 
@@ -407,6 +447,8 @@ task main()
 	setMotorTarget(liftMotorR, iLiftLevel[1], 100);
 	wait1Msec(1000);
 
+	iCheckBattLevel(7.8, 8.0);
+
 	setTouchLEDColor(LED,colorOrange);
 	waitUntil(getTouchLEDValue(LED) == 1);
 
@@ -423,19 +465,15 @@ task main()
 	// On the mark
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	clearTimer( T1 );
-/*
-	goStraightDecel(30,60,0.007, 0.6, 30);
-
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
-	turnDecel(90, ON_SPOT_TURN, 0, 0.25, 3, 20);
-*/
-
 	right_low_green_two_blue();
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 
+	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	left_low_green_high_green();
-	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 
-	two_red_two_blue();
+	LEDBusiness( colorGreen, 0, 0, 0, 0 );
+	two_red_two_blue_on_left();
+
+	LEDBusiness( colorGreen, 0, 0, 0, 0 );
+	two_red_right();
 
 }
