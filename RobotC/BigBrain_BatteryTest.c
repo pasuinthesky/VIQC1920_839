@@ -3,10 +3,13 @@
 void iCheckBattLevel(float min, float closemin){
 	float nBattLevel = 0;
 	float BattLevel = 0;
+	setTouchLEDRGB(LED, 255, 185, 33);
+	setTouchLEDBlinkTime(LED, 5, 5);
 	for(int i = 0; i<1000; i++){
 		BattLevel = BattLevel+(nImmediateBatteryLevel/1000);
 		wait1Msec(10);
 	}
+	setTouchLEDColor(LED, colorNone);
 	nBattLevel = Battlevel/1000;
 	displayCenteredBigTextLine(3, "%f", nBattLevel);
 	if(nBattLevel<min){
