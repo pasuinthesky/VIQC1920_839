@@ -19,7 +19,7 @@
 #define MS_PER_DEGREE_ROBOT_TURN 12
 
 int pickUpTrigger, clawTarget, liftLevel;
-
+float timeStamp;
 
 #define LIFT_LEVELS 5
 int iLiftLevel[LIFT_LEVELS] = {15 ,420, 1100, 1500, 1830}; //pickup_inside, pickup_outside/transport,low_inside,low_outside,,high_inside
@@ -69,6 +69,8 @@ void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour,
 
 }
 
+
+
 void clawAction(int targetName)
 {
 	setMotorTarget( clawMotor, targetName, 100 );
@@ -92,11 +94,10 @@ void scoreBalls()
 
 task pick_up_cube()
 {
-	currentCount = 0;
-    // We need to rewrite this into time wait.
-	while ( currentCount < cmToEncoderUnit( pickUpTrigger ) )
+	clearTimer(T2);
+
+	while ( time1[T2] < pickUpTrigger )
 	{
-	
 		wait1Msec( WAIT_CYCLE );
 	}
 
@@ -108,34 +109,42 @@ task pick_up_cube()
 	EndTimeSlice();
 }
 
+
+void moveRobot(int waitTime, int leftSpeed, int rightSpeed)
+{
+	setMotorSpeed(leftMotor, leftSpeed);
+	setMotorSpeed(rightMotor, rightSpeed);
+	wait1Msec(waitTime);
+}
+
 void right_low_green_two_blue()
 {
-	GoStraight(5 cm, -60 as seped);
+	//goStraight(5, -60);
 
 	pickUpTrigger = 4; liftLevel = 3; clawTarget = CLAW_CLOSE;
 	startTask( pick_up_cube );
 
-	GoStraight(10 cm, -30 as speed);
+	//goStraight(10, -30);
 	setMotorTarget(liftMotorL, iLiftLevel[liftLevel],100);
 	setMotorTarget(liftMotorR, iLiftLevel[liftLevel],100);
 
-	GoStraight(55 cm, -40 as speed);
+	//goStraight(55, -40);
 
 	clawAction(CLAW_OPEN);
 
-	GoStraight(5 cm, 30 as speed);
+	//goStraight(5, 30);
 	setMotorTarget(clawMotor, CLAW_CLOSE,30);
 	setMotorTarget(liftMotorL, iLiftLevel[1],100);
 	setMotorTarget(liftMotorR, iLiftLevel[1],100);
-	Turn(110 degree, ON_SPOT_TURN);
+	//Turn(110, ON_SPOT_TURN);
 
-	GoStraight(25 cm, 60 as speed);
+	//goStraight(25, 60);
 	setMotorTarget(scoopMotor, iScoopPos[0], 100);
-	GoStraight(10 cm, -40 as speed);
+	//goStraight(10, -40);
 
-	Turn(185 degree, ON_SPOT_TURN);
+	//Turn(185, ON_SPOT_TURN);
 
-	GoStraight(65 cm, -100 as speed);
+	//goStraight(65, -100);
 
 	clawAction(CLAW_OPEN);
 
@@ -145,42 +154,42 @@ void left_low_green_high_green()
 {
 	setMotorTarget(scoopMotor, iScoopPos[1], 100);
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
-	GoStraight(5 cm, -60 as speed);
+	//goStraight(5, -60);
 
 	pickUpTrigger = 4; liftLevel = 3; clawTarget = CLAW_CLOSE;
 	startTask( pick_up_cube );
 
-	GoStraight(10 cm, -30 as speed);
+	//goStraight(10, -30);
 	setMotorTarget(liftMotorL, iLiftLevel[liftLevel],100);
 	setMotorTarget(liftMotorR, iLiftLevel[liftLevel],100);
 
-	GoStraight(55 cm, -40 as speed);
+	//goStraight(55, -40);
 
 	clawAction(CLAW_OPEN);
 
-	GoStraight(10 cm, 30 as speed);
+	//goStraight(10, 30);
 
 	setMotorTarget(clawMotor, CLAW_CLOSE,30);
 	setMotorTarget(liftMotorL, iLiftLevel[0],100);
 	setMotorTarget(liftMotorR, iLiftLevel[0],100);
-	Turn(-90 degree, ON_SPOT_TURN);
+	//Turn(-90, ON_SPOT_TURN);
 
-	GoStraight(30 cm, -40 as speed);
-	Turn(-140 degree, ON_SPOT_TURN);
+	//goStraight(30, -40);
+	//Turn(-140, ON_SPOT_TURN);
 
-	GoStraight(20 cm, -40 as speed);
+	//goStraight(20, -40);
 	pickUpTrigger = 4; liftLevel = 4; clawTarget = CLAW_OPEN;
 	startTask( pick_up_cube );
-	GoStraight(60 cm, -40 as speed0);
-	Turn(-230 degree, ON_SPOT_TURN as speed);
+	//goStraight(60, -400);
+	//Turn(-230, ON_SPOT_TURN);
 
-	GoStraight(23 cm, -40 as speed);
+	//goStraight(23, -40);
 
 	clawAction(CLAW_CLOSE);
 
 	setMotorTarget(liftMotorL,iLiftLevel[1],50);
 	setMotorTarget(liftMotorR,iLiftLevel[1],50);
-	GoStraight(15 cm, 100 as speed);
+	//goStraight(15, 100);
 }
 
 void two_red_two_blue_on_left()
@@ -189,25 +198,25 @@ void two_red_two_blue_on_left()
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(liftMotorL,iLiftLevel[1],100);
 	setMotorTarget(liftMotorR,iLiftLevel[1],100);
-	Turn(-35 degree, ON_SPOT_TURN);
-	Turn(-80 degree, RIGHT_WHEEL_TURN);
+	//Turn(-35, ON_SPOT_TURN);
+	//Turn(-80, RIGHT_WHEEL_TURN);
 
-	GoStraight(20 cm, 90 as speed);
+	//goStraight(20, 90);
 	setMotorTarget(scoopMotor, iScoopPos[0]+170, 100);
-	GoStraight(10 cm, -100 as speed);
+	//goStraight(10, -100);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 
-	Turn(-135 degree, ON_SPOT_TURN);
-	GoStraight(45 cm, 90 as speed);
+	//Turn(-135, ON_SPOT_TURN);
+	//goStraight(45, 90);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 
-	Turn(-15 degree, ON_SPOT_TURN);
+	//Turn(-15, ON_SPOT_TURN);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
-	GoStraight(5 cm, 100 as speed);
-	GoStraight(33 cm, -100 as speed);
+	//goStraight(5, 100);
+	//goStraight(33, -100);
 }
 
 void two_red_right()
@@ -216,33 +225,33 @@ void two_red_right()
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(liftMotorL,iLiftLevel[0],100);
 	setMotorTarget(liftMotorR,iLiftLevel[0],100);
-	GoStraight(20 cm, -90 as speed);
+	//goStraight(20, -90);
 
-	Turn(85 cm, ON_SPOT_TURN as speed);
+	//Turn(85, ON_SPOT_TURN);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 
-	GoStraight(30 cm, 90 as speed);
+	//goStraight(30, 90);
 	turnNumber++;
 	setMotorTarget(scoopMotor, iScoopPos[1]+ENCODER_UNIT_PER_SCOOP_ROUND*turnNumber, 100);
-	GoStraight(20 cm, -60 as speed);
+	//goStraight(20, -60);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 
-	Turn(45 degree, ON_SPOT_TURN);
+	//Turn(45, ON_SPOT_TURN);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 
-	GoStraight(20 cm, 90 as speed);
+	//goStraight(20, 90);
 
 	scoreBalls();
 
-	GoStraight(15 cm, -90 as speed);
+	//goStraight(15, -90);
 
-	Turn(-55 degree, ON_SPOT_TURN);
+	//Turn(-55, ON_SPOT_TURN);
 
-	GoStraight(35 cm, -100 as speed);
-	Turn(-10 degree, ON_SPOT_TURN);
+	//goStraight(35, -100);
+	//Turn(-10, ON_SPOT_TURN);
 
 	setMotorSpeed(leftMotor, -100);
 	setMotorSpeed(rightMotor, -100);
