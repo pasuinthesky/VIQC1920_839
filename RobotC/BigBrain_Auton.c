@@ -58,18 +58,23 @@ int turnNumber = 0;
 void iCheckBattLevel(float min, float closemin){
 	float nBattLevel = 0;
 	float BattLevel = 0;
+	setTouchLEDRGB(LED,255, 145, 0);
+	setTouchLEDBlinkTime(LED, 5, 5);
 	for(int i = 0; i<1000; i++){
 		BattLevel = BattLevel+(nImmediateBatteryLevel/1000);
 		wait1Msec(10);
+		playNote(noteC, 1, 50);
 	}
-	nBattLevel = BattLevel/1000;
+	setTouchLEDColor(LED, colorNone);
+	setTouchLEDBlinkTime(LED, 0, 0);
+	nBattLevel = Battlevel/1000;
 	displayCenteredBigTextLine(3, "%f", nBattLevel);
 	if(nBattLevel<min){
 		setTouchLEDRGB(LED,255, 0, 0);
 		waitUntil(getTouchLEDValue(LED)==1);
 		setTouchLEDColor(LED, colorNone);
 		}else if(nBattLevel<=closemin){
-		setTouchLEDRGB(LED,255, 125, 125);
+		setTouchLEDRGB(LED,255, 255, 0);
 		waitUntil(getTouchLEDValue(LED)==1);
 		setTouchLEDColor(LED, colorNone);
 	}
@@ -83,16 +88,16 @@ void setGyroStable()
 	{
 		setTouchLEDColor(LED,colorRed);
 		setTouchLEDBlinkTime(LED, 14,6);
-		wait(3);
+		wait1Msec(3000);
 		setTouchLEDBlinkTime(LED, 0,1);
-		wait(2);
+		wait1Msec(2000);
 
 		setTouchLEDColor(LED,colorGreen);
 		setTouchLEDBlinkTime(LED, 8, 12);
 
 		resetGyro(Gyro); targetHeading = 0;
 		clearTimer(T4);
-		wait(GYRO_SAMPLEING_SECONDS);
+		wait1Msec(GYRO_SAMPLEING_SECONDS*1000);
 
 		fGyroDriftRate = getGyroDegreesFloat(Gyro) / GYRO_SAMPLEING_SECONDS;
 
@@ -290,11 +295,11 @@ void right_low_green_two_blue()
 
 	clawAction(CLAW_OPEN);
 
-	goStraightDecel(5, 30, 0.007, 0.6, 0);
+	goStraightDecel(5, 34, 0.007, 0.6, 0);
 	setMotorTarget(clawMotor, CLAW_CLOSE,30);
 	setMotorTarget(liftMotorL, iLiftLevel[1],100);
 	setMotorTarget(liftMotorR, iLiftLevel[1],100);
-	turnDecel(110, ON_SPOT_TURN, 0, 0.25, 5, 20);
+	turnDecel(130, ON_SPOT_TURN, 0, 0.25, 5, 20);
 
 	goStraightDecel(25, 60, 0.007, 0.6, 0);
 	setMotorTarget(scoopMotor, iScoopPos[0], 100);
