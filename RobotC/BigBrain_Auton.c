@@ -502,7 +502,7 @@ task main()
 	resetMotorEncoder(rightMotor);
 	setMotorBrakeMode(leftMotor, motorHold);
 	setMotorBrakeMode(rightMotor, motorHold);
-/*
+
 	// On the mark
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	clearTimer( T1 );
@@ -510,7 +510,7 @@ task main()
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	left_low_green_high_green();
-*/
+
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	two_red_two_blue_on_left();
 
