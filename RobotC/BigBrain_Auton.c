@@ -62,7 +62,6 @@ void iCheckBattLevel(float min, float closemin){
 	setTouchLEDBlinkTime(LED, 5, 5);
 	for(int i = 0; i<1000; i++){
 		BattLevel = BattLevel+(nImmediateBatteryLevel/1000);
-		playNote(noteC, 1, 5);
 		wait1Msec(10);
 	}
 	setTouchLEDColor(LED, colorNone);
