@@ -339,7 +339,7 @@ void left_low_green_high_green()
 	setMotorTarget(liftMotorR, iLiftLevel[0],100);
 	turnDecel(-90, ON_SPOT_TURN, 0, 0.25, 5, 20);
 
-	goStraightDecel(30, -40, 0.007, 0.6, 30);
+	goStraightDecel(32, -40, 0.007, 0.6, 30);
 	turnDecel(-140, ON_SPOT_TURN, 0, 0.25, 10, 10);
 
 	goStraightDecel(20, -40, 0.007, 0.6, 30);
