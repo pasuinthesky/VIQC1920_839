@@ -312,7 +312,7 @@ void right_low_green_two_blue()
 
 	wait1Msec(2000);
 	setMotorTarget(scoopMotor, iScoopPos[1], 100);
-
+	setMotorTarget(clawMotor, CLAW_CLOSE, 100);
 }
 
 void left_low_green_high_green()
