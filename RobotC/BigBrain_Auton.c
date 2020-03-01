@@ -298,17 +298,20 @@ void right_low_green_two_blue()
 	setMotorTarget(clawMotor, CLAW_CLOSE,30);
 	setMotorTarget(liftMotorL, iLiftLevel[1],100);
 	setMotorTarget(liftMotorR, iLiftLevel[1],100);
-	turnDecel(130, ON_SPOT_TURN, 0, 0.25, 5, 20);
+	turnDecel(110, ON_SPOT_TURN, 0, 0.5, 10, 10);
 
-	goStraightDecel(25, 60, 0.007, 0.6, 0);
+	goStraightDecel(29, 80, 0.007, 0.6, 0);
 	setMotorTarget(scoopMotor, iScoopPos[0], 100);
-	goStraightDecel(10, -40, 0.007, 0.6, 0);
+	goStraightDecel(13, -40, 0.007, 0.6, 0);
 
-	turnDecel(185, ON_SPOT_TURN, 0, 0.3, 5, 10);
+	turnDecel(185, ON_SPOT_TURN, 0, 0.5, 10, 10);
 
 	goStraightDecel(65, -100, 0.007, 0.6, 0);
 
 	clawAction(CLAW_OPEN);
+
+	wait1Msec(2000);
+	setMotorTarget(scoopMotor, iScoopPos[1], 100);
 
 }
 
@@ -357,20 +360,19 @@ void left_low_green_high_green()
 void two_red_two_blue_on_left()
 {
 	setMotorTarget(scoopMotor, iScoopPos[1], 100);
-	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	setMotorTarget(clawMotor, CLAW_CLOSE, 100);
 	setMotorTarget(liftMotorL,iLiftLevel[1],100);
 	setMotorTarget(liftMotorR,iLiftLevel[1],100);
-	turnDecel(-35, ON_SPOT_TURN, 0, 0.5, 20, 10);
-	turnDecel(-80, RIGHT_WHEEL_TURN, 0, 0.3, 10, 10);
+	turnDecel(-80, RIGHT_WHEEL_TURN, 0, 0.5, 10, 10);
 
-	goStraightDecel(20, 90, 0.007, 0.6, 0);
-	setMotorTarget(scoopMotor, iScoopPos[0]+170, 100);
+	goStraightDecel(20, 100, 0.007, 0.6, 0);
+	setMotorTarget(scoopMotor, iScoopPos[0]+185, 100);
 	goStraightDecel(10, -100, 0.007, 0.6, 0);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 
 	turnDecel(-135, ON_SPOT_TURN, 0, 0.5, 10, 10);
-	goStraightDecel(45, 90, 0.007, 0.6, 30);
+	goStraightDecel(40, 90, 0.007, 0.6, 30);
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 
@@ -378,7 +380,41 @@ void two_red_two_blue_on_left()
 
 	//waitUntil(getTouchLEDValue(LED)==1);
 	goStraightDecel(5, 100, 0.007, 0.6, 0);
-	goStraightDecel(33, -100, 0.007, 0.6, 0);
+	goStraightDecel(20, -100, 0.007, 0.6, 0);
+
+	turnDecel(0, ON_SPOT_TURN, 0, 0.5, 20, 10);
+	goStraightDecel(13, -100, 0.007, 0.6, 0);
+
+	clawAction(CLAW_OPEN + 150);
+}
+
+void two_red_two_blue_on_left_2()
+{
+	setMotorTarget(scoopMotor, iScoopPos[1], 100);
+	setMotorTarget(clawMotor, CLAW_CLOSE, 50);
+	setMotorTarget(liftMotorL,iLiftLevel[1],100);
+	setMotorTarget(liftMotorR,iLiftLevel[1],100);
+	turnDecel(-80, RIGHT_WHEEL_TURN, 0, 0.5, 10, 10);
+
+	goStraightDecel(20, 100, 0.007, 0.6, 0);
+	setMotorTarget(scoopMotor, iScoopPos[0]+170, 100);
+	goStraightDecel(2, -100, 0.007, 0.6, 0);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	turnDecel(40, ON_SPOT_TURN, 0, 0.5, 10, 10);
+	goStraightDecel(38, -90, 0.007, 0.6, 30);
+
+	turnDecel(0, ON_SPOT_TURN, 0, 0.5, 10, 10);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	goStraightDecel(28, -90, 0.007, 0.6, 30);
+	clawAction(CLAW_OPEN + 150);
+
+	//waitUntil(getTouchLEDValue(LED)==1);
+
+	goStraightDecel(3, 100, 0.007, 0.6, 0);
 }
 
 void two_red_right()
@@ -479,5 +515,4 @@ task main()
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	two_red_right();
-
 }
