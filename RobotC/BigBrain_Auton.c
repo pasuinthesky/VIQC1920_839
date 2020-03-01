@@ -463,13 +463,7 @@ void two_red_right()
 	setMotorSpeed(rightMotor, 0);
 
 }
-
-task main()
-{
-
-	setMotorEncoderUnits( encoderCounts );
-
-	// Define 0 point for claw, scooper, and lift.
+void findPointZero(){
 	setMotorSpeed(liftMotorL, -100);
 	setMotorSpeed(liftMotorR, -100);
 	setMotorSpeed(clawMotor, -50);
@@ -479,12 +473,28 @@ task main()
 	setMotorSpeed(liftMotorR, 0);	resetMotorEncoder(liftMotorR);
 	setMotorSpeed(clawMotor, 0);	resetMotorEncoder(clawMotor);
 	setMotorSpeed(scoopMotor, 0); resetMotorEncoder(scoopMotor);
-
-	// Get claw, scooper, and lift ready for the game
+}
+void prepareMotors(){
 	setMotorTarget(scoopMotor, iScoopPos[1], 100);
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(liftMotorL, iLiftLevel[1], 100);
 	setMotorTarget(liftMotorR, iLiftLevel[1], 100);
+}
+void prepareDriveTrain(){
+	resetMotorEncoder(leftMotor);
+	resetMotorEncoder(rightMotor);
+	setMotorBrakeMode(leftMotor, motorHold);
+	setMotorBrakeMode(rightMotor, motorHold);
+}
+task main()
+{
+
+	setMotorEncoderUnits( encoderCounts );
+
+	// Define 0 point for claw, scooper, and lift.
+	findPointZero();
+	// Get claw, scooper, and lift ready for the game
+	prepareMotors();
 	wait1Msec(1000);
 
 	iCheckBattLevel(7.8, 8.0);
@@ -497,11 +507,7 @@ task main()
 	targetHeading = 0;
 
 	// Get drive train ready for the game
-	resetMotorEncoder(leftMotor);
-	resetMotorEncoder(rightMotor);
-	setMotorBrakeMode(leftMotor, motorHold);
-	setMotorBrakeMode(rightMotor, motorHold);
-
+	prepareDriveTrain();
 	// On the mark
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	clearTimer( T1 );
