@@ -69,8 +69,6 @@ void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour,
 
 }
 
-
-
 void clawAction(int targetName)
 {
 	setMotorTarget( clawMotor, targetName, 100 );
