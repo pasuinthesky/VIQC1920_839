@@ -41,7 +41,7 @@
 #define MS_PER_DEGREE_ROBOT_TURN 12
 
 #define GYRO_SAMPLEING_SECONDS 10
-#define ACCEPTABLE_DRIFT_RANGE 0.08
+#define ACCEPTABLE_DRIFT_RANGE 0.10
 
 float fGyroDriftRate;
 int currentCount, pickUpTrigger, clawTarget, targetHeading, liftLevel;
@@ -346,7 +346,7 @@ void left_low_green_high_green()
 	pickUpTrigger = 4; liftLevel = 4; clawTarget = CLAW_OPEN;
 	startTask( pick_up_cube );
 	goStraightDecel(60, -40, 0.007, 0.6, 30);
-	turnDecel(-230, ON_SPOT_TURN, 0, 0.25, 10, 10);
+	turnDecel(-235, ON_SPOT_TURN, 0, 0.25, 10, 10);
 
 	goStraightDecel(23, -40, 0.007, 0.6, 30);
 
