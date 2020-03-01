@@ -73,7 +73,7 @@ void iCheckBattLevel(float min, float closemin){
 		waitUntil(getTouchLEDValue(LED)==1);
 		setTouchLEDColor(LED, colorNone);
 		}else if(nBattLevel<=closemin){
-		setTouchLEDRGB(LED,255, 255, 0);
+		setTouchLEDRGB(LED,255, 125, 125);
 		waitUntil(getTouchLEDValue(LED)==1);
 		setTouchLEDColor(LED, colorNone);
 	}
