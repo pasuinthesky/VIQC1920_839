@@ -468,6 +468,7 @@ void two_red_right()
 	setMotorSpeed(rightMotor, 0);
 
 }
+
 void findPointZero(){
 	setMotorSpeed(liftMotorL, -100);
 	setMotorSpeed(liftMotorR, -100);
@@ -479,18 +480,21 @@ void findPointZero(){
 	setMotorSpeed(clawMotor, 0);	resetMotorEncoder(clawMotor);
 	setMotorSpeed(scoopMotor, 0); resetMotorEncoder(scoopMotor);
 }
+
 void prepareMotors(){
 	setMotorTarget(scoopMotor, iScoopPos[1], 100);
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(liftMotorL, iLiftLevel[1], 100);
 	setMotorTarget(liftMotorR, iLiftLevel[1], 100);
 }
+
 void prepareDriveTrain(){
 	resetMotorEncoder(leftMotor);
 	resetMotorEncoder(rightMotor);
 	setMotorBrakeMode(leftMotor, motorHold);
 	setMotorBrakeMode(rightMotor, motorHold);
 }
+
 task main()
 {
 
