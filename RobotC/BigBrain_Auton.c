@@ -281,6 +281,7 @@ task pick_up_cube()
 
 void right_low_green_two_blue()
 {
+	setMotorTarget(clawMotor,CLAW_OPEN,100);
 	goStraightDecel(5, -60, 0.007, 0.6, 30);
 
 	pickUpTrigger = 4; liftLevel = 3; clawTarget = CLAW_CLOSE;
@@ -312,7 +313,7 @@ void right_low_green_two_blue()
 
 	wait1Msec(2000);
 	setMotorTarget(scoopMotor, iScoopPos[1], 100);
-	setMotorTarget(clawMotor, CLAW_CLOSE, 100);
+	setMotorTarget(clawMotor, CLAW_CLOSE-100, 100);
 }
 
 void left_low_green_high_green()
