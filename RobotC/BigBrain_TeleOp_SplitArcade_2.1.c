@@ -22,7 +22,7 @@ bool overwriteDrive = false;
 bool overwriteClaw = false;
 bool overwriteLift = false;
 bool overwriteScooper = false;
-
+bool specialLift = false;
 
 #define LIFT_LEVELS 5
 int iLiftLevel[LIFT_LEVELS] = {15 ,400, 1100, 1435, 1830}; //pickup_inside, pickup_outside/transport,low_inside,low_outside,,high_inside
@@ -193,9 +193,20 @@ task task_lift()
 	{
 		if (! overwriteLift)
 		{
-			//lift_preset();
-			lift_manual();
+			if (! specialLift)
+			{
+				//lift_preset();
+				lift_manual();
+			}
+			else
+			{
+				setMotorTarget(liftMotorL, iLiftLevel[1],100);
+				setMotorTarget(liftMotorR, iLiftLevel[1],100);
+			}
 		}
+
+		if ( abs(getMotorEncoder(liftMotorL) - iLiftLevel[1]) < LIFT_DELTA )
+			specialLift = false;
 
 		wait1Msec(20);
 	}
@@ -337,6 +348,8 @@ void trick1()
 
 }
 
+
+
 task main()
 {
 	setMotorEncoderUnits(encoderCounts);
@@ -368,13 +381,13 @@ task main()
 
 	repeat (forever)
 	{
-		/*
-		if (getJoystickValue(BtnEDown) == 1 && time1[T1] > 1000 )
+
+		if (getJoystickValue(BtnEUp) == 1 && time1[T1] > 1000 && (! specialLift) && (! overwriteLift) )
 		{
-		iDriveDirection = iDriveDirection * (-1);
-		clearTimer(T1);
+			specialLift = true;
+			clearTimer(T1);
 		}
-		*/
+
 		if (getJoystickValue(BtnLDown) == 1)
 			flip_by_scooper();
 
