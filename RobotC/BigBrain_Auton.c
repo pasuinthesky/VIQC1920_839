@@ -309,7 +309,7 @@ void right_low_green_two_blue()
 	setMotorTarget(scoopMotor, iScoopPos[0], 100);
 	goStraightDecel(13, -40, 0.007, 0.6, 0);
 
-	turnDecel(185, ON_SPOT_TURN, 0, 0.5, 10, 10);
+	turnDecel(192, ON_SPOT_TURN, 0, 0.5, 10, 10);
 
 	goStraightDecel(65, -100, 0.007, 0.6, 0);
 
