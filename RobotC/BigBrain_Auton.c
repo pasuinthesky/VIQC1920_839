@@ -295,11 +295,15 @@ void right_low_green_two_blue()
 
 	clawAction(CLAW_OPEN);
 
+	targetHeading = 5;
 	goStraightDecel(5, 34, 0.007, 0.6, 0);
+
 	setMotorTarget(clawMotor, CLAW_CLOSE,30);
 	setMotorTarget(liftMotorL, iLiftLevel[1],100);
 	setMotorTarget(liftMotorR, iLiftLevel[1],100);
+
 	turnDecel(110, ON_SPOT_TURN, 0, 0.5, 10, 10);
+	wait1Msec(300);
 
 	goStraightDecel(29, 80, 0.007, 0.6, 0);
 	setMotorTarget(scoopMotor, iScoopPos[0], 100);
