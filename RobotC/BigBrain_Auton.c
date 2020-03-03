@@ -342,18 +342,24 @@ void left_low_green_high_green()
 	setMotorTarget(clawMotor, CLAW_CLOSE,30);
 	setMotorTarget(liftMotorL, iLiftLevel[0],100);
 	setMotorTarget(liftMotorR, iLiftLevel[0],100);
-	turnDecel(-90, ON_SPOT_TURN, 0, 0.25, 5, 20);
+	turnDecel(-90, ON_SPOT_TURN, 0, 0.5, 10, 20);
 
-	goStraightDecel(32, -40, 0.007, 0.6, 30);
-	turnDecel(-140, ON_SPOT_TURN, 0, 0.25, 10, 10);
+	goStraightDecel(32, -60, 0.007, 0.6, 30);
+	turnDecel(-140, ON_SPOT_TURN, 0, 0.5, 10, 10);
 
-	goStraightDecel(20, -40, 0.007, 0.6, 30);
-	pickUpTrigger = 4; liftLevel = 4; clawTarget = CLAW_OPEN;
+	goStraightDecel(15, -80, 0.007, 0.6, 30);
+	clawAction(CLAW_OPEN);
+	setMotorTarget(clawMotor, CLAW_CLOSE,100);
+
+	wait1Msec(300);
+
+	pickUpTrigger = 15; liftLevel = 4; clawTarget = CLAW_OPEN;
 	startTask( pick_up_cube );
-	goStraightDecel(60, -40, 0.007, 0.6, 30);
+	goStraightDecel(20, -50, 0.007, 0.6, 0);
+	goStraightDecel(43, -80, 0.007, 0.6, 40);
 	turnDecel(-235, ON_SPOT_TURN, 0, 0.25, 10, 10);
 
-	goStraightDecel(23, -40, 0.007, 0.6, 30);
+	goStraightDecel(21, -40, 0.007, 0.6, 30);
 
 	clawAction(CLAW_CLOSE);
 
