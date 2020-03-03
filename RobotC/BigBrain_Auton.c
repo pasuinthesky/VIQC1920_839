@@ -66,7 +66,7 @@ void iCheckBattLevel(float min, float closemin){
 	}
 	setTouchLEDColor(LED, colorNone);
 	setTouchLEDBlinkTime(LED, 0, 0);
-	nBattLevel = Battlevel/1000;
+	nBattLevel = BattLevel/1000;
 	displayCenteredBigTextLine(3, "%f", nBattLevel);
 	if(nBattLevel<min){
 		setTouchLEDRGB(LED,255, 0, 0);
@@ -525,6 +525,7 @@ task main()
 
 	// Get drive train ready for the game
 	prepareDriveTrain();
+
 	// On the mark
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	clearTimer( T1 );
@@ -532,10 +533,10 @@ task main()
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	left_low_green_high_green();
-
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	two_red_two_blue_on_left();
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	two_red_right();
+
 }
