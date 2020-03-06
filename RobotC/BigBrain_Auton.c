@@ -295,25 +295,25 @@ void right_low_green_two_blue()
 
 	clawAction(CLAW_OPEN);
 
-	targetHeading = 5;
+	targetHeading = -5;
 	goStraightDecel(5, 34, 0.007, 0.6, 0);
 
 	setMotorTarget(clawMotor, CLAW_CLOSE,30);
 	setMotorTarget(liftMotorL, iLiftLevel[1],100);
 	setMotorTarget(liftMotorR, iLiftLevel[1],100);
 
-	turnDecel(110, ON_SPOT_TURN, 0, 0.5, 10, 10);
+	turnDecel(115, ON_SPOT_TURN, 0, 0.5, 10, 10);
 	wait1Msec(300);
 
 	goStraightDecel(29, 80, 0.007, 0.6, 0);
 	setMotorTarget(scoopMotor, iScoopPos[0], 100);
 	goStraightDecel(13, -40, 0.007, 0.6, 0);
 
-	turnDecel(192, ON_SPOT_TURN, 0, 0.5, 10, 10);
+	turnDecel(189, ON_SPOT_TURN, 0, 0.5, 10, 10);
 
 	goStraightDecel(65, -100, 0.007, 0.6, 0);
 
-	clawAction(CLAW_OPEN);
+	clawAction(CLAW_OPEN+150);
 
 	wait1Msec(2000);
 	setMotorTarget(scoopMotor, iScoopPos[1], 100);
@@ -348,10 +348,10 @@ void left_low_green_high_green()
 	turnDecel(-140, ON_SPOT_TURN, 0, 0.5, 10, 10);
 
 	goStraightDecel(15, -80, 0.007, 0.6, 30);
-	clawAction(CLAW_OPEN);
+	/*clawAction(CLAW_OPEN);
 	setMotorTarget(clawMotor, CLAW_CLOSE,100);
 
-	wait1Msec(300);
+	wait1Msec(300);*/
 
 	pickUpTrigger = 15; liftLevel = 4; clawTarget = CLAW_OPEN;
 	startTask( pick_up_cube );
@@ -533,6 +533,7 @@ task main()
 
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	left_low_green_high_green();
+
 	LEDBusiness( colorGreen, 0, 0, 0, 0 );
 	two_red_two_blue_on_left();
 
