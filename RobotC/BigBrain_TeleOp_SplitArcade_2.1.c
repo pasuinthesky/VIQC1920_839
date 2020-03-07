@@ -29,7 +29,7 @@ bool specialLift = false;
 #define LIFT_LEVELS 5
 int iLiftLevel[LIFT_LEVELS] = {15 ,400, 1100, 1435, 1830}; //pickup_inside, pickup_outside/transport,low_inside,low_outside,,high_inside
 
-int iScoopPos[4] = { -150, 280, 815, 1000 }; //pick_cube, keep_ball/release cube, ready_to_scoop_ball, score_ball
+int iScoopPos[4] = { -150, 280, 800, 1050 }; //pick_cube, keep_ball/release cube, ready_to_scoop_ball, score_ball
 
 int iChA_filtered=0, iChC_filtered=0, turnNumber = 0;
 
@@ -129,7 +129,7 @@ void scooper_preset()
 {
 	if (getJoystickValue (BtnFUp) == 1)
 	{
-		if (abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2])) < SCOOPER_DELTA )
+		if (abs( getMotorEncoder(scoopMotor) - (turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[2])) < SCOOPER_DELTA*2 )
 		{//Scoop Balls
 			turnNumber++;
 			setMotorTarget(scoopMotor,turnNumber*ENCODER_UNIT_PER_SCOOP_ROUND+iScoopPos[1],100);
