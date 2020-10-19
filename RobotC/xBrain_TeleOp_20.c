@@ -18,7 +18,7 @@ int artificial_ChC_Reading = 0;
 #define MS_PER_ENCODER_UNIT 1
 
 #define LIFT_LEVELS 2
-int iLiftLevel[LIFT_LEVELS] = {15, 560};
+int iLiftLevel[LIFT_LEVELS] = {15, 570};
 
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
@@ -39,8 +39,8 @@ int iStrafeMapping[101] = {
 10,10,10,10,10,10,10,10,10,10,
 20,20,20,20,20,20,20,20,20,20,
 25,25,25,25,25,25,25,25,25,25,
-40,40,40,40,40,40,40,40,40,40,
-60,60,60,60,60,60,60,60,60,60,
+30,30,30,30,30,30,30,40,40,30,
+50,50,50,50,50,60,60,60,60,60,
 80,80,80,80,80,80,80,80,80,80,
 100,100,100,100,100,100,100,100,100,100,100};
 
@@ -64,16 +64,6 @@ void lift_preset()
 		{
 			if ( getMotorEncoder(liftMotorL) < ( iLiftLevel[i+1] - ARM_DELTA ) )
 			{
-				setMotorSpeed(BL, 50 );
-				setMotorSpeed(BR,  -50 );
-				setMotorSpeed(FL, 50 );
-				setMotorSpeed(FR, -50 );
-				wait1Msec(500);
-				setMotorSpeed(BL, 0 );
-				setMotorSpeed(BR, 0 );
-				setMotorSpeed(FL, 0 );
-				setMotorSpeed(FR, 0 );
-
 				setMotorTarget(liftMotorL,iLiftLevel[i+1],100);
 				setMotorTarget(liftMotorR, iLiftLevel[i+1], 100);
 				wait1Msec( ( iLiftLevel[i+1] - iLiftLevel[i] ) * MS_PER_ENCODER_UNIT );
@@ -130,7 +120,17 @@ task main()
 	setMotorBrakeMode(FR, motorHold);
 	setMotorBrakeMode(BR, motorHold);
 	setMotorBrakeMode(BL, motorHold);
+
+	setMotorSpeed(liftMotorL, -100);
+	setMotorSpeed(liftMotorR, -100);
+	wait1Msec(1000);
+	setMotorSpeed(liftMotorL, 0);
+	setMotorSpeed(liftMotorR, 0) ;
+
 	startTask( flashLED );
+	resetMotorEncoder(liftMotorL);
+	resetMotorEncoder(liftMotorR);
+
 	while(true)
 	{
 //		setpoint = 0; //later, we will plug in ChC reading.
@@ -147,6 +147,7 @@ task main()
 		{
 			iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 		}
+		lift_preset();
 
 		setMotorSpeed(BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
 		setMotorSpeed(BR, 0 - iChA_filtered - iChB_filtered - iChC_filtered );
