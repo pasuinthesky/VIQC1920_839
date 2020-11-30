@@ -1,8 +1,19 @@
-
-
+#pragma config(Sensor, port10, LED,            sensorVexIQ_LED)
+#pragma config(Sensor, port12, gyro,           sensorVexIQ_Gyro)
+#pragma config(Motor,  motor1,          BR,            tmotorVexIQ, PIDControl, encoder)
+#pragma config(Motor,  motor4,          liftMotorL,    tmotorVexIQ, PIDControl, reversed, encoder)
+#pragma config(Motor,  motor5,          BL,            tmotorVexIQ, PIDControl, encoder)
+#pragma config(Motor,  motor6,          FL,            tmotorVexIQ, PIDControl, encoder)
+#pragma config(Motor,  motor7,          FR,            tmotorVexIQ, PIDControl, encoder)
+#pragma config(Motor,  motor11,         liftMotorR,    tmotorVexIQ, PIDControl, encoder)
+#define MIN_SPEED 30
+#define GEAR_RATIO 2
+#define DECEL_RATE 0.75
+#define WHEEL_TRAVEL 20.0
 int currentCount, pickUpTrigger, targetHeading;
 #define COUNT_PER_ROUND 960
 #define MS_PER_ENCODER_UNIT 1
+#define RATE 1.05
 
 float cmToEncoderUnit(float distance)
 {
@@ -21,8 +32,10 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 	writeDebugStreamLine("slowZone = %d", slowZone);
 
 	currentCount = 0;
-	resetMotorEncoder(leftMotor);
-	resetMotorEncoder(rightMotor);
+	resetMotorEncoder(FL);
+	resetMotorEncoder(FR);
+	resetMotorEncoder(BL);
+	resetMotorEncoder(BR);
 
 	clearTimer( T2 );
 
@@ -43,6 +56,7 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 
 		setMotorSpeed(leftMotor, motorSpeed + output);
 		setMotorSpeed(rightMotor, motorSpeed - output);
+		setMotorSpeed(BL, motorSpeed )
 
 		currentCount = abs( getMotorEncoder(leftMotor) + getMotorEncoder(rightMotor) ) / 2;
 //		writeDebugStreamLine("%d:  %f,  %f,  %f,  %f,  %f", time1[T1], error, integral, output, motorSpeed, currentCount);
