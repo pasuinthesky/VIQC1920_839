@@ -1,12 +1,12 @@
 #pragma config(Sensor, port10, LED,            sensorVexIQ_LED)
 #pragma config(Sensor, port12, gyro,           sensorVexIQ_Gyro)
 #pragma config(Motor,  motor1,          BR,            tmotorVexIQ, PIDControl, encoder)
-#pragma config(Motor,  motor4,          liftMotorL,    tmotorVexIQ, PIDControl, reversed, encoder)
 #pragma config(Motor,  motor5,          BL,            tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor6,          FL,            tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor7,          FR,            tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor11,         liftMotorR,    tmotorVexIQ, PIDControl, encoder)
 //ARE YA READY KIDS? AY AY CAPTAIN! I CAAANNNNNNNNNNNNNNNNNNNT HEAAAAAAAR YOUUUUUUUUUUUUU! AYY AYYY CAPTAIN! WHO LIVES IN A PINEAPPLE UNDER THE SEA? SPONGEBOB SQUARE PANTS! ABOSRBENT AND YELLOW AND POROUS IS HE? SPONGEBOB SQUAREPANTS! IF NAUTICAL NONSENSE BE SOMETHING YOU WISH? SPONGEBOB SQUAREPANTS! THEN DROP ON THE DECK AND FLOP LIKE A FISH! SPONGEBOB SQUAREPANTS! READY? SPONGEBOB SQUAREPANTS! SPONGEBOB SQUAREPANTS! SPONGEBOB SQUAREPANTS!
+// turn this into claw later#pragma config(Motor,  motor4,          liftMotorL,    tmotorVexIQ, PIDControl, reversed, encoder)
 float desired_distance;
 float dt = 25;
 float allowed_time = 7.5;
