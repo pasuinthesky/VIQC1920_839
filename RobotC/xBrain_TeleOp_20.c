@@ -1,7 +1,7 @@
 #pragma config(Sensor, port10, LED,            sensorVexIQ_LED)
 #pragma config(Sensor, port12, gyro,           sensorVexIQ_Gyro)
 #pragma config(Motor,  motor1,          BR,            tmotorVexIQ, PIDControl, encoder)
-#pragma config(Motor,  motor4,          clawMotor,     tmotorVexIQ, PIDControl, reversed, encoder)
+#pragma config(Motor,  motor4,          clawMotor,     tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor5,          BL,            tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor6,          FL,            tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor7,          FR,            tmotorVexIQ, PIDControl, encoder)
@@ -23,12 +23,13 @@ bool claw_working = false;
 #define MS_PER_ENCODER_UNIT 3
 
 #define LIFT_LEVELS 2
-int iLiftLevel[LIFT_LEVELS] = {75, 520};
+int iLiftLevel[LIFT_LEVELS] = {30, 450};
 int in_between_level = 405
 
-#define CLAW_CLOSED 15
-#define CLAW_OPEN 50
+#define CLAW_CLOSED 20
+#define CLAW_OPEN 60
 
+/*
 int iDriveMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
@@ -41,8 +42,7 @@ int iDriveMapping[101] = {
 	60,62,64,66,68,70,72,74,76,78,
 	84,88,92,96,100,100,100,100,100,100,100};
 
-
-int iStrafeMapping[101] = {
+	int iStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
 	10,10,10,10,10,10,10,10,10,10,
@@ -53,18 +53,42 @@ int iStrafeMapping[101] = {
 	50,50,50,50,50,60,60,60,60,60,
 	80,80,80,80,80,80,80,80,80,80,
 	100,100,100,100,100,100,100,100,100,100,100};
+*/
+int iDriveMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	40,40,40,60,60,80,80,100,100,100,100};
+
+int iStrafeMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	40,40,40,60,60,80,80,100,100,100,100};
 
 int iTurnMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
-	40,40,40,40,40,40,40,40,40,40,
-	40,40,40,40,40,40,40,40,40,40,
-	40,40,40,40,40,40,40,40,40,40,
-	40,40,40,40,40,40,40,40,40,40,
-	40,40,40,40,40,40,40,40,40,40,
-	40,40,40,40,40,40,40,40,40,40,
-	40,40,40,40,40,40,40,40,40,40,
-	50,50,50,50,50,60,60,60,60,60,60};
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	40,40,40,40,40,40,40,60,60,60,60};
 
 void claw_preset()
 {
@@ -80,6 +104,19 @@ void claw_preset()
 				setMotorTarget(clawMotor,CLAW_CLOSED,100);
 				wait1Msec( abs( CLAW_CLOSED - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
 				setMotorSpeed(clawMotor, 0);
+				if ( getMotorEncoder(liftMotor) > ( iLiftLevel[1] - ARM_DELTA ) )
+				{
+					setMotorTarget(liftMotor, iLiftLevel[0],80);
+					setMotorSpeed(BL, -50 );
+					setMotorSpeed(BR, 50 );
+					setMotorSpeed(FL, -50 );
+					setMotorSpeed(FR, 50 );
+					wait1Msec(500);
+					setMotorSpeed(BL, 0 );
+					setMotorSpeed(BR, 0 );
+					setMotorSpeed(FL, 0 );
+					setMotorSpeed(FR, 0 );
+				}
 			}
 			else
 			{
@@ -136,16 +173,6 @@ void lift_preset()
 		{
 			if ( getMotorEncoder(liftMotor) > ( iLiftLevel[i-1] + ARM_DELTA ) )
 			{
-				setMotorTarget(liftMotor, iLiftLevel[i-1],100);
-				setMotorSpeed(BL, -50 );
-				setMotorSpeed(BR, 50 );
-				setMotorSpeed(FL, -50 );
-				setMotorSpeed(FR, 50 );
-				wait1Msec(500);
-				setMotorSpeed(BL, 0 );
-				setMotorSpeed(BR, 0 );
-				setMotorSpeed(FL, 0 );
-				setMotorSpeed(FR, 0 );
 				setMotorTarget(liftMotor, iLiftLevel[i-1],100);
 				wait1Msec( ( iLiftLevel[i] - iLiftLevel[i-1] ) * MS_PER_ENCODER_UNIT );
 				break;
