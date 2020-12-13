@@ -26,33 +26,33 @@ bool claw_working = false;
 int iLiftLevel[LIFT_LEVELS] = {30, 450};
 int in_between_level = 405
 
-#define CLAW_CLOSED 20
-#define CLAW_OPEN 60
+#define CLAW_CLOSED 15
+#define CLAW_OPEN 145
 
 /*
 int iDriveMapping[101] = {
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	10,10,10,10,10,10,10,10,10,10,
-	10,10,10,10,10,10,10,10,10,10,
-	20,20,20,20,20,20,20,20,20,20,
-	30,30,30,30,30,30,30,30,30,30,
-	40,40,40,40,40,40,40,40,40,40,
-	50,50,50,50,50,50,50,50,50,50,
-	60,62,64,66,68,70,72,74,76,78,
-	84,88,92,96,100,100,100,100,100,100,100};
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+10,10,10,10,10,10,10,10,10,10,
+10,10,10,10,10,10,10,10,10,10,
+20,20,20,20,20,20,20,20,20,20,
+30,30,30,30,30,30,30,30,30,30,
+40,40,40,40,40,40,40,40,40,40,
+50,50,50,50,50,50,50,50,50,50,
+60,62,64,66,68,70,72,74,76,78,
+84,88,92,96,100,100,100,100,100,100,100};
 
-	int iStrafeMapping[101] = {
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	10,10,10,10,10,10,10,10,10,10,
-	10,10,10,10,10,10,10,10,10,10,
-	20,20,20,20,20,20,20,20,20,20,
-	25,25,25,25,25,25,25,25,25,25,
-	30,30,30,30,30,30,30,40,40,40,
-	50,50,50,50,50,60,60,60,60,60,
-	80,80,80,80,80,80,80,80,80,80,
-	100,100,100,100,100,100,100,100,100,100,100};
+int iStrafeMapping[101] = {
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+10,10,10,10,10,10,10,10,10,10,
+10,10,10,10,10,10,10,10,10,10,
+20,20,20,20,20,20,20,20,20,20,
+25,25,25,25,25,25,25,25,25,25,
+30,30,30,30,30,30,30,40,40,40,
+50,50,50,50,50,60,60,60,60,60,
+80,80,80,80,80,80,80,80,80,80,
+100,100,100,100,100,100,100,100,100,100,100};
 */
 int iDriveMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -90,46 +90,60 @@ int iTurnMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,40,40,40,40,60,60,60,60};
 
-void claw_preset()
+task claw_preset()
 {
-	// checks the level before moving
-	if (getJoystickValue(BtnLUp)==1)
+	int claw_position, prev_claw=CLAW_CLOSED;
+
+	while (true)
 	{
-		if (! claw_working)
+		// checks the level before moving
+		if (getJoystickValue(BtnLUp)==1)
 		{
-			claw_working = true;
-			if ( abs(getMotorEncoder(clawMotor) - CLAW_OPEN) < CLAW_DELTA )
+			if (! claw_working)
 			{
-				setMotorBrakeMode(clawMotor, motorCoast);
-				setMotorTarget(clawMotor,CLAW_CLOSED,100);
-				wait1Msec( abs( CLAW_CLOSED - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
-				setMotorSpeed(clawMotor, 0);
-				if ( getMotorEncoder(liftMotor) > ( iLiftLevel[1] - ARM_DELTA ) )
+				claw_working = true;
+				if ( abs(getMotorEncoder(clawMotor) - CLAW_OPEN) < CLAW_DELTA )
 				{
-					setMotorTarget(liftMotor, iLiftLevel[0],80);
-					setMotorSpeed(BL, -50 );
-					setMotorSpeed(BR, 50 );
-					setMotorSpeed(FL, -50 );
-					setMotorSpeed(FR, 50 );
-					wait1Msec(500);
-					setMotorSpeed(BL, 0 );
-					setMotorSpeed(BR, 0 );
-					setMotorSpeed(FL, 0 );
-					setMotorSpeed(FR, 0 );
+					setMotorBrakeMode(clawMotor, motorCoast);
+					setMotorTarget(clawMotor,CLAW_CLOSED,100);
+					wait1Msec( abs( CLAW_CLOSED - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
+					setMotorSpeed(clawMotor, 0);
+					if ( abs(getMotorEncoder(liftMotor) - iLiftLevel[1]) < ARM_DELTA  )
+					{
+						setMotorTarget(liftMotor, in_between_level, 100);
+						setMotorSpeed(BL, -50 );
+						setMotorSpeed(BR, 50 );
+						setMotorSpeed(FL, -50 );
+						setMotorSpeed(FR, 50 );
+						wait1Msec(500);
+						setMotorSpeed(BL, 0 );
+						setMotorSpeed(BR, 0 );
+						setMotorSpeed(FL, 0 );
+						setMotorSpeed(FR, 0 );
+					}
+				}
+				else
+				{
+					setMotorBrakeMode(clawMotor, motorHold);
+					claw_position = getMotorEncoder(clawMotor);
+					if (prev_claw == claw_position)
+					{
+						setMotorSpeed(clawMotor, 0);
+					}
+					else
+					{
+						setMotorSpeed(clawMotor,100);
+					}
+					prev_claw = claw_position;
 				}
 			}
-			else
-			{
-				setMotorBrakeMode(clawMotor, motorHold);
-				setMotorTarget(clawMotor,CLAW_OPEN,100);
-				wait1Msec( abs( CLAW_CLOSED - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
-			}
 		}
-	}
-	else
-	{
-		claw_working = false;
-		//setMotorSpeed(clawMotor, 0);
+		else
+		{
+			claw_working = false;
+			setMotorSpeed(clawMotor, 0);
+		}
+		wait1Msec(50);
 	}
 }
 
@@ -244,6 +258,7 @@ task main()
 	desired_heading = 0;
 
 	//startTask( flashLED );
+	startTask(claw_preset);
 
 	while(true)
 	{
@@ -266,8 +281,6 @@ task main()
 		displayCenteredTextLine(3, "%d, %d, %d", getGyroDegrees(gyro), desired_heading, getMotorBrakeMode(clawMotor));
 
 		lift_preset();
-
-		claw_preset();
 
 		setMotorSpeed(BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
 		setMotorSpeed(BR, 0 - iChA_filtered - iChB_filtered - iChC_filtered );
