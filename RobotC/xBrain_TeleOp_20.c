@@ -13,7 +13,7 @@
 
 #define ARM_DELTA 10
 #define CLAW_DELTA 15
-#define MS_PER_ENCODER_UNIT 3
+#define MS_PER_ENCODER_UNIT 2
 
 #define LIFT_LEVELS 2
 
@@ -47,17 +47,6 @@ int iDriveMapping[101] = {
 60,62,64,66,68,70,72,74,76,78,
 84,88,92,96,100,100,100,100,100,100,100};
 
-int iStrafeMapping[101] = {
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,10,10,10,10,10,
-10,10,10,10,10,10,10,10,10,10,
-20,20,20,20,20,20,20,20,20,20,
-25,25,25,25,25,25,25,25,25,25,
-30,30,30,30,30,30,30,40,40,40,
-50,50,50,50,50,60,60,60,60,60,
-80,80,80,80,80,80,80,80,80,80,
-100,100,100,100,100,100,100,100,100,100,100};
 */
 int iDriveMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -71,17 +60,6 @@ int iDriveMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,60,60,80,80,100,100,100,100};
 
-int iStrafeMapping[101] = {
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	10,10,10,10,10,10,10,10,10,10,
-	10,10,10,10,10,10,10,10,10,10,
-	20,20,20,20,20,20,20,20,20,20,
-	20,20,20,20,20,20,20,20,20,20,
-	30,30,30,30,30,30,30,30,30,30,
-	30,30,30,30,30,30,30,30,30,30,
-	30,30,30,30,30,30,30,30,30,30,
-	40,40,40,60,60,80,80,100,100,100,100};
 
 int iTurnMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -122,7 +100,7 @@ task claw_preset()
 				{
 					drive_override = true;
 					setMotorTarget(armMotor, in_between_level, 100);
-					wait1Msec(300)
+					wait1Msec(150);
 				}
 				setMotorBrakeMode(clawMotor, motorCoast);
 				setMotorTarget(clawMotor,CLAW_CLOSED,100);
@@ -283,12 +261,12 @@ task main()
 	{
 
 		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
-		iChB_filtered = iStrafeMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
+		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
 		iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
-			iChC_filtered = PIDControl( desired_heading, getGyroDegrees(gyro), 0.7, 0, 0, 5 );
+			iChC_filtered = PIDControl( desired_heading, getGyroDegrees(gyro), 0.7, 0, 0, 15 );
 			setTouchLEDColor(LED, colorBlue);
 		}
 		else
@@ -300,6 +278,7 @@ task main()
 		displayCenteredTextLine(3, "%d, %d, %d", getGyroDegrees(gyro), desired_heading, getMotorBrakeMode(clawMotor));
 
 		lift_preset();
+
 		if (! drive_override)
 		{
 			setMotorSpeed(BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
