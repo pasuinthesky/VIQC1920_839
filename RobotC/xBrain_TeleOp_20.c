@@ -29,6 +29,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_close = false;
 
+int strafeSpeed;
 int iArmLevel[LIFT_LEVELS] = {90, 530};
 int in_between_level = 440;
 bool drive_override = false;
@@ -60,6 +61,17 @@ int iDriveMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,60,60,80,80,100,100,100,100};
 
+int iStrafeMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	40,40,40,60,60,80,80,100,100,100,100};
 
 int iTurnMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -72,6 +84,26 @@ int iTurnMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,40,40,40,40,60,60,60,60};
+
+switch()
+{
+	case(0<abs(y/getJoystickValue(ChB))<1000000)
+	{
+		strafeSpeed = sqrt(getJoystickValue(ChB)*getJoystickValue(ChB) + y*y)
+		iChB_filtered = sgn(getJoystickValue(ChB)) * strafeSpeed
+		ChA_filtered = 0
+	}
+	case(1/2<abs(y/getJoystickValue(ChB))<2)
+	{
+		iChA_filtered = sgn(y) * strafeSpeed
+		iChB_filtered = sgn(getJoystickValue(ChB)) * strafeSpeed
+	}
+	case(2<abs(y/getJoystickValue(ChB))<1000000000000000)
+	{
+		iChA_filtered = sgn(y) * strafeSpeed
+		iChB_filtered = 0
+	}
+}
 
 task claw_preset()
 {
@@ -266,7 +298,14 @@ task main()
 
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
-			iChC_filtered = PIDControl( desired_heading, getGyroDegrees(gyro), 0.7, 0, 0, 15 );
+			if ( iChA_filtered + iChB_filtered > 0 )
+			{
+				iChC_filtered = PIDControl( desired_heading, getGyroDegrees(gyro), 0.7, 0, 0, 5 );
+			}
+			else
+			{
+				iChC_filtered = PIDControl( desired_heading, getGyroDegrees(gyro), 0.7, 0, 0, 15 );
+			}
 			setTouchLEDColor(LED, colorBlue);
 		}
 		else
