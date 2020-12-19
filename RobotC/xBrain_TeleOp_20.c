@@ -15,7 +15,7 @@
 #define CLAW_DELTA 15
 #define MS_PER_ENCODER_UNIT 2
 
-#define LIFT_LEVELS 2
+#define LIFT_LEVELS 3
 
 int error;
 float integral = 0;
@@ -29,11 +29,13 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_close = false;
 
-int strafeSpeed;
-int iArmLevel[LIFT_LEVELS] = {90, 530};
+int iArmLevel[LIFT_LEVELS] = {90, 530, 560};
 int in_between_level = 440;
 bool drive_override = false;
 
+int iChC_filtered;
+int iChA_filtered;
+int iChB_filtered;
 
 /*
 int iDriveMapping[101] = {
@@ -49,18 +51,6 @@ int iDriveMapping[101] = {
 84,88,92,96,100,100,100,100,100,100,100};
 
 */
-int iDriveMapping[101] = {
-	0,0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,
-	10,10,10,10,10,10,10,10,10,10,
-	10,10,10,10,10,10,10,10,10,10,
-	20,20,20,20,20,20,20,20,20,20,
-	20,20,20,20,20,20,20,20,20,20,
-	30,30,30,30,30,30,30,30,30,30,
-	30,30,30,30,30,30,30,30,30,30,
-	30,30,30,30,30,30,30,30,30,30,
-	40,40,40,60,60,80,80,100,100,100,100};
-
 int iStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
@@ -71,7 +61,7 @@ int iStrafeMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	30,30,30,30,30,30,30,30,30,30,
 	30,30,30,30,30,30,30,30,30,30,
-	40,40,40,60,60,80,80,100,100,100,100};
+	40,40,40,60,60,80,80,80,80,80,80}; // Max not to 100 to allow room for PID.
 
 int iTurnMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -85,23 +75,41 @@ int iTurnMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,40,40,40,40,60,60,60,60};
 
-switch()
+void eightDirectionalLimitedJoystick()
 {
-	case(0<abs(y/getJoystickValue(ChB))<1000000)
+	int x = getJoystickValue(ChB);
+	int y = getJoystickValue(ChA);
+
+	int strafeSpeed = sqrt(x*x + y*y);
+
+	if (strafeSpeed == 0)
 	{
-		strafeSpeed = sqrt(getJoystickValue(ChB)*getJoystickValue(ChB) + y*y)
-		iChB_filtered = sgn(getJoystickValue(ChB)) * strafeSpeed
-		ChA_filtered = 0
+		iChA_filtered = 0;
+		iChB_filtered = 0;
 	}
-	case(1/2<abs(y/getJoystickValue(ChB))<2)
+	else
 	{
-		iChA_filtered = sgn(y) * strafeSpeed
-		iChB_filtered = sgn(getJoystickValue(ChB)) * strafeSpeed
-	}
-	case(2<abs(y/getJoystickValue(ChB))<1000000000000000)
-	{
-		iChA_filtered = sgn(y) * strafeSpeed
-		iChB_filtered = 0
+		// In C language, int devided by int equals int.
+		// When y smaller than strafeSpeed, y/strafeSpeed will always equals 0 if not forced into the float type.
+		float abs_sin = abs((float)y/strafeSpeed);
+
+		// We have to do this to avoid referring iStrageMapping array out of boundary.
+		// We have to do this after calculating abs_sin to get accurate value.
+		if (strafeSpeed > 100)
+			strafeSpeed = 100;
+
+		// Default to diagnal directions
+		iChA_filtered = sgn(y) * iStrafeMapping[strafeSpeed];
+		iChB_filtered = sgn(x) * iStrafeMapping[strafeSpeed];
+
+		if( abs_sin <= sinDegrees(22.5))
+		{
+			iChA_filtered = 0;
+		}
+		else if ( abs_sin >= sinDegrees(67.5))
+		{
+			iChB_filtered = 0;
+		}
 	}
 }
 
@@ -257,10 +265,6 @@ task flashLED ()
 
 task main()
 {
-	int iChC_filtered;
-	int iChA_filtered;
-	int iChB_filtered;
-
 	setMotorBrakeMode(FL, motorHold);
 	setMotorBrakeMode(FR, motorHold);
 	setMotorBrakeMode(BR, motorHold);
@@ -292,9 +296,11 @@ task main()
 	while(true)
 	{
 
-		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
-		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
+		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
+		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
 		iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
+
+		eightDirectionalLimitedJoystick();
 
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
