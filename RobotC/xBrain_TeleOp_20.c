@@ -37,7 +37,7 @@ int iChC_filtered;
 int iChA_filtered;
 int iChB_filtered;
 
-#define GYRO_SAMPLING_SECONDS 1000
+#define GYRO_SAMPLING_SECONDS 10000
 #define ACCEPTABLE_DRIFT_RANGE 0.08
 float fGyroDriftRate;
 /*
@@ -336,7 +336,9 @@ task main()
 	wait1Msec(1000);
 	setMotorSpeed(clawMotor, 0);
 
-	resetGyro(gyro);
+	setGyroStable();
+	resetGyroStable();
+
 	desired_heading = 0;
 
 	//startTask( flashLED );
@@ -355,21 +357,21 @@ task main()
 		{
 			if ( iChA_filtered + iChB_filtered > 0 )
 			{
-				iChC_filtered = PIDControl( desired_heading, getGyroDegrees(gyro), 0.7, 0, 0, 5 );
+				iChC_filtered = PIDControl( desired_heading, getGyroStable(), 0.7, 0, 0, 5 );
 			}
 			else
 			{
-				iChC_filtered = PIDControl( desired_heading, getGyroDegrees(gyro), 0.7, 0, 0, 15 );
+				iChC_filtered = PIDControl( desired_heading, getGyroStable(), 0.7, 0, 0, 15 );
 			}
 			setTouchLEDColor(LED, colorBlue);
 		}
 		else
 		{
-			desired_heading = getGyroDegrees(gyro);
+			desired_heading = getGyroStable();
 			setTouchLEDColor(LED, colorYellow);
 		}
 
-		displayCenteredTextLine(3, "%d, %d, %d", getGyroDegrees(gyro), desired_heading, getMotorBrakeMode(clawMotor));
+		displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
 		lift_preset();
 
