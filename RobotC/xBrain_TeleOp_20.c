@@ -113,6 +113,17 @@ void setGyroStable()
 
 }
 
+float getGyroStable()
+{
+	return getGyroDegreesFloat(Gyro) - fGyroDriftRate * time1[T4] / 1000;
+}
+
+void resetGyroStable()
+{
+	resetGyro(Gyro);
+	clearTimer(T4);
+}
+
 void eightDirectionalLimitedJoystick()
 {
 	int x = getJoystickValue(ChB);
