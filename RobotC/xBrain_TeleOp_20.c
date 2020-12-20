@@ -11,7 +11,7 @@
 #define CLAW_CLOSED 15
 #define CLAW_OPEN 145
 
-#define ARM_DELTA 10
+#define ARM_DELTA 5
 #define CLAW_DELTA 15
 #define MS_PER_ENCODER_UNIT 2
 
@@ -29,7 +29,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_close = false;
 
-int iArmLevel[LIFT_LEVELS] = {90, 530, 560};
+int iArmLevel[LIFT_LEVELS] = {90, 530, 590};
 int in_between_level = 440;
 bool drive_override = false;
 
@@ -129,7 +129,7 @@ void eightDirectionalLimitedJoystick()
 	int x = getJoystickValue(ChB);
 	int y = getJoystickValue(ChA);
 
-	int strafeSpeed = sqrt(x*x + y*y);
+	int strafeSpeed = sqrt(x*x + y*y); //this is the hypotenuse
 
 	if (strafeSpeed == 0)
 	{
