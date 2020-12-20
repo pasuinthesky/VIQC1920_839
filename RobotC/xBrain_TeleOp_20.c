@@ -29,7 +29,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_close = false;
 
-int iArmLevel[LIFT_LEVELS] = {90, 530, 590};
+int iArmLevel[LIFT_LEVELS] = {90, 530, 565};
 int in_between_level = 440;
 bool drive_override = false;
 
@@ -185,7 +185,7 @@ task claw_preset()
 		{
 			if (claw_to_close)
 			{
-				if ( abs(getMotorEncoder(armMotor) - iArmLevel[1]) < ARM_DELTA  )
+				if ( abs(getMotorEncoder(armMotor) >= (iArmLevel[1] - ARM_DELTA)))
 				{
 					drive_override = true;
 					setMotorTarget(armMotor, in_between_level, 100);
@@ -274,7 +274,7 @@ void lift_preset()
 			if ( getMotorEncoder(armMotor) > ( iArmLevel[i-1] + ARM_DELTA ) )
 			{
 				setMotorTarget(armMotor, iArmLevel[i-1],100);
-				wait1Msec( ( iArmLevel[i] - iArmLevel[i-1] ) * MS_PER_ENCODER_UNIT );
+				wait1Msec( ( iArmLevel[i] - iArmLevel[i-1] ) * MS_PER_ENCODER_UNIT + 100 );
 				break;
 			}
 		}
