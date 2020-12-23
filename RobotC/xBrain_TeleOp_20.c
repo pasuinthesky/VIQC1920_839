@@ -333,10 +333,10 @@ task claw_preset()
 					if ( drive_override  )
 					{
 						setMotorSpeed(BL, -50 );
-						setMotorSpeed(BR, 50 );
+						setMotorSpeed(BR, 45 );
 						setMotorSpeed(FL, -50 );
-						setMotorSpeed(FR, 50 );
-						wait1Msec(500);
+						setMotorSpeed(FR, 45 );
+						wait1Msec(300);
 						setMotorSpeed(BL, 0 );
 						setMotorSpeed(BR, 0 );
 						setMotorSpeed(FL, 0 );
