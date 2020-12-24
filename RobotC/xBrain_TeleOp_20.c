@@ -32,7 +32,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {50, 455, 550};
+int iArmLevel[LIFT_LEVELS] = {20, 440, 540};
 int in_between_level = 355;
 bool drive_override = false;
 
@@ -129,7 +129,7 @@ void resetGyroStable()
 
 void eightDirectionalLimitedJoystick()
 {
-	int x = getJoystickValue(ChB);
+	int x = -getJoystickValue(ChB);
 	int y = getJoystickValue(ChA);
 
 	int strafeSpeed = sqrt(x*x + y*y); //this is the hypotenuse
@@ -483,7 +483,7 @@ task main()
 			}
 			else
 			{
-				iChC_filtered = PIDControl( desired_heading, getGyroStable(), 0.7, 0, 0, 15 );
+				iChC_filtered = PIDControl( desired_heading, getGyroStable(), 0.5, 0, 0, 25 );
 			}
 			setTouchLEDColor(LED, colorBlue);
 		}
