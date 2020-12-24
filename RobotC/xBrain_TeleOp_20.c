@@ -272,12 +272,17 @@ task claw_preset()
 				if ( abs(getMotorEncoder(armMotor)) >= iArmLevel[1] - ARM_DELTA )
 				{
 					drive_override = true;
+					setMotorSpeed(BL, 0 );
+					setMotorSpeed(BR, 0 );
+					setMotorSpeed(FL, 0 );
+					setMotorSpeed(FR, 0 );
 					setMotorTarget(armMotor, in_between_level, 100);
 					wait1Msec(150);
 				}
 
 				if (grab_again)
 				{
+					/*
 					setMotorTarget(clawMotor,RELEASED,100);
 					wait1Msec( abs( getMotorEncoder(clawMotor) - RELEASED ) * MS_PER_ENCODER_UNIT );
 					setMotorSpeed(BL, -50 );
@@ -296,11 +301,6 @@ task claw_preset()
 					setMotorSpeed(FL, 50 );
 					setMotorSpeed(FR, -50 );
 					wait1Msec(550);
-/*					setMotorSpeed(BL, 30 );
-					setMotorSpeed(BR, -30 );
-					setMotorSpeed(FL, 30 );
-					setMotorSpeed(FR, -30 );
-					wait1Msec(80);*/
 					setMotorSpeed(BL, 0 );
 					setMotorSpeed(BR, 0 );
 					setMotorSpeed(FL, 0 );
@@ -324,6 +324,7 @@ task claw_preset()
 							wait1Msec(100);
 						}
 					}
+					*/
 				}
 				else
 				{
@@ -332,10 +333,11 @@ task claw_preset()
 					setMotorSpeed(clawMotor, 0);
 					if ( drive_override  )
 					{
+						desired_heading += 3;
 						setMotorSpeed(BL, -50 );
-						setMotorSpeed(BR, 45 );
+						setMotorSpeed(BR, 50 );
 						setMotorSpeed(FL, -50 );
-						setMotorSpeed(FR, 45 );
+						setMotorSpeed(FR, 50 );
 						wait1Msec(300);
 						setMotorSpeed(BL, 0 );
 						setMotorSpeed(BR, 0 );
