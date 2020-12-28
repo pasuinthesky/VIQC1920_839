@@ -456,7 +456,8 @@ task main()
 	setMotorBrakeMode(FR, motorHold);
 	setMotorBrakeMode(BR, motorHold);
 	setMotorBrakeMode(BL, motorHold);
-	setMotorBrakeMode(clawMotor, motorCoast);
+//	setMotorBrakeMode(clawMotor, motorCoast);
+	setMotorBrakeMode(clawMotor, motorHold);
 	setMotorBrakeMode( armMotor, motorHold );
 
 	setMotorSpeed(clawMotor, -100);
