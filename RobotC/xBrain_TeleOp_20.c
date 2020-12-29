@@ -499,7 +499,7 @@ task main()
 		{
 			if ( getTimerValue(T2) > INERTIA_DIE_DOWN )
 			{
-				iChC_filtered = PIDControl( desired_heading, getGyroStable(), 0.7, 0, 0, 5 );
+				iChC_filtered = PIDControl( desired_heading, getGyroStable(), 1, 0.00001, 0.0001, 0.6 );
 				setTouchLEDColor(LED, colorBlue);
 			}
 			else
