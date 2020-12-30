@@ -88,7 +88,7 @@ typedef struct {
 	float delta;
 }structPID;
 
-structPID pidDistance;
+structPID pidStrafe;
 structPID pidOrientation;
 
 float PIDControl (structPID &pid)
@@ -119,24 +119,81 @@ task orientationPID()
 	}
 }
 
-void DrivePID(int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
+void strafePID(float direction, int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
 {
-	pidDistance.setpoint = cmToEncoderUnit(distance) / sqrt(2);
-	pidDistance.measured_value = 0;
-	pidDistance.kp = Kp;
-	pidDistance.ki = Ki;
-	pidDistance.kd = Kd;
-	pidDistance.delta = cmToEncoderUnit(delta);
+	int tmpJoyStick, motor_a, motor_b, selector_a, selector_b;
 
-	while ( abs(pidDistance.setpoint - pidDistance.measured_value) > pidDistance.delta )
+	pidStrafe.setpoint = cmToEncoderUnit(distance) / sqrt(2);
+	pidStrafe.measured_value = 0;
+	pidStrafe.kp = Kp;
+	pidStrafe.ki = Ki;
+	pidStrafe.kd = Kd;
+	pidStrafe.delta = cmToEncoderUnit(delta);
+
+	resetMotorEncoder(FL);
+	resetMotorEncoder(FR);
+	resetMotorEncoder(BL);
+	resetMotorEncoder(BR);
+
+	switch(direction)
 	{
-		pidDistance.measured_value = (abs(getMotorEncoder(BL)) + abs(getMotorEncoder(BR))) / 2;
+		case 1:
+			if(distance > 0)
+		  {
+		  	motor_a = FL;
+		  	motor_b = BL;
+			}
+			else
+			{
+			 	motor_a = FR;
+		  	motor_b = BR;
+			}
+	  	selector_a = 0;
+	  	selector_b = 1;
+	  	break;
 
-		iChA_filtered = PIDControl(pidDistance);
-		if (iChA_filtered > maxJoyStick)
-			iChA_filtered = maxJoyStick;
-		iChB_filtered = 0;
-		writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading, pidDistance.setpoint, pidDistance.measured_value );
+		case 2:
+		  motor_a = FL;
+		  motor_b = BR;
+	  	selector_a = 1;
+	  	selector_b = 1;
+	  	break;
+
+		case 3:
+		  if(distance > 0)
+		  {
+		  	motor_a = BL;
+		  	motor_b = BR;
+			}
+			else
+			{
+			 	motor_a = FL;
+		  	motor_b = FR;
+			}
+	  	selector_a = 1;
+	  	selector_b = 0;
+	  	break;
+
+	  case 4:
+		  motor_a = FR;
+		  motor_b = BL;
+	  	selector_a = 1;
+	  	selector_b = -1;
+	  	break;
+	}
+
+	while ( abs(pidStrafe.setpoint - pidStrafe.measured_value) > pidStrafe.delta )
+	{
+		pidStrafe.measured_value = sgn(pidStrafe.setpoint) * (abs(getMotorEncoder(motor_a)) + abs(getMotorEncoder(motor_b))) / 2;
+
+		tmpJoyStick = PIDControl(pidStrafe);
+		if (abs(tmpJoyStick) > maxJoyStick)
+			tmpJoyStick = maxJoyStick * sgn(tmpJoyStick);
+
+		iChA_filtered = tmpJoyStick * selector_a;
+		iChB_filtered = tmpJoyStick * selector_b;
+
+		writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading, pidStrafe.setpoint, pidStrafe.measured_value );
 		wait1Msec(dt);
 	}
 	iChA_filtered = 0;
@@ -178,7 +235,9 @@ task main()
 	pidOrientation.kd = 0.0001;
 
 	startTask(drive);
-	DrivePID(28, 90, 0.18, 0, 0, 1);
+	strafePID(2, 28, 20, 0.18, 0, 0, 1);
+	wait1Msec(1000);
+	strafePID(2, -28, 20, 0.18, 0, 0, 1);
 	//desired_heading = 90;
 	pidOrientation.delta = 1;
 	waitUntil( abs(getGyroStable() - desired_heading) <= pidOrientation.delta );

@@ -33,7 +33,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {50, 455, 550};
+int iArmLevel[LIFT_LEVELS] = {30, 455, 550};
 int in_between_level = 355;
 bool drive_override = false;
 
@@ -261,7 +261,6 @@ task claw_preset()
 		if ( getJoystickValue(BtnFUp)==1 && !claw_working && !claw_to_release)
 		{
 			claw_working = true;
-			grab_again = true;
 			claw_to_release = true;
 		}
 
@@ -280,74 +279,27 @@ task claw_preset()
 					wait1Msec(150);
 				}
 
-				if (grab_again)
+
+				setMotorTarget(clawMotor,RELEASED,100);
+				wait1Msec( abs( getMotorEncoder(clawMotor) - RELEASED ) * MS_PER_ENCODER_UNIT );
+				setMotorSpeed(clawMotor, 0);
+				if ( drive_override  )
 				{
-					/*
-					setMotorTarget(clawMotor,RELEASED,100);
-					wait1Msec( abs( getMotorEncoder(clawMotor) - RELEASED ) * MS_PER_ENCODER_UNIT );
+					desired_heading += 3;
 					setMotorSpeed(BL, -50 );
 					setMotorSpeed(BR, 50 );
 					setMotorSpeed(FL, -50 );
 					setMotorSpeed(FR, 50 );
-					wait1Msec(350);
+					wait1Msec(300);
 					setMotorSpeed(BL, 0 );
 					setMotorSpeed(BR, 0 );
 					setMotorSpeed(FL, 0 );
 					setMotorSpeed(FR, 0 );
 					setMotorTarget(armMotor, iArmLevel[0], 100);
-					wait1Msec(900);
-					setMotorSpeed(BL, 50 );
-					setMotorSpeed(BR, -50 );
-					setMotorSpeed(FL, 50 );
-					setMotorSpeed(FR, -50 );
-					wait1Msec(550);
-					setMotorSpeed(BL, 0 );
-					setMotorSpeed(BR, 0 );
-					setMotorSpeed(FL, 0 );
-					setMotorSpeed(FR, 0 );
 					drive_override = false;
-					setMotorBrakeMode(clawMotor, motorHold);
-					while(claw_working)
-					{
-						claw_position = getMotorEncoder(clawMotor);
-						if (prev_claw == claw_position)
-						{
-							setMotorSpeed(clawMotor, 0);
-							claw_working = false;
-							grab_again = false;
-							prev_claw = -1000;
-						}
-						else
-						{
-							prev_claw = claw_position;
-							setMotorSpeed(clawMotor, -100);
-							wait1Msec(100);
-						}
-					}
-					*/
 				}
-				else
-				{
-					setMotorTarget(clawMotor,RELEASED,100);
-					wait1Msec( abs( getMotorEncoder(clawMotor) - RELEASED ) * MS_PER_ENCODER_UNIT );
-					setMotorSpeed(clawMotor, 0);
-					if ( drive_override  )
-					{
-						desired_heading += 3;
-						setMotorSpeed(BL, -50 );
-						setMotorSpeed(BR, 50 );
-						setMotorSpeed(FL, -50 );
-						setMotorSpeed(FR, 50 );
-						wait1Msec(300);
-						setMotorSpeed(BL, 0 );
-						setMotorSpeed(BR, 0 );
-						setMotorSpeed(FL, 0 );
-						setMotorSpeed(FR, 0 );
-						setMotorTarget(armMotor, iArmLevel[0], 100);
-						drive_override = false;
-					}
-					claw_working = false
-				}
+				claw_working = false
+
 			}
 			else
 			{
@@ -488,7 +440,6 @@ task main()
 
 	while(true)
 	{
-
 		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
 		iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
