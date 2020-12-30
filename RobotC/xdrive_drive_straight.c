@@ -106,19 +106,6 @@ float PIDControl (structPID &pid)
 	return output;
 }
 
-task orientationPID()
-{
-	while (true)
-	{
-		pidOrientation.measured_value = getGyroStable();
-		pidOrientation.setpoint = desired_heading;
-
-		iChC_filtered = -PIDControl(pidOrientation);
-		writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading );
-		wait1Msec(dt);
-	}
-}
-
 void strafePID(float direction, int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
 {
 	int tmpJoyStick, motor_a, motor_b, selector_a, selector_b;
@@ -204,6 +191,12 @@ task drive()
 {
 	while (true)
 	{
+		pidOrientation.measured_value = getGyroStable();
+		pidOrientation.setpoint = desired_heading;
+
+		iChC_filtered = -PIDControl(pidOrientation);
+		writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading );
+
 		setMotorSpeed( FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
 		setMotorSpeed( BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
 		setMotorSpeed( FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
@@ -224,8 +217,6 @@ task main()
 	setMotorBrakeMode(FR, motorHold);
 	resetTimer(T2);
 	setMotorEncoderUnits(encoderCounts);
-
-	startTask(orientationPID);
 
 	clearDebugStream();
 
