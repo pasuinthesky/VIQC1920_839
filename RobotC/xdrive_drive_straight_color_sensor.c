@@ -1,3 +1,4 @@
+#pragma config(Sensor, port8,  ColorSensor,    sensorVexIQ_ColorGrayscale)
 #pragma config(Sensor, port10, LED,            sensorVexIQ_LED)
 #pragma config(Sensor, port12, gyro,           sensorVexIQ_Gyro)
 #pragma config(Motor,  motor1,          BR,            tmotorVexIQ, PIDControl, encoder)
@@ -17,8 +18,6 @@ float iChA_filtered = 0.0;
 float progressToGoal = getMotorEncoder(BL) * 1.414;
 float desired_heading = 0.0;
 
-bool drive_override = false
-
 #define GYRO_SAMPLING_SECONDS 10000
 #define ACCEPTABLE_DRIFT_RANGE 0.08
 float fGyroDriftRate;
@@ -29,34 +28,16 @@ float fGyroDriftRate;
 #define RATE 1
 
 #define LIFT_LEVELS 3
-int iArmLevel[LIFT_LEVELS] = {125, 1300, 1425};
-int in_between_level = 1100;
+int iArmLevel[LIFT_LEVELS] = {30, 455, 550};
+int in_between_level = 355;
 
 bool claw_to_close = false;
-#define RELEASED 735
+#define CLAW_OPEN 145
 
 float cmToEncoderUnit(float distance)
 {
 	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
 }
-
-float tempDelta;
-
-typedef struct {
-	float setpoint;
-	float measured_value;
-	float integral;
-	float prev_error;
-	float kp;
-	float ki;
-	float kd;
-	float delta;
-}structPID;
-
-structPID pidStrafe;
-structPID pidOrientation;
-structPID pidEncoder;
-
 
 void setGyroStable()
 {
@@ -104,6 +85,22 @@ void resetGyroStable()
 	clearTimer(T4);
 }
 
+typedef struct {
+	float setpoint;
+	float measured_value;
+	float integral;
+	float prev_error;
+	float kp;
+	float ki;
+	float kd;
+	float delta;
+}structPID;
+
+structPID pidStrafe;
+structPID pidOrientation;
+structPID pidLight;
+structPID pidEncoder;
+
 float PIDControl (structPID &pid)
 {
 	float error = pid.setpoint - pid.measured_value;
@@ -121,7 +118,8 @@ float PIDControl (structPID &pid)
 
 void strafePID(float direction, int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
 {
-	int tmpJoyStick, motor_a, motor_b, ChA_selector, ChB_selector;
+	int tmpJoyStick, motor_a, motor_b, selector_a, selector_b;
+	float pre_FL = 0, pre_FR = 0, pre_BL = 0, pre_BR = 0;
 
 	pidStrafe.setpoint = cmToEncoderUnit(distance) / sqrt(2);
 	pidStrafe.measured_value = 0;
@@ -129,6 +127,15 @@ void strafePID(float direction, int distance, int maxJoyStick, float Kp, float K
 	pidStrafe.ki = Ki;
 	pidStrafe.kd = Kd;
 	pidStrafe.delta = cmToEncoderUnit(delta);
+
+/*
+	pidLight.setpoint = getColorGrayscale(ColorSensor);
+	pidLight.measured_value = 0;
+	pidLight.kp = 0.03;
+	pidLight.ki = 0.000002;
+	pidLight.kd = 0.001;
+	pidLight.delta = 30;
+*/
 
 	pidEncoder.setpoint = 0;
 	pidEncoder.measured_value = 0;
@@ -144,49 +151,49 @@ void strafePID(float direction, int distance, int maxJoyStick, float Kp, float K
 
 	switch(direction)
 	{
-	case 1:
-		if(distance > 0)
-		{
-			motor_a = FL;
-			motor_b = BL;
-		}
-		else
-		{
-			motor_a = FR;
-			motor_b = BR;
-		}
-		ChA_selector = 0;
-		ChB_selector = 1;
-		break;
+		case 1:
+			if(distance > 0)
+		  {
+		  	motor_a = FL;
+		  	motor_b = BL;
+			}
+			else
+			{
+			 	motor_a = FR;
+		  	motor_b = BR;
+			}
+	  	selector_a = 0;
+	  	selector_b = 1;
+	  	break;
 
-	case 2:
-		motor_a = FL;
-		motor_b = BR;
-		ChA_selector = 1;
-		ChB_selector = 1;
-		break;
+		case 2:
+		  motor_a = FL;
+		  motor_b = BR;
+	  	selector_a = 1;
+	  	selector_b = 1;
+	  	break;
 
-	case 3:
-		if(distance > 0)
-		{
-			motor_a = BR;
-			motor_b = BL;
-		}
-		else
-		{
-			motor_a = FR;
-			motor_b = FL;
-		}
-		ChA_selector = 1;
-		ChB_selector = 0;
-		break;
+		case 3:
+		  if(distance > 0)
+		  {
+		  	motor_a = BR;
+		  	motor_b = BL;
+			}
+			else
+			{
+			 	motor_a = FR;
+		  	motor_b = FL;
+			}
+	  	selector_a = 1;
+	  	selector_b = 0;
+	  	break;
 
-	case 4:
-		motor_a = FR;
-		motor_b = BL;
-		ChA_selector = 1;
-		ChB_selector = -1;
-		break;
+	  case 4:
+		  motor_a = FR;
+		  motor_b = BL;
+	  	selector_a = 1;
+	  	selector_b = -1;
+	  	break;
 	}
 
 	while ( abs(pidStrafe.setpoint - pidStrafe.measured_value) > pidStrafe.delta )
@@ -197,21 +204,27 @@ void strafePID(float direction, int distance, int maxJoyStick, float Kp, float K
 		if (abs(tmpJoyStick) > maxJoyStick)
 			tmpJoyStick = maxJoyStick * sgn(tmpJoyStick);
 
-		iChA_filtered = tmpJoyStick * ChA_selector;
-		iChB_filtered = tmpJoyStick * ChB_selector;
+		iChA_filtered = tmpJoyStick * selector_a;
+		iChB_filtered = tmpJoyStick * selector_b;
+/*
+		pidLight.measured_value = getColorGrayscale(ColorSensor);
+		iChA_filtered = -sgn(abs(getMotorEncoder(FL))+abs(getMotorEncoder(FR))-abs(getMotorEncoder(BL))-abs(getMotorEncoder(BR))) * PIDControl(pidLight);
+		writeDebugStreamLine( "%f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChB_filtered, abs(getMotorEncoder(FL))+abs(getMotorEncoder(FR)), abs(getMotorEncoder(BL))+abs(getMotorEncoder(BR)), pidLight.prev_error, pidLight.measured_value );
+*/
+		//pidEncoder.measured_value = abs(getMotorEncoder(BL))+abs(getMotorEncoder(BR))-abs(getMotorEncoder(FL))-abs(getMotorEncoder(FR));
 
 		pidEncoder.measured_value = abs(getMotorEncoder(motor_b))-abs(getMotorEncoder(motor_a));
 		switch (direction)
 		{
-		case 1:
-			iChA_filtered = PIDControl(pidEncoder);
-			break;
-		case 3:
-			iChB_filtered = PIDControl(pidEncoder);
-			break;
+			case 1:
+				iChA_filtered = PIDControl(pidEncoder);
+				break;
+			case 3:
+				iChB_filtered = PIDControl(pidEncoder);
+				break;
 		}
 
-		writeDebugStreamLine( "%f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChB_filtered, abs(getMotorEncoder(motor_a)), abs(getMotorEncoder(motor_b)), pidEncoder.measured_value );
+		writeDebugStreamLine( "%f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChB_filtered, abs(getMotorEncoder(FL))+abs(getMotorEncoder(FR)), abs(getMotorEncoder(BL))+abs(getMotorEncoder(BR)), pidEncoder.measured_value );
 
 		//writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading, pidStrafe.setpoint, pidStrafe.measured_value );
 		//writeDebugStreamLine( "%f %f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, abs(getMotorEncoder(FL))-pre_FL, abs(getMotorEncoder(FR))-pre_FR, abs(getMotorEncoder(BL))-pre_BL, abs(getMotorEncoder(BR))-pre_BR, abs(getMotorEncoder(FL))+abs(getMotorEncoder(FR)), abs(getMotorEncoder(BL))+abs(getMotorEncoder(BR)), pidLight.measured_value );
@@ -222,15 +235,6 @@ void strafePID(float direction, int distance, int maxJoyStick, float Kp, float K
 	iChB_filtered = 0;
 }
 
-void turn(float heading)
-{
-	tempDelta = pidOrientation.delta;
-	pidOrientation.delta = 10;
-	desired_heading = heading;
-	waitUntil( abs(getGyroStable() - desired_heading) <= pidOrientation.delta );
-	pidOrientation.delta = tempDelta;
-}
-
 task drive()
 {
 	while (true)
@@ -239,20 +243,21 @@ task drive()
 		pidOrientation.setpoint = desired_heading;
 
 		iChC_filtered = -PIDControl(pidOrientation);
-		writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading );
-		if(! drive_override)
-		{
-			setMotorSpeed( FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
-			setMotorSpeed( BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
-			setMotorSpeed( FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
-			setMotorSpeed( BR, 0 - iChA_filtered - iChB_filtered - iChC_filtered );
-			wait1Msec(dt);
-		}
+		//writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading );
+
+		setMotorSpeed( FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
+		setMotorSpeed( BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
+		setMotorSpeed( FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
+		setMotorSpeed( BR, 0 - iChA_filtered - iChB_filtered - iChC_filtered );
+		wait1Msec(dt);
 	}
 }
+
 task claw_move()
 {
 	int claw_position, prev_claw = -1;
+
+	setMotorBrakeMode(clawMotor, motorHold);
 
 	while (true)
 	{
@@ -273,53 +278,30 @@ task claw_move()
 		}
 		else
 		{
-			setMotorTarget(clawMotor, RELEASED, 100);
+			setMotorTarget(clawMotor, CLAW_OPEN, 100);
 		}
 
 		wait1Msec(dt);
 	}
 }
 
-void initialize()
-{
-	setMotorEncoderUnits(encoderCounts);
-
-	setMotorBrakeMode(FL, motorHold);
-	setMotorBrakeMode(FR, motorHold);
-	setMotorBrakeMode(BR, motorHold);
-	setMotorBrakeMode(BL, motorHold);
-	setMotorBrakeMode(clawMotor, motorHold);
-	setMotorBrakeMode( armMotor, motorHold );
-
-	setMotorSpeed(clawMotor, -100);
-	setMotorSpeed(armMotor, -50);
-	wait1Msec(3000);
-
-	resetMotorEncoder(clawMotor);
-	resetMotorEncoder(armMotor);
-
-	setMotorSpeed(clawMotor, 0);
-	setMotorSpeed(armMotor, 0);
-
-	setMotorTarget(clawMotor, RELEASED, 100);
-	setMotorTarget(armMotor, iArmLevel[0], 100);
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
-	waitUntilMotorStop(armMotor);
-	setMotorSpeed(clawMotor, 0);
-}
 
 // remember these values for orientation: DriveStraightPID(20, 0.7, 0, 0, 5)
 task main()
 {
-	initialize();
+//	getColorGrayscale(ColorSensor);
+//	while(true)
+//		displaySensorValues(line3,ColorSensor);
 
 	setGyroStable();
 	resetGyroStable();
 
-	desired_heading = 0;
-
+	setMotorBrakeMode(BL, motorHold);
+	setMotorBrakeMode(FL, motorHold);
+	setMotorBrakeMode(BR, motorHold);
+	setMotorBrakeMode(FR, motorHold);
 	resetTimer(T2);
+	setMotorEncoderUnits(encoderCounts);
 
 	clearDebugStream();
 
@@ -329,70 +311,15 @@ task main()
 	pidOrientation.kd = 0.0001;
 
 	startTask(drive);
-	startTask(claw_move);
+	//startTask(claw_move);
 
 	//setMotorTarget(armMotor, iArmLevel[1], 100);
 
-
-	strafePID(1, 55, 90, 0.18, 0, 0, 1);
-	turn(-90);
-	strafePID(1, -32, 90, 0.18, 0, 0, 1);
-	strafePID(3, 5, 90, 0.18, 0, 0, 1);
-	claw_to_close = true;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
-	//waitUntil(getTouchLEDValue(LED));
-
-	setMotorTarget(armMotor, iArmLevel[1], 100);
-	wait1Msec(300);
-	waitUntilMotorStop(armMotor);
-	//waitUntil(getTouchLEDValue(LED));
-
-	turn(-130);
-	//waitUntil(getTouchLEDValue(LED));
-
-	strafePID(3, 5, 40, 0.18, 0, 0, 1);
-
-	setMotorTarget(armMotor,in_between_level,100);
-	waitUntilMotorStop(armMotor);
-	claw_to_close=false;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
-
-	strafePID(3, -60, 90, 0.18, 0, 0, 1);
-
-	setMotorTarget(armMotor, iArmLevel[0], 100);
-	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
-	desired_heading = -90;
-	strafePID(1, -50, 60, 0.18, 0, 0, 1);
-	waitUntil(getTouchLEDValue(LED));
-
-	claw_to_close = true;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
-	drive_override = true
-
-	setMotorSpeed(FL, 100);
-	setMotorSpeed(FR, -100);
-	setMotorSpeed(BL, 100);
-	setMotorSpeed(BR, -100);
-	wait1Msec(500);
-	setMotorSpeed(BL, 0 );
-	setMotorSpeed(BR, 0 );
-	setMotorSpeed(FL, 0 );
-	setMotorSpeed(FR, 0 );
-	drive_override = false
-
-	claw_to_close = false;
-
-	//turn(-100);
-
-	waitUntil(getTouchLEDValue(LED));
-
-	/*	desired_heading = -90;
-	strafePID(1, -25, 60, 0.18, 0, 0, 1);
-	strafePID(3, 10, 60, 0.18, 0, 0, 1);
-	claw_to_close = true;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor); this comment pairs with "strafePID(3, -17, 40, 0.18, 0, 0, 1);" */
+	strafePID(1, -100, 60, 0.18, 0, 0, 1);
+	wait1Msec(1000);
+	strafePID(1, 100, 60, 0.18, 0, 0, 1);
+	//desired_heading = 90;
+	pidOrientation.delta = 1;
+	waitUntil( abs(getGyroStable() - desired_heading) <= pidOrientation.delta );
+	stopAllTasks();
 }
