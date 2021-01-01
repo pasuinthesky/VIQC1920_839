@@ -31,8 +31,8 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {30, 455, 550};
-int in_between_level = 355;
+int iArmLevel[LIFT_LEVELS] = {40, 465, 550};
+int in_between_level = 400;
 bool drive_override = false;
 
 int iChC_filtered;
@@ -288,7 +288,7 @@ task claw_preset()
 					setMotorSpeed(BR, 50 );
 					setMotorSpeed(FL, -50 );
 					setMotorSpeed(FR, 50 );
-					wait1Msec(300);
+					wait1Msec(375);
 					setMotorSpeed(BL, 0 );
 					setMotorSpeed(BR, 0 );
 					setMotorSpeed(FL, 0 );

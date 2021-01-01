@@ -30,8 +30,10 @@ float fGyroDriftRate;
 int iArmLevel[LIFT_LEVELS] = {125, 1300, 1425};
 int in_between_level = 1100;
 
-bool claw_to_close = false;
-#define RELEASED 735
+bool claw_grab = false;
+#define CLAW_CLOSE 100
+#define CLAW_OPEN 735
+#define CLAW_PUSH 540
 
 float cmToEncoderUnit(float distance)
 {
@@ -252,15 +254,17 @@ task claw_move()
 {
 	int claw_position, prev_claw = -1;
 
+	setMotorBrakeMode(clawMotor, motorHold);
 	while (true)
 	{
-		if (claw_to_close)
+		if (claw_grab)
 		{
 			claw_position = getMotorEncoder(clawMotor);
 			if (prev_claw == claw_position)
 			{
 				setMotorSpeed(clawMotor, 0);
 				prev_claw = 0;
+				claw_grab = false;
 			}
 			else
 			{
@@ -269,11 +273,6 @@ task claw_move()
 				wait1Msec(100);
 			}
 		}
-		else
-		{
-			setMotorTarget(clawMotor, RELEASED, 100);
-		}
-
 		wait1Msec(dt);
 	}
 }
@@ -299,7 +298,7 @@ void initialize()
 	setMotorSpeed(clawMotor, 0);
 	setMotorSpeed(armMotor, 0);
 
-	setMotorTarget(clawMotor, RELEASED, 100);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	wait1Msec(100);
 	waitUntilMotorStop(clawMotor);
@@ -308,25 +307,95 @@ void initialize()
 }
 
 // remember these values for orientation: DriveStraightPID(20, 0.7, 0, 0, 5)
+
+void right_side_3_1_3()
+{
+	strafePID(1, 55, 90, 0.18, 0, 0, 1);
+	turnTo(-90);
+	strafePID(1, -32, 90, 0.18, 0, 0, 1);
+	strafePID(3, 8, 90, 0.18, 0, 0, 1);
+	claw_grab = true;
+	waitUntil( !claw_grab );
+
+	setMotorTarget(armMotor, iArmLevel[1], 100);
+	wait1Msec(300);
+	waitUntilMotorStop(armMotor);
+
+	turnTo(-125);
+
+	strafePID(3, 5, 40, 0.18, 0, 0, 1);
+
+	setMotorTarget(armMotor,in_between_level,100);
+	waitUntilMotorStop(armMotor);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	waitUntilMotorStop(clawMotor);
+
+	strafePID(3, -65, 90, 0.18, 0, 0, 1);
+
+	setMotorTarget(armMotor, iArmLevel[0], 100);
+	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
+
+	setMotorTarget(clawMotor, CLAW_PUSH, 100);
+
+	desired_heading = -90;
+	strafePID(1, -40, 40, 0.18, 0, 0, 1);
+
+	strafePID(3, 38, 90, 0.18, 0, 0, 1);
+
+	strafePID(3, -36, 90, 0.18, 0, 0, 1);
+
+	strafePID(1, -100, 60, 0.18, 0, 0, 1);
+	//waitUntil(getTouchLEDValue(LED));
+	//strafePID(1, 5, 40, 0.18, 0, 0, 1);
+
+	strafePID(3, 30, 90, 0.18, 0, 0, 1);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	//strafePID(3, -3, 40, 0.18, 0, 0, 1);
+
+	strafePID(1, 20, 40, 0.18, 0, 0, 1);
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(3, 8, 40, 0.18, 0, 0, 1);
+	claw_grab = true;
+	waitUntil( !claw_grab );
+
+	setMotorTarget(armMotor, iArmLevel[1], 100);
+	wait1Msec(300);
+	waitUntilMotorStop(armMotor);
+
+	turnTo(-55);
+
+	strafePID(3, 4, 40, 0.18, 0, 0, 1);
+
+	setMotorTarget(armMotor,in_between_level,100);
+	waitUntilMotorStop(armMotor);
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	waitUntilMotorStop(clawMotor);
+
+	strafePID(3, -60, 90, 0.18, 0, 0, 1);
+	turnTo(0);
+	//waitUntil(getTouchLEDValue(LED));
+	strafePID(3, -10, 40, 0.18, 0, 0, 1);
+
+	strafePID(3, -120, 90, 0.18, 0, 0, 1);
+}
+
 task main()
 {
 	initialize();
-
 	setTouchLEDColor(LED,colorYellow);
 	waitUntil(getTouchLEDValue(LED));
 
 	setGyroStable();
-
 	setTouchLEDColor(LED,colorBlue);
 	waitUntil(getTouchLEDValue(LED));
 
 	setTouchLEDColor(LED,colorGreen);
+	clearDebugStream();
 
 	resetGyroStable();
 	desired_heading = 0;
 	resetTimer(T2);
-
-	clearDebugStream();
 
 	pidOrientation.delta = 0.6;
 	pidOrientation.kp = 1;
@@ -336,104 +405,8 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-	strafePID(1, 55, 90, 0.18, 0, 0, 1);
-	turnTo(-90);
-	strafePID(1, -32, 90, 0.18, 0, 0, 1);
-	strafePID(3, 8, 90, 0.18, 0, 0, 1);
-	claw_to_close = true;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
+	right_side_3_1_3();
 
-	setMotorTarget(armMotor, iArmLevel[1], 100);
-	wait1Msec(300);
-	waitUntilMotorStop(armMotor);
-
-	turnTo(-130);
-
-	strafePID(3, 5, 40, 0.18, 0, 0, 1);
-
-	setMotorTarget(armMotor,in_between_level,100);
-	waitUntilMotorStop(armMotor);
-	claw_to_close=false;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
-
-	strafePID(3, -65, 90, 0.18, 0, 0, 1);
-
-	setMotorTarget(armMotor, iArmLevel[0], 100);
-	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
-
-	claw_to_close = true;
-	desired_heading = -90;
-	strafePID(1, -40, 60, 0.18, 0, 0, 1);
-
-
-/*
-	iChA_filtered = 100;
-	wait1Msec(250);
-	claw_to_close = false;
-	wait1Msec(150);
-*/
-
-	strafePID(3, 31, 90, 0.18, 0, 0, 1);
-	claw_to_close = false;
-	//waitUntil(getTouchLEDValue(LED));
-
-	strafePID(3, -36, 90, 0.18, 0, 0, 1);
-
-	claw_to_close = true;
-	strafePID(1, -90, 60, 0.18, 0, 0, 1);
-	//waitUntil(getTouchLEDValue(LED));
-	//strafePID(1, 5, 40, 0.18, 0, 0, 1);
-
-
-/*
-	iChA_filtered = 100;
-	wait1Msec(120);
-	claw_to_close = false;
-	wait1Msec(180);
-*/
-
-
-	strafePID(3, 31, 90, 0.18, 0, 0, 1);
-	claw_to_close = false;
-	strafePID(3, -3, 40, 0.18, 0, 0, 1);
-
-	strafePID(1, 20, 60, 0.18, 0, 0, 1);
-	//waitUntil(getTouchLEDValue(LED));
-
-	strafePID(3, 8, 40, 0.18, 0, 0, 1);
-	claw_to_close = true;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
-
-	setMotorTarget(armMotor, iArmLevel[1], 100);
-	wait1Msec(300);
-	waitUntilMotorStop(armMotor);
-
-	turnTo(-50);
-
-	strafePID(3, 4, 40, 0.18, 0, 0, 1);
-
-	setMotorTarget(armMotor,in_between_level,100);
-	waitUntilMotorStop(armMotor);
-	claw_to_close=false;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor);
-
-	strafePID(3, -60, 90, 0.18, 0, 0, 1);
-	turnTo(0);
-	//waitUntil(getTouchLEDValue(LED));
-	strafePID(3, -10, 40, 0.18, 0, 0, 1);
-
-	strafePID(3, -120, 90, 0.18, 0, 0, 1);
-
-	/*	desired_heading = -90;
-	strafePID(1, -25, 60, 0.18, 0, 0, 1);
-	strafePID(3, 10, 60, 0.18, 0, 0, 1);
-	claw_to_close = true;
-	wait1Msec(100);
-	waitUntilMotorStop(clawMotor); this comment pairs with "strafePID(3, -17, 40, 0.18, 0, 0, 1);" */
 	displayTextLine(3, "%f", getTimerValue(T2));
 	waitUntil(getTouchLEDValue(LED));
 }
