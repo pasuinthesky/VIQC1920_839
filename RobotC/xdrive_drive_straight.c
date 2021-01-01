@@ -367,25 +367,39 @@ task main()
 	desired_heading = -90;
 	strafePID(1, -40, 60, 0.18, 0, 0, 1);
 
+
+/*
 	iChA_filtered = 100;
 	wait1Msec(250);
 	claw_to_close = false;
 	wait1Msec(150);
+*/
 
-	strafePID(1, -10, 90, 0.18, 0, 0, 1);
-	strafePID(3, -30, 90, 0.18, 0, 0, 1);
+	strafePID(3, 31, 90, 0.18, 0, 0, 1);
+	claw_to_close = false;
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(3, -36, 90, 0.18, 0, 0, 1);
 
 	claw_to_close = true;
-	strafePID(1, -90, 90, 0.18, 0, 0, 1);
-	strafePID(1, 5, 40, 0.18, 0, 0, 1);
-	waitUntil(getTouchLEDValue(LED));
+	strafePID(1, -90, 60, 0.18, 0, 0, 1);
+	//waitUntil(getTouchLEDValue(LED));
+	//strafePID(1, 5, 40, 0.18, 0, 0, 1);
 
+
+/*
 	iChA_filtered = 100;
-	wait1Msec(250);
+	wait1Msec(120);
 	claw_to_close = false;
-	wait1Msec(150);
+	wait1Msec(180);
+*/
 
-	strafePID(1, 25, 90, 0.18, 0, 0, 1);
+
+	strafePID(3, 31, 90, 0.18, 0, 0, 1);
+	claw_to_close = false;
+	strafePID(3, -3, 40, 0.18, 0, 0, 1);
+
+	strafePID(1, 20, 60, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, 8, 40, 0.18, 0, 0, 1);
@@ -409,22 +423,10 @@ task main()
 
 	strafePID(3, -60, 90, 0.18, 0, 0, 1);
 	turnTo(0);
-	waitUntil(getTouchLEDValue(LED));
+	//waitUntil(getTouchLEDValue(LED));
+	strafePID(3, -10, 40, 0.18, 0, 0, 1);
 
-
-	drive_override = true;
-	setMotorSpeed(FL, -100);
-	setMotorSpeed(BL, -100);
-	setMotorSpeed(FR, 100);
-	setMotorSpeed(BR, 100);
-
-	wait1Msec(2000);
-
-	setMotorSpeed(FL, 0);
-	setMotorSpeed(BL, 0);
-	setMotorSpeed(FR, 0);
-	setMotorSpeed(BR, 0);
-	drive_override = false;
+	strafePID(3, -120, 90, 0.18, 0, 0, 1);
 
 	/*	desired_heading = -90;
 	strafePID(1, -25, 60, 0.18, 0, 0, 1);
@@ -432,4 +434,6 @@ task main()
 	claw_to_close = true;
 	wait1Msec(100);
 	waitUntilMotorStop(clawMotor); this comment pairs with "strafePID(3, -17, 40, 0.18, 0, 0, 1);" */
+	displayTextLine(3, "%f", getTimerValue(T2));
+	waitUntil(getTouchLEDValue(LED));
 }
