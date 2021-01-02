@@ -1,3 +1,4 @@
+#pragma config(Sensor, port3,  colorLeft,      sensorVexIQ_ColorGrayscale)
 #pragma config(Sensor, port10, LED,            sensorVexIQ_LED)
 #pragma config(Sensor, port12, gyro,           sensorVexIQ_Gyro)
 #pragma config(Motor,  motor1,          BR,            tmotorVexIQ, PIDControl, encoder)
@@ -306,8 +307,6 @@ void initialize()
 	setMotorSpeed(clawMotor, 0);
 }
 
-// remember these values for orientation: DriveStraightPID(20, 0.7, 0, 0, 5)
-
 void right_side_3_1_3()
 {
 	strafePID(1, 55, 90, 0.18, 0, 0, 1);
@@ -335,16 +334,24 @@ void right_side_3_1_3()
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
 
-	setMotorTarget(clawMotor, CLAW_PUSH, 100);
-
 	desired_heading = -90;
 	strafePID(1, -40, 40, 0.18, 0, 0, 1);
 
+	//strafePID(3, 5, 60, 0.18, 0, 0, 1);
+	setMotorTarget(clawMotor, CLAW_PUSH, 100);
+
+	while (getColorGrayscale(colorLeft)>100)
+	{
+		iChB_filtered = -20;
+	}
+	iChB_filtered = 0;
+	wait1Msec(100);
+
 	strafePID(3, 38, 90, 0.18, 0, 0, 1);
 
-	strafePID(3, -36, 90, 0.18, 0, 0, 1);
+	strafePID(3, -30, 60, 0.18, 0, 0, 1);
 
-	strafePID(1, -100, 60, 0.18, 0, 0, 1);
+	strafePID(1, -90, 60, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 	//strafePID(1, 5, 40, 0.18, 0, 0, 1);
 
