@@ -131,6 +131,8 @@ void strafePID(float direction, int distance, int maxJoyStick, float Kp, float K
 	pidStrafe.ki = Ki;
 	pidStrafe.kd = Kd;
 	pidStrafe.delta = cmToEncoderUnit(delta);
+	pidStrafe.integral = 0;
+	pidStrafe.prev_error = 0;
 
 	pidEncoder.setpoint = 0;
 	pidEncoder.measured_value = 0;
@@ -138,6 +140,8 @@ void strafePID(float direction, int distance, int maxJoyStick, float Kp, float K
 	pidEncoder.ki = 0.000002;
 	pidEncoder.kd = 0.005;
 	pidEncoder.delta = 30;
+	pidEncoder.integral = 0;
+	pidEncoder.prev_error = 0;
 
 	resetMotorEncoder(FL);
 	resetMotorEncoder(FR);
@@ -228,6 +232,9 @@ void turnTo(float heading, float delta)
 {
 	tempDelta = pidOrientation.delta;
 	pidOrientation.delta = delta;
+	pidOrientation.integral = 0;
+	pidOrientation.prev_error = 0;
+
 	desired_heading = heading;
 	waitUntil( abs(getGyroStable() - desired_heading) <= pidOrientation.delta );
 	pidOrientation.delta = tempDelta;
