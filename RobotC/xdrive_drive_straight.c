@@ -291,10 +291,10 @@ void initialize()
 {
 	setMotorEncoderUnits(encoderCounts);
 
-	setMotorBrakeMode(FL, motorHold);
-	setMotorBrakeMode(FR, motorHold);
-	setMotorBrakeMode(BR, motorHold);
-	setMotorBrakeMode(BL, motorHold);
+	setMotorBrakeMode(FL, motorCoast);
+	setMotorBrakeMode(FR, motorCoast);
+	setMotorBrakeMode(BR, motorCoast);
+	setMotorBrakeMode(BL, motorCoast);
 	setMotorBrakeMode(clawMotor, motorHold);
 	setMotorBrakeMode( armMotor, motorHold );
 
@@ -314,6 +314,14 @@ void initialize()
 	waitUntilMotorStop(clawMotor);
 	waitUntilMotorStop(armMotor);
 	setMotorSpeed(clawMotor, 0);
+
+	setTouchLEDColor(LED,colorYellow);
+	waitUntil(getTouchLEDValue(LED));
+
+	setMotorBrakeMode(FL, motorHold);
+	setMotorBrakeMode(FR, motorHold);
+	setMotorBrakeMode(BR, motorHold);
+	setMotorBrakeMode(BL, motorHold);
 }
 
 void land_riser()
