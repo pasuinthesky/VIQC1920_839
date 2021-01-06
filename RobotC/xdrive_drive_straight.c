@@ -624,7 +624,7 @@ void right_side_3_3_3_FANCY()
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	//strafePID(3, -3, 40, 0.18, 0, 0, 1);
 
-	strafePID(1, 21, 40, 0.18, 0, 0, 1);
+	strafePID(1, 22, 20, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, 12, 30, 0.18, 0, 0, 1);
