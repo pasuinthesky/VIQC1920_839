@@ -1,4 +1,5 @@
 #pragma config(Sensor, port3,  colorLeft,      sensorVexIQ_ColorGrayscale)
+#pragma config(Sensor, port9,  colorRight,     sensorVexIQ_ColorGrayscale)
 #pragma config(Sensor, port10, LED,            sensorVexIQ_LED)
 #pragma config(Sensor, port12, gyro,           sensorVexIQ_Gyro)
 #pragma config(Motor,  motor1,          BR,            tmotorVexIQ, PIDControl, encoder)
@@ -558,36 +559,46 @@ void right_side_3_3_3_FANCY()
 
 	claw_grab = true;
 	waitUntil( !claw_grab );
+	strafePID(1, -20, 90, 0.18, 0, 0, 1);
 	setMotorTarget(armMotor, ARM_CARRY, 100);
-	turnTo(0, 3);
-	//wait1Msec(300);
-	strafePID(1, -45, 40, 0.3, 0, 0, 1);
-	waitUntil(getTouchLEDValue(LED));
+	turnTo(-90, 3);
+	strafePID(1, -20, 40, 0.3, 0, 0, 1);
+	//waitUntil(getTouchLEDValue(LED));
+	wait1Msec(300);
 
+	while (getColorGrayscale(colorLeft)>150)
+	{
+		iChB_filtered = -20;
+	}
+	iChB_filtered = 0;
 
+	strafePID(3, -5, 40, 0.18, 0, 0, 1);
+	while (getColorGrayscale(colorRight)>150)
+	{
+		iChA_filtered = -20;
+	}
+	iChA_filtered = 0;
+	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 35, 90, 0.18, 0, 0, 1);
+	wait1Msec(300);
+	turnTo(-360, 3);
 
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(1, 40, 90, 0.18, 0, 0, 1);
-	turnTo(-30, 10);
-	turnTo(0, 10);
-
-	waitUntil(getTouchLEDValue(LED));
-
 	setMotorTarget(armMotor, iArmLevel[1], 100);
 
-	//pidOrientation.ki = 0;
+	pidOrientation.ki = 0;
+	pidOrientation.kd = 0;
 	pidOrientation.kp = 0.7;
-	strafePID(3, 40, 90, 0.18, 0, 0, 1);
+	strafePID(3, 50, 40, 0.3, 0, 0, 1);
 
-	turnTo(-60, 10);
+	turnTo(-420, 3);
 
 	strafePID(3, 10, 40, 0.18, 0, 0, 1);
 	pidOrientation.ki = 0.00001;
+	pidOrientation.kd = 0.001;
 	pidOrientation.kp = 1;
-	waitUntil(getTouchLEDValue(LED));
+	//waitUntil(getTouchLEDValue(LED));
 
 	land_riser();
 
@@ -595,19 +606,24 @@ void right_side_3_3_3_FANCY()
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	waitUntilMotorStop(armMotor);
 
-	strafePID(3, 16, 20, 0.18, 0, 0, 1);
+	//strafePID(3, 16, 20, 0.18, 0, 0, 1);
 
 	//waitUntil(getTouchLEDValue(LED));
 
+	iChA_filtered = 40;
+	wait1Msec(280);
 	claw_grab = true;
-	waitUntil( !claw_grab );
+	wait1Msec(120);
+	//waitUntil( !claw_grab );
 
 	strafePID(3, -16, 40, 0.18, 0, 0, 1);
+	//waitUntil(getTouchLEDValue(LED));
+
 	setMotorTarget(armMotor, iArmLevel[1], 100);
 	waitUntilMotorStop(armMotor);
 
 	pidOrientation.ki = 0;
-	turnTo(-475, 10);
+	turnTo(-470, 10);
 	pidOrientation.ki = 0.00001;
 
 	land_riser();
@@ -625,10 +641,10 @@ void right_side_3_3_3_FANCY()
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	//strafePID(3, -3, 40, 0.18, 0, 0, 1);
 
-	strafePID(1, 21, 40, 0.18, 0, 0, 1);
+	strafePID(1, 22, 40, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 12, 30, 0.18, 0, 0, 1);
+	strafePID(3, 12, 20, 0.18, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
