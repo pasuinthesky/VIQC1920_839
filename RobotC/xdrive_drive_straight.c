@@ -553,7 +553,9 @@ void right_side_3_3_3_FANCY()
 	turnTo(-90, 10);
 	strafePID(1, -28, 70, 0.18, 0, 0, 1);
 
-	strafePID(3, 12, 60, 0.18, 0, 0, 1);
+	strafePID(3, 10, 60, 0.18, 0, 0, 1);
+	strafePID(4, 3, 90, 0.18, 0, 0, 1);
+
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
@@ -590,6 +592,7 @@ void right_side_3_3_3_FANCY()
 
 	land_riser();
 
+	desired_heading = -415;
 	strafePID(3, -10, 40, 0.18, 0, 0, 1);
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	waitUntilMotorStop(armMotor);
@@ -600,6 +603,8 @@ void right_side_3_3_3_FANCY()
 
 	claw_grab = true;
 	waitUntil( !claw_grab );
+
+	desired_heading = -420;
 
 	strafePID(3, -16, 40, 0.18, 0, 0, 1);
 	setMotorTarget(armMotor, iArmLevel[1], 100);
