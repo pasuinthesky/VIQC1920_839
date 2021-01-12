@@ -68,6 +68,18 @@ int iStrafeMapping[101] = {
 	40,40,40,40,40,60,60,60,60,60,
 	60,60,60,60,60,80,80,80,80,80,80}; // Max not to 100 to allow room for PID.
 
+int iSlowStrafeMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,40,40,40,40,40,40};
+
 int iTurnMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
@@ -152,6 +164,12 @@ void eightDirectionalLimitedJoystick()
 		// Default to diagnal directions
 		iChA_filtered = sgn(y) * iStrafeMapping[strafeSpeed];
 		iChB_filtered = sgn(x) * iStrafeMapping[strafeSpeed];
+
+		if (getJoystickValue(BtnLDown) == 1)
+		{
+			iChA_filtered = sgn(y) * iSlowStrafeMapping[strafeSpeed];
+			iChB_filtered = sgn(x) * iSlowStrafeMapping[strafeSpeed];
+		}
 
 		if( abs_sin <= sinDegrees(22.5))
 		{
