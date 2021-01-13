@@ -34,6 +34,7 @@ bool claw_to_release = false;
 int iArmLevel[LIFT_LEVELS] = {10, 440, 540};
 int in_between_level = 355;
 bool drive_override = false;
+bool slow_drive = false
 
 int iChC_filtered;
 int iChA_filtered;
@@ -156,19 +157,21 @@ void eightDirectionalLimitedJoystick()
 		// When y smaller than strafeSpeed, y/strafeSpeed will always equals 0 if not forced into the float type.
 		float abs_sin = abs((float)y/strafeSpeed);
 
-		// We have to do this to avoid referring iStrageMapping array out of boundary.
+		// We have to do this to avoid referring iStrafeMapping array out of boundary.
 		// We have to do this after calculating abs_sin to get accurate value.
 		if (strafeSpeed > 100)
 			strafeSpeed = 100;
 
-		// Default to diagnal directions
-		iChA_filtered = sgn(y) * iStrafeMapping[strafeSpeed];
-		iChB_filtered = sgn(x) * iStrafeMapping[strafeSpeed];
-
-		if (getJoystickValue(BtnLDown) == 1)
+		// Default to diagnal directions and slow mode
+		if (slow_drive)
 		{
 			iChA_filtered = sgn(y) * iSlowStrafeMapping[strafeSpeed];
 			iChB_filtered = sgn(x) * iSlowStrafeMapping[strafeSpeed];
+		}
+		else
+		{
+			iChA_filtered = sgn(y) * iStrafeMapping[strafeSpeed];
+			iChB_filtered = sgn(x) * iStrafeMapping[strafeSpeed];
 		}
 
 		if( abs_sin <= sinDegrees(22.5))
@@ -462,6 +465,17 @@ task main()
 
 		eightDirectionalLimitedJoystick();
 
+		if (getJoystickValue(BtnLDown))
+		{
+			if(slow_drive)
+			{
+				slow_drive = false
+			}
+			else
+			{
+				slow_drive = true
+			}
+		}
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
 			if ( getTimerValue(T2) > INERTIA_DIE_DOWN )
