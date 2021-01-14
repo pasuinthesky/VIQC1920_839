@@ -44,6 +44,9 @@ int iChB_filtered;
 #define GYRO_SAMPLING_SECONDS 10000
 #define ACCEPTABLE_DRIFT_RANGE 0.08
 float fGyroDriftRate;
+
+float timestamp;
+
 /*
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
@@ -75,12 +78,13 @@ int iSlowStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
 	10,10,10,10,10,10,10,10,10,10,
 	10,10,10,10,10,10,10,10,10,10,
+	15,15,15,15,15,15,15,15,15,15,
+	15,15,15,15,15,15,15,15,15,15,
 	20,20,20,20,20,20,20,20,20,20,
 	20,20,20,20,20,20,20,20,20,20,
-	30,30,30,30,30,30,30,30,30,30,
-	30,30,30,30,30,30,30,30,30,30,
-	30,30,30,30,30,30,30,30,30,30,
-	30,30,30,30,30,40,40,40,40,40,40};
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,30,30,30,30,30,30};
+
 
 int iTurnMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -93,6 +97,19 @@ int iTurnMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,40,40,40,40,60,60,60,60};
+
+int iSlowTurnMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	5,5,5,5,5,5,5,5,5,5,
+	5,5,5,5,5,5,5,5,5,5,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	15,15,15,15,15,15,15,15,15,15,
+	15,15,15,15,15,15,15,15,15,15,
+	15,15,15,15,15,15,15,15,15,15,
+	20,20,20,20,20,20,20,30,30,30,30};
+
 
 void setGyroStable()
 {
@@ -318,7 +335,7 @@ task claw_preset()
 					setMotorTarget(armMotor, iArmLevel[0], 100);
 					drive_override = false;
 				}
-				claw_working = false
+				claw_working = false;
 
 			}
 			else
@@ -450,6 +467,8 @@ task main()
 	setGyroStable();
 	resetGyroStable();
 
+	timestamp = getTimerValue(T1);
+
 	desired_heading = 0;
 
 	//startTask( flashLED );
@@ -462,21 +481,31 @@ task main()
 	{
 		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
-		iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 
+		if(slow_drive)
+		{
+			iChC_filtered = iSlowTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
+		}
+		else
+		{
+			iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
+		}
 		eightDirectionalLimitedJoystick();
 
-		if (getJoystickValue(BtnLDown))
+		if (getJoystickValue(BtnLDown) && getTimerValue(T1) > (500 + timestamp))
 		{
+			timestamp = getTimerValue(T1);
+
 			if(slow_drive)
 			{
-				slow_drive = false
+				slow_drive = false;
 			}
 			else
 			{
-				slow_drive = true
+				slow_drive = true;
 			}
 		}
+
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
 			if ( getTimerValue(T2) > INERTIA_DIE_DOWN )
