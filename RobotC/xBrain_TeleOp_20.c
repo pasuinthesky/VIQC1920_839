@@ -31,11 +31,11 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {40, 465, 550};
+int iArmLevel[LIFT_LEVELS] = {40, 455, 550};
 int in_between_level = 400;
 
 bool drive_override = false;
-bool slow_drive = false
+bool slow_drive = false;
 
 int iChC_filtered;
 int iChA_filtered;
