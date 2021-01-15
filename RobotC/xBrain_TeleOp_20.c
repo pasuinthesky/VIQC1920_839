@@ -36,6 +36,7 @@ bool claw_to_release = false;
 int iArmLevel[LIFT_LEVELS] = {50, 455, 550};
 int in_between_level = 355;
 bool drive_override = false;
+bool slow_drive = false;
 
 int iChC_filtered;
 int iChA_filtered;
@@ -180,9 +181,17 @@ void eightDirectionalLimitedJoystick()
 		if (strafeSpeed > 100)
 			strafeSpeed = 100;
 
-		// Default to diagnal directions
-		iChA_filtered = sgn(y) * iStrafeMapping[strafeSpeed];
-		iChB_filtered = sgn(x) * iStrafeMapping[strafeSpeed];
+		// Default to diagnal directions and slow mode
+		if (slow_drive)
+		{
+				iChA_filtered = sgn(y) * iSlowStrafeMapping[strafeSpeed];
+				iChB_filtered = sgn(x) * iSlowStrafeMapping[strafeSpeed];
+		}
+		else
+		{
+				iChA_filtered = sgn(y) * iStrafeMapping[strafeSpeed];
+				iChB_filtered = sgn(x) * iStrafeMapping[strafeSpeed];
+		}
 
 		if( abs_sin <= sinDegrees(22.5))
 		{
