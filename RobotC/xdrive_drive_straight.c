@@ -552,7 +552,7 @@ void left_side_3_1_3()
 	wait1Msec(300);
 	waitUntilMotorStop(armMotor);
 
-	turnTo(125, 10);
+	turnTo(130, 10);
 
 	strafePID(3, 5, 40, 0.18, 0, 0, 1);
 
@@ -560,19 +560,19 @@ void left_side_3_1_3()
 
 	strafePID(3, -61, 90, 0.18, 0, 0, 1);
 
-	waitUntil(getTouchLEDValue(LED))
+	//waitUntil(getTouchLEDValue(LED));
 
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
 
 	desired_heading = 135;
-	strafePID(4, -34, 90, 0.18, 0, 0, 1);
+	strafePID(4, -30, 90, 0.18, 0, 0, 1);
 	turnTo(90, 3);
 
 	//strafePID(3, 5, 60, 0.18, 0, 0, 1);
 	setMotorTarget(clawMotor, CLAW_PUSH, 100);
 
-	waitUntil(getTouchLEDValue(LED));
+	//waitUntil(getTouchLEDValue(LED));
 
 	while (getColorGrayscale(colorLeft)>150)
 	{
@@ -581,21 +581,21 @@ void left_side_3_1_3()
 	iChB_filtered = 0;
 	strafePID(1, 4, 40, 0.18, 0, 0, 1);
 
-	strafePID(3, 35, 90, 0.18, 0, 0, 1);
+	strafePID(3, 30, 90, 0.18, 0, 0, 1);
 
 	strafePID(3, -40, 60, 0.18, 0, 0, 1);
 
-	strafePID(1, 90, 60, 0.18, 0, 0, 1);
+	strafePID(1, 100, 60, 0.18, 0, 0, 1);
 
 	waitUntil(getTouchLEDValue(LED));
 
-	//strafePID(1, 5, 40, 0.18, 0, 0, 1);
+	strafePID(1, -4, 40, 0.18, 0, 0, 1);
+	strafePID(3, 34, 90, 0.18, 0, 0, 1);
 
-	strafePID(3, 30, 90, 0.18, 0, 0, 1);
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 	//strafePID(3, -3, 40, 0.18, 0, 0, 1);
 
-	strafePID(1, -20, 40, 0.18, 0, 0, 1);
+	strafePID(1, -23, 40, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, 8, 40, 0.18, 0, 0, 1);
@@ -611,13 +611,6 @@ void left_side_3_1_3()
 	strafePID(3, 4, 40, 0.18, 0, 0, 1);
 
 	land_riser();
-
-	strafePID(3, -60, 90, 0.18, 0, 0, 1);
-	turnTo(0, 10);
-	//waitUntil(getTouchLEDValue(LED));
-	strafePID(3, -10, 40, 0.18, 0, 0, 1);
-
-	strafePID(3, -120, 90, 0.18, 0, 0, 1);
 }
 
 task main()
