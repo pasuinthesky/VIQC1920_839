@@ -261,6 +261,24 @@ task drive()
 	}
 }
 
+void intermission()
+{
+	setMotorBrakeMode(FL, motorCoast);
+	setMotorBrakeMode(FR, motorCoast);
+	setMotorBrakeMode(BR, motorCoast);
+	setMotorBrakeMode(BL, motorCoast);
+	desired_heading = 0
+	stopTask(drive);
+	setMotorSpeed(FL, 0);
+	setMotorSpeed(FR, 0);
+	setMotorSpeed(BL, 0);
+	setMotorSpeed(BR, 0);
+	setMotorSpeed(clawMotor, 0);
+	setMotorSpeed(armMotor, 0);
+	waitUntil(getTouchLEDValue(LED));
+	startTask(drive)
+}
+
 task claw_move()
 {
 	int claw_position, prev_claw = -1;
@@ -541,10 +559,10 @@ void right_side_3_3_3_stable()
 
 void left_side_3_1_3()
 {
-	strafePID(1, -58, 90, 0.18, 0, 0, 1);
+	strafePID(1, -55, 90, 0.22, 0, 0, 1);
 	turnTo(90, 10);
-	strafePID(1, 31, 90, 0.18, 0, 0, 1);
-	strafePID(3, 9, 90, 0.14, 0, 0, 1);
+	strafePID(1, 30, 90, 0.18, 0, 0, 1);
+	strafePID(3, 12, 90, 0.14, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
@@ -566,7 +584,7 @@ void left_side_3_1_3()
 	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
 
 	desired_heading = 135;
-	strafePID(4, -30, 90, 0.18, 0, 0, 1);
+	strafePID(4, -24, 90, 0.18, 0, 0, 1);
 	turnTo(90, 3);
 
 	//strafePID(3, 5, 60, 0.18, 0, 0, 1);
@@ -587,9 +605,9 @@ void left_side_3_1_3()
 
 	strafePID(1, 100, 60, 0.18, 0, 0, 1);
 
-	waitUntil(getTouchLEDValue(LED));
+	wait1Msec(300);
 
-	strafePID(1, -4, 40, 0.18, 0, 0, 1);
+	strafePID(1, -6, 40, 0.18, 0, 0, 1);
 	strafePID(3, 34, 90, 0.18, 0, 0, 1);
 
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
@@ -638,7 +656,15 @@ task main()
 
 //	right_side_3_3_3_stable();
 
-	left_side_3_1_3();
+//	left_side_3_1_3();
+
+	setMotorSpeed(armMotor, 30)
+	wait1Msec(300);
+	setMotorSpeed(armMotor, 0)
+	intermission();
+	setMotorSpeed(clawMotor, 50)
+	wait1Msec(1000);
+	setMotorSpeed(clawMotor, 0)
 
 	displayTextLine(3, "%f", getTimerValue(T2));
 	waitUntil(getTouchLEDValue(LED));
