@@ -18,6 +18,7 @@ float iChA_filtered = 0.0;
 float desired_heading = 0.0;
 
 bool drive_override = false;
+bool task_running = false;
 
 #define GYRO_SAMPLING_SECONDS 10000
 #define ACCEPTABLE_DRIFT_RANGE 0.08
@@ -256,27 +257,9 @@ task drive()
 			setMotorSpeed( BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
 			setMotorSpeed( FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
 			setMotorSpeed( BR, 0 - iChA_filtered - iChB_filtered - iChC_filtered );
-			wait1Msec(dt);
 		}
+		wait1Msec(dt);
 	}
-}
-
-void intermission()
-{
-	setMotorBrakeMode(FL, motorCoast);
-	setMotorBrakeMode(FR, motorCoast);
-	setMotorBrakeMode(BR, motorCoast);
-	setMotorBrakeMode(BL, motorCoast);
-	desired_heading = 0
-	stopTask(drive);
-	setMotorSpeed(FL, 0);
-	setMotorSpeed(FR, 0);
-	setMotorSpeed(BL, 0);
-	setMotorSpeed(BR, 0);
-	setMotorSpeed(clawMotor, 0);
-	setMotorSpeed(armMotor, 0);
-	waitUntil(getTouchLEDValue(LED));
-	startTask(drive)
 }
 
 task claw_move()
@@ -341,6 +324,38 @@ void initialize()
 	setMotorBrakeMode(FR, motorHold);
 	setMotorBrakeMode(BR, motorHold);
 	setMotorBrakeMode(BL, motorHold);
+}
+
+
+void intermission()
+{
+
+	stopTask(drive);
+	stopTask(claw_move);
+
+	setMotorSpeed(FL, 0);
+	setMotorSpeed(FR, 0);
+	setMotorSpeed(BL, 0);
+	setMotorSpeed(BR, 0);
+	setMotorSpeed(clawMotor, 0);
+
+	setMotorBrakeMode(FL, motorCoast);
+	setMotorBrakeMode(FR, motorCoast);
+	setMotorBrakeMode(BR, motorCoast);
+	setMotorBrakeMode(BL, motorCoast);
+	setMotorBrakeMode(clawMotor, motorCoast);
+
+	setTouchLEDColor(LED, colorBlue);
+	waitUntil(getTouchLEDValue(LED));
+	setTouchLEDColor(LED, colorGreen);
+
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	setMotorTarget(armMotor, iArmLevel[0], 100);
+
+	desired_heading = 0;
+	startTask(drive);
+	startTask(claw_move);
+
 }
 
 void land_riser()
@@ -552,9 +567,6 @@ void right_side_3_3_3_stable()
 	strafePID(3, -60, 90, 0.18, 0, 0, 1);
 
 	strafePID(1, 80, 90, 0.18, 0, 0, 1);
-
-
-
 }
 
 void left_side_3_1_3()
@@ -629,6 +641,9 @@ void left_side_3_1_3()
 	strafePID(3, 4, 40, 0.18, 0, 0, 1);
 
 	land_riser();
+
+	strafePID(3, -15, 90, 0.18, 0, 0, 1);
+
 }
 
 task main()
@@ -654,17 +669,11 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-//	right_side_3_3_3_stable();
+	right_side_3_3_3_stable();
 
-//	left_side_3_1_3();
-
-	setMotorSpeed(armMotor, 30)
-	wait1Msec(300);
-	setMotorSpeed(armMotor, 0)
 	intermission();
-	setMotorSpeed(clawMotor, 50)
-	wait1Msec(1000);
-	setMotorSpeed(clawMotor, 0)
+
+	left_side_3_1_3();
 
 	displayTextLine(3, "%f", getTimerValue(T2));
 	waitUntil(getTouchLEDValue(LED));
