@@ -368,7 +368,7 @@ void land_riser()
 	waitUntilMotorStop(clawMotor);
 }
 
-void right_side_3_1_3_1_1()
+void right_side_3_1_3_1_1_1()
 {
 	strafePID(1, 55, 90, 0.18, 0, 0, 1);
 	turnTo(-90, 10);
@@ -450,9 +450,38 @@ void right_side_3_1_3_1_1()
 
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 
-	turnTo(-10, 3);
+	turnTo(90, 3);
 
-	strafePID(3, -95, 90, 0.5, 0, 0, 1);
+	strafePID(1, -95, 60, 0.18, 0, 0, 1);
+
+	while (getColorGrayscale(colorRight)>100)
+	{
+		iChB_filtered = -20;
+	}
+	iChB_filtered = 0;
+	wait1Msec(100);
+
+	while (getColorGrayscale(colorLeft)>150)
+	{
+		iChA_filtered = 20;
+	}
+	iChA_filtered = 0;
+	wait1Msec(100);
+
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(1, 10, 40, 0.18, 0, 0, 1);
+	strafePID(3, 20, 40, 0.15, 0, 0, 1);
+
+	claw_grab = true;
+	waitUntil( !claw_grab );
+	setMotorTarget(armMotor, ARM_CARRY, 100);
+	turnTo(135, 3);
+	wait1Msec(100);
+
+	setMotorTarget(clawMotor, CLAW_OPEN, 100);
+	strafePID(3, 10, 60, 0.18, 0, 0, 1);
+	strafePID(3, -15, 90, 0.5, 0, 0, 1);
 }
 
 void right_side_3_3_3_stable()
@@ -684,7 +713,7 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-	right_side_3_1_3_1_1();
+	right_side_3_1_3_1_1_1();
 
 	displayTextLine(3, "%f", getTimerValue(T2));
 
