@@ -413,13 +413,13 @@ void right_side_3_1_3_1_1()
 
 	strafePID(3, 42, 90, 0.18, 0, 0, 1);
 
-	strafePID(3, -35, 60, 0.18, 0, 0, 1);
+	strafePID(3, -32, 60, 0.18, 0, 0, 1);
 
 	strafePID(1, -95, 60, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, -32, 90, 0.18, 0, 0, 1);
-	strafePID(3, 25, 90, 0.18, 0, 0, 1);
+	strafePID(3, -35, 90, 0.18, 0, 0, 1);
+	strafePID(3, 28, 90, 0.18, 0, 0, 1);
 
 	while (getColorGrayscale(colorLeft)>150)
 	{
@@ -432,13 +432,13 @@ void right_side_3_1_3_1_1()
 	iChB_filtered = 0;
 	wait1Msec(200);
 
-	strafePID(3, 26, 90, 0.18, 0, 0, 1);
+	strafePID(3, 27, 90, 0.18, 0, 0, 1);
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
 
-	strafePID(1, 21.5, 40, 0.18, 0, 0, 1);
+	strafePID(1, 22, 40, 0.19, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 10, 40, 0.15, 0, 0, 1);
+	strafePID(3, 11, 30, 0.14, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
@@ -709,11 +709,11 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-	//right_side_3_1_3_1_1();
+	right_side_3_1_3_1_1();
 
-	//displayTextLine(3, "%f", getTimerValue(T2));
+	displayTextLine(3, "%f", getTimerValue(T2));
 
-	//intermission_reset_gyro();
+	intermission_reset_gyro();
 
 	left_side_3_1_3();
 
