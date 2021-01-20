@@ -438,7 +438,7 @@ void right_side_3_1_3_1_1()
 	strafePID(1, 21.5, 40, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 10, 40, 0.15, 0, 0, 1);
+	strafePID(3, 11, 40, 0.15, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
@@ -709,11 +709,11 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-	//right_side_3_1_3_1_1();
+	right_side_3_1_3_1_1();
 
 	//displayTextLine(3, "%f", getTimerValue(T2));
 
-	//intermission_reset_gyro();
+	intermission_reset_gyro();
 
 	left_side_3_1_3();
 
