@@ -419,7 +419,7 @@ void right_side_3_1_3_1_1()
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, -35, 90, 0.18, 0, 0, 1);
-	strafePID(3, 28, 90, 0.18, 0, 0, 1);
+	strafePID(3, 23, 90, 0.18, 0, 0, 1);
 
 	while (getColorGrayscale(colorLeft)>150)
 	{
@@ -672,7 +672,8 @@ void bonus()
 	strafePID(3, -110, 90, 0.18, 0, 0, 1);
 	turnTo(-90,3);
 	wait1Msec(300);
-	strafePID(3, 48, 90, 0.135, 0, 0, 1);
+	strafePID(3, 40, 90, 0.18, 0, 0, 1);
+	strafePID(3, 5, 30, 0.15, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
 	claw_grab = true;
