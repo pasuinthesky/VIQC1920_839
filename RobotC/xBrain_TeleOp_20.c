@@ -295,12 +295,6 @@ task claw_preset()
 			claw_working = true;
 		}
 
-		if ( getJoystickValue(BtnFUp)==1 && !claw_working && !claw_to_release)
-		{
-			claw_working = true;
-			claw_to_release = true;
-		}
-
 		if (claw_working)
 		{
 			if (claw_to_release)
@@ -492,7 +486,7 @@ task main()
 		}
 		eightDirectionalLimitedJoystick();
 
-		if (getJoystickValue(BtnLDown) && getTimerValue(T1) > (500 + timestamp))
+		if (getJoystickValue(BtnFUp) && getTimerValue(T1) > (500 + timestamp))
 		{
 			timestamp = getTimerValue(T1);
 

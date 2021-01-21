@@ -480,25 +480,26 @@ void right_side_3_3_3_stable()
 
 	land_riser();
 
-	strafePID(3, -75, 90, 0.18, 0, 0, 1);
+	strafePID(3, -65, 90, 0.18, 0, 0, 1);
 
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
 
-	turnTo(-90, 3);
+	desired_heading = -90;
+	strafePID(1, -40, 40, 0.18, 0, 0, 1);
 
-	//strafePID(3, 5, 60, 0.18, 0, 0, 1);
+	waitUntil(getTouchLEDValue(LED));
+
 	setMotorTarget(clawMotor, CLAW_PUSH, 100);
 
-	while (getColorGrayscale(colorRight)>100)
+	while (getColorGrayscale(colorLeft)>150)
 	{
 		iChB_filtered = -20;
-		wait1Msec(dt);
 	}
 	iChB_filtered = 0;
-	strafePID(1, -15, 90, 0.18, 0, 0, 1);
+	wait1Msec(100);
 
-	strafePID(3, 45, 90, 0.18, 0, 0, 1);
+	strafePID(3, 38, 90, 0.18, 0, 0, 1);
 	waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, -35, 60, 0.18, 0, 0, 1);
