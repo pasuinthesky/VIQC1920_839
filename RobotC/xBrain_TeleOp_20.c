@@ -31,8 +31,8 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {40, 455, 550};
-int in_between_level = 400;
+int iArmLevel[LIFT_LEVELS] = {60, 470, 560};
+int in_between_level = 410;
 
 bool drive_override = false;
 bool slow_drive = false;
