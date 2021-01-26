@@ -488,7 +488,7 @@ void right_side_3_3_3_stable()
 	desired_heading = -90;
 	strafePID(1, -40, 40, 0.18, 0, 0, 1);
 
-	waitUntil(getTouchLEDValue(LED));
+	//waitUntil(getTouchLEDValue(LED));
 
 	setMotorTarget(clawMotor, CLAW_PUSH, 100);
 
@@ -499,23 +499,33 @@ void right_side_3_3_3_stable()
 	iChB_filtered = 0;
 	wait1Msec(100);
 
-	strafePID(3, 38, 90, 0.18, 0, 0, 1);
-	waitUntil(getTouchLEDValue(LED));
+	strafePID(3, 40, 90, 0.18, 0, 0, 1);
+	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, -35, 60, 0.18, 0, 0, 1);
+	strafePID(3, -40, 60, 0.18, 0, 0, 1);
 
 	strafePID(1, -95, 60, 0.18, 0, 0, 1);
-	waitUntil(getTouchLEDValue(LED));
+	//waitUntil(getTouchLEDValue(LED));
 	//strafePID(1, 5, 40, 0.18, 0, 0, 1);
 
-	strafePID(3, 30, 90, 0.18, 0, 0, 1);
+	while (getColorGrayscale(colorLeft)>150)
+	{
+		iChA_filtered = 40;
+	}
+	iChA_filtered = 0;
+
+	iChB_filtered = -90;
+	wait1Msec(150);
+	iChB_filtered = 0;
+	wait1Msec(200);
+
+	strafePID(3, 26, 90, 0.18, 0, 0, 1);
 	setMotorTarget(clawMotor, CLAW_OPEN, 100);
-	//strafePID(3, -3, 40, 0.18, 0, 0, 1);
 
 	strafePID(1, 22, 40, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 8, 40, 0.18, 0, 0, 1);
+	strafePID(3, 10, 30, 0.14, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
