@@ -30,9 +30,9 @@ float fGyroDriftRate;
 #define RATE 1
 
 #define LIFT_LEVELS 3
-int iArmLevel[LIFT_LEVELS] = {140, 1300, 1425};
-#define ARM_LAND 1050
-#define ARM_CARRY 200
+int iArmLevel[LIFT_LEVELS] = {160, 1300, 1500};
+#define ARM_LAND 1100
+#define ARM_CARRY 220
 
 bool claw_grab = false;
 #define CLAW_CLOSE 100
