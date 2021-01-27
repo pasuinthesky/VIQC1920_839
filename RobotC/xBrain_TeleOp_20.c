@@ -28,10 +28,11 @@ float output;
 float delta = 10;
 int artificial_ChC_Reading = 0;
 float desired_heading;
+
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {60, 470, 560};
+int iArmLevel[LIFT_LEVELS] = {60, 480, 560};
 int in_between_level = 410;
 
 bool drive_override = false;
@@ -46,6 +47,8 @@ int iChB_filtered;
 float fGyroDriftRate;
 
 float timestamp;
+
+bool orientation_maintenance;
 
 /*
 int iDriveMapping[101] = {
@@ -110,7 +113,6 @@ int iSlowTurnMapping[101] = {
 	15,15,15,15,15,15,15,15,15,15,
 	20,20,20,20,20,20,20,30,30,30,30};
 
-
 void setGyroStable()
 {
 	fGyroDriftRate = 100;
@@ -155,6 +157,21 @@ void resetGyroStable()
 {
 	resetGyro(gyro);
 	clearTimer(T4);
+}
+
+float PIDControl (float setpoint, float measured_value, float Kp, float Ki, float Kd, int delta)
+{
+	error = measured_value - setpoint;
+
+	if ( abs(error) < delta )
+		error = 0;
+
+	integral = integral + error * dt;
+	float derivative = ( error - prev_error ) / dt;
+	output = Kp * error + Ki * integral + Kd * derivative;
+	prev_error = error;
+
+	return output;
 }
 
 void eightDirectionalLimitedJoystick()
@@ -275,6 +292,40 @@ wait1Msec(dt);
 }
 */
 
+void stopDrivetrain()
+{
+	setMotorSpeed(BL, 0);
+	setMotorSpeed(BR, 0);
+	setMotorSpeed(FL, 0);
+	setMotorSpeed(FR, 0);
+}
+
+/*
+void manual_45degreeTurn()
+{
+bool turn45 = false;
+
+if ( getJoystickValue(BtnFDown) == 1)
+{
+desired_heading = desired_heading - 45;
+turn45 = true;
+}
+else if ( getJoystickValue(BtnEDown) )
+{
+desired_heading = desired_heading + 45;
+turn45 = true;
+}
+if(turn45)
+{
+drive_override = true;
+stopDrivetrain();
+waitUntil( abs( getGyroStable() - desired_heading ) < delta);
+drive_override = false;
+turn45 = false;
+}
+
+}*/
+
 task claw_preset()
 {
 	int claw_position, prev_claw = -1000;
@@ -302,10 +353,7 @@ task claw_preset()
 				if ( abs(getMotorEncoder(armMotor)) >= iArmLevel[1] - ARM_DELTA )
 				{
 					drive_override = true;
-					setMotorSpeed(BL, 0 );
-					setMotorSpeed(BR, 0 );
-					setMotorSpeed(FL, 0 );
-					setMotorSpeed(FR, 0 );
+					stopDrivetrain();
 					setMotorTarget(armMotor, in_between_level, 100);
 					wait1Msec(150);
 				}
@@ -322,10 +370,7 @@ task claw_preset()
 					setMotorSpeed(FL, -50 );
 					setMotorSpeed(FR, 50 );
 					wait1Msec(375);
-					setMotorSpeed(BL, 0 );
-					setMotorSpeed(BR, 0 );
-					setMotorSpeed(FL, 0 );
-					setMotorSpeed(FR, 0 );
+					stopDrivetrain();
 					setMotorTarget(armMotor, iArmLevel[0], 100);
 					drive_override = false;
 				}
@@ -354,36 +399,22 @@ task claw_preset()
 	}
 }
 
-float PIDControl (float setpoint, float measured_value, float Kp, float Ki, float Kd, int delta)
-{
-	error = measured_value - setpoint;
-
-	if ( abs(error) < delta )
-		error = 0;
-
-	integral = integral + error * dt;
-	float derivative = ( error - prev_error ) / dt;
-	output = Kp * error + Ki * integral + Kd * derivative;
-	prev_error = error;
-
-	return output;
-}
-
 void lift_preset()
 {
 	if (getJoystickValue(BtnRUp)== 1)
 	{
-		setMotorSpeed(BL, 0 );
-		setMotorSpeed(BR, 0 );
-		setMotorSpeed(FL, 0 );
-		setMotorSpeed(FR, 0 );
+		drive_override = true;
+		stopDrivetrain();
 
 		for (int i=0;i<LIFT_LEVELS-1;i=i+1)
 		{
 			if ( getMotorEncoder(armMotor) < ( iArmLevel[i+1] - ARM_DELTA ) )
 			{
 				setMotorTarget(armMotor, iArmLevel[i+1], 100);
-				wait1Msec( ( iArmLevel[i+1] - iArmLevel[i] ) * MS_PER_ENCODER_UNIT );
+				//wait1Msec( ( iArmLevel[i+1] - iArmLevel[i] ) * MS_PER_ENCODER_UNIT );
+				wait1Msec(100);
+				waitUntilMotorStop(armMotor);
+				drive_override = false;
 				break;
 			}
 		}
@@ -395,7 +426,7 @@ void lift_preset()
 			if ( getMotorEncoder(armMotor) > ( iArmLevel[i-1] + ARM_DELTA ) )
 			{
 				setMotorTarget(armMotor, iArmLevel[i-1],100);
-				wait1Msec( ( iArmLevel[i] - iArmLevel[i-1] ) * MS_PER_ENCODER_UNIT + 100 );
+				//				wait1Msec( ( iArmLevel[i] - iArmLevel[i-1] ) * MS_PER_ENCODER_UNIT + 100 );
 				break;
 			}
 		}
@@ -439,7 +470,7 @@ task main()
 	setMotorBrakeMode(FR, motorHold);
 	setMotorBrakeMode(BR, motorHold);
 	setMotorBrakeMode(BL, motorHold);
-//setMotorBrakeMode(clawMotor, motorCoast);
+	//setMotorBrakeMode(clawMotor, motorCoast);
 	setMotorBrakeMode(clawMotor, motorHold);
 	setMotorBrakeMode( armMotor, motorHold );
 
@@ -473,6 +504,10 @@ task main()
 
 	while(true)
 	{
+		if(getJoystickValue(BtnLDown) == 1)
+		{
+			drive_override = false;
+		}
 		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
 
@@ -499,6 +534,9 @@ task main()
 				slow_drive = true;
 			}
 		}
+
+
+
 
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
@@ -533,6 +571,9 @@ task main()
 			setMotorSpeed(FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
 			setMotorSpeed(FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
 		}
+
+
+		//		manual_45degreeTurn();
 
 		wait1Msec(dt);
 	}
