@@ -505,7 +505,7 @@ void right_side_3_3_3_stable()
 	strafePID(4, -5, 90, 0.18, 0, 0, 1);
 	waitUntilMotorStop(armMotor);
 
-	turnTo(-40, 10);
+	turnTo(-37, 10);
 	wait1Msec(200);
 
 	land_riser();
