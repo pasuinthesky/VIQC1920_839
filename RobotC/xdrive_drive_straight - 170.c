@@ -502,11 +502,11 @@ void right_side_3_3_3_stable()
 	waitUntil( !claw_grab );
 
 	setMotorTarget(armMotor, iArmLevel[1], 100);
-	strafePID(4, -5, 90, 0.18, 0, 0, 1);
+	strafePID(3, -15, 90, 0.18, 0, 0, 1);
 	waitUntilMotorStop(armMotor);
 
-	turnTo(-37, 10);
-	wait1Msec(200);
+	turnTo(-60, 10);
+	//wait1Msec(200);
 
 	land_riser();
 
@@ -533,7 +533,7 @@ void left_side_3_1_3()
 
 	land_riser();
 
-	strafePID(3, -80, 90, 0.18, 0, 0, 1);
+	strafePID(3, -81, 90, 0.18, 0, 0, 2);
 
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 
