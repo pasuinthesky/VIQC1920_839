@@ -552,10 +552,11 @@ void left_side_3_1_3()
 	}
 	iChB_filtered = 0;
 	strafePID(1, 4, 40, 0.18, 0, 0, 1);
+	wait1Msec(300);
 
-	strafePID(3, 40, 90, 0.18, 0, 0, 1);
+	strafePID(3, 44, 90, 0.18, 0, 0, 1);
 
-	strafePID(3, -35, 60, 0.18, 0, 0, 1);
+	strafePID(3, -38, 60, 0.18, 0, 0, 1);
 
 	strafePID(1, 100, 60, 0.18, 0, 0, 1);
 
