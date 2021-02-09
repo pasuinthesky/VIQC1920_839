@@ -431,7 +431,7 @@ void right_side_3_3_3_stable()
 
 	strafePID(3, -5, 40, 0.18, 0, 0, 1);
 
-	strafePID(1, 27, 40, 0.18, 0, 0, 1);
+	strafePID(1, 26, 40, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, 15, 30, 0.14, 0, 0, 1);
@@ -554,9 +554,9 @@ void left_side_3_1_3()
 	strafePID(1, 4, 40, 0.18, 0, 0, 1);
 	wait1Msec(300);
 
-	strafePID(3, 44, 90, 0.18, 0, 0, 1);
+	strafePID(3, 46, 90, 0.18, 0, 0, 1);
 
-	strafePID(3, -38, 60, 0.18, 0, 0, 1);
+	strafePID(3, -40, 60, 0.18, 0, 0, 1);
 
 	strafePID(1, 100, 60, 0.18, 0, 0, 1);
 
@@ -571,7 +571,7 @@ void left_side_3_1_3()
 	strafePID(1, -23, 40, 0.18, 0, 0, 1);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 10, 30, 0.15, 0, 0, 1);
+	strafePID(3, 10, 30, 0.14, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
