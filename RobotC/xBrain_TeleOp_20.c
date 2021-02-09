@@ -32,7 +32,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {60, 480, 560};
+int iArmLevel[LIFT_LEVELS] = {60, 490, 590};
 int in_between_level = 410;
 
 bool drive_override = false;
@@ -74,7 +74,7 @@ int iStrafeMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,40,40,60,60,60,60,60,
-	60,60,60,60,60,80,80,80,80,80,80}; // Max not to 100 to allow room for PID.
+	60,60,60,80,80,95,95,95,95,95,95}; // Max not to 100 to allow room for PID.
 
 int iSlowStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -402,9 +402,9 @@ task claw_preset()
 void lift_preset()
 {
 	if (getJoystickValue(BtnRUp)== 1)
-	{
+	{/*
 		drive_override = true;
-		stopDrivetrain();
+		stopDrivetrain();*/
 
 		for (int i=0;i<LIFT_LEVELS-1;i=i+1)
 		{
@@ -412,9 +412,9 @@ void lift_preset()
 			{
 				setMotorTarget(armMotor, iArmLevel[i+1], 100);
 				//wait1Msec( ( iArmLevel[i+1] - iArmLevel[i] ) * MS_PER_ENCODER_UNIT );
-				wait1Msec(100);
+/*				wait1Msec(100);
 				waitUntilMotorStop(armMotor);
-				drive_override = false;
+				drive_override = false;*/
 				break;
 			}
 		}
@@ -534,9 +534,6 @@ task main()
 				slow_drive = true;
 			}
 		}
-
-
-
 
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
