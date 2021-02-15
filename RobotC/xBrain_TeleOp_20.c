@@ -333,19 +333,6 @@ task claw_preset()
 
 	while (true)
 	{
-		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
-		{
-			if (claw_to_release)
-			{
-				claw_to_release = false;
-			}
-			else
-			{
-				claw_to_release = true;
-			}
-			claw_working = true;
-		}
-
 		if (claw_working)
 		{
 			if (claw_to_release)
@@ -379,6 +366,7 @@ task claw_preset()
 			}
 			else
 			{
+
 				setMotorBrakeMode(clawMotor, motorHold);
 				claw_position = getMotorEncoder(clawMotor);
 				if (prev_claw == claw_position)
@@ -475,9 +463,8 @@ void second_grab()
 	setMotorSpeed(FL, 0 );
 	setMotorSpeed(FR, 0 );
 
-	setMotorSpeed(clawMotor, -100);
-	waitUntilMotorStop(clawMotor);
-	setMotorSpeed(clawMotor, 0);
+	claw_working = true;
+	claw_to_release = false;
 
 	drive_override = false;
 }
@@ -578,9 +565,22 @@ task main()
 
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
+		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
+		{
+			if (claw_to_release)
+			{
+				claw_to_release = false;
+			}
+			else
+			{
+				claw_to_release = true;
+			}
+			claw_working = true;
+		}
+
 		lift_preset();
 
-		if(getJoystickValue(BtnLDown) == 1)
+		if(getJoystickValue(BtnLDown) == 1 && claw_to_release && !claw_working)
 		{
 			second_grab();
 		}
