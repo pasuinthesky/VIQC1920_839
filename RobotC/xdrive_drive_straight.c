@@ -39,10 +39,10 @@ bool claw_grab = false;
 #define CLAW_OPEN 735
 #define CLAW_PUSH 540
 
-float cmToEncoderUnit(float distance)
-{
-	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
-}
+	float cmToEncoderUnit(float distance)
+	{
+		return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
+	}
 
 float tempDelta;
 

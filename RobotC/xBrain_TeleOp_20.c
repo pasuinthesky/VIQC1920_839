@@ -461,7 +461,26 @@ task flashLED ()
 	}
 }
 
+void second_grab()
+{
+	drive_override = true;
 
+	setMotorSpeed(BL, 35 );
+	setMotorSpeed(BR, -15 );
+	setMotorSpeed(FL, 35 );
+	setMotorSpeed(FR, -15 );
+	wait1Msec(300);
+	setMotorSpeed(BL, 0 );
+	setMotorSpeed(BR, 0 );
+	setMotorSpeed(FL, 0 );
+	setMotorSpeed(FR, 0 );
+
+	setMotorSpeed(clawMotor, -100);
+	waitUntilMotorStop(clawMotor);
+	setMotorSpeed(clawMotor, 0);
+
+	drive_override = false;
+}
 
 
 task main()
@@ -560,6 +579,11 @@ task main()
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
 		lift_preset();
+
+		if(getJoystickValue(BtnLDown) == 1)
+		{
+			second_grab();
+		}
 
 		if (! drive_override)
 		{
