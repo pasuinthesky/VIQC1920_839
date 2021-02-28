@@ -442,10 +442,11 @@ void right_side_3_1_3()
 
 void right_side_3_3_3_stable()
 {
-	strafePID(1, 55, 90, 0.18, 0, 0, 1);
+	strafePID(1, 57, 90, 0.18, 0, 0, 1);
+	strafePID(1, -5, 90, 0.18, 0, 0, 1);
 	turnTo(-90, 10);
-	strafePID(1, -32, 90, 0.18, 0, 0, 1);
-	strafePID(3, 8, 90, 0.18, 0, 0, 1);
+	strafePID(1, -31, 90, 0.18, 0, 0, 1);
+	strafePID(3, 13, 90, 0.18, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 

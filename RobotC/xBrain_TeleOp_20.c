@@ -32,7 +32,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {60, 490, 590};
+int iArmLevel[LIFT_LEVELS] = {75, 490, 590};
 int in_between_level = 410;
 
 bool drive_override = false;
@@ -366,7 +366,6 @@ task claw_preset()
 			}
 			else
 			{
-
 				setMotorBrakeMode(clawMotor, motorHold);
 				claw_position = getMotorEncoder(clawMotor);
 				if (prev_claw == claw_position)
@@ -400,7 +399,7 @@ void lift_preset()
 			{
 				setMotorTarget(armMotor, iArmLevel[i+1], 100);
 				//wait1Msec( ( iArmLevel[i+1] - iArmLevel[i] ) * MS_PER_ENCODER_UNIT );
-/*				wait1Msec(100);
+				/*				wait1Msec(100);
 				waitUntilMotorStop(armMotor);
 				drive_override = false;*/
 				break;
@@ -448,27 +447,6 @@ task flashLED ()
 		setTouchLEDColor(LED, colorViolet);
 	}
 }
-
-void second_grab()
-{
-	drive_override = true;
-
-	setMotorSpeed(BL, 35 );
-	setMotorSpeed(BR, -15 );
-	setMotorSpeed(FL, 35 );
-	setMotorSpeed(FR, -15 );
-	wait1Msec(300);
-	setMotorSpeed(BL, 0 );
-	setMotorSpeed(BR, 0 );
-	setMotorSpeed(FL, 0 );
-	setMotorSpeed(FR, 0 );
-
-	claw_working = true;
-	claw_to_release = false;
-
-	drive_override = false;
-}
-
 
 task main()
 {
@@ -580,9 +558,29 @@ task main()
 
 		lift_preset();
 
-		if(getJoystickValue(BtnLDown) == 1 && claw_to_release && !claw_working)
+		if(getJoystickValue(BtnLDown) == 1 && !claw_working)
 		{
-			second_grab();
+			if (claw_to_release)
+			{
+				drive_override = true;
+				setMotorSpeed(BL, 35 );
+				setMotorSpeed(BR, -15 );
+				setMotorSpeed(FL, 35 );
+				setMotorSpeed(FR, -15 );
+				wait1Msec(100);
+				claw_to_release = false;
+				wait1Msec(200);
+				setMotorSpeed(BL, 0 );
+				setMotorSpeed(BR, 0 );
+				setMotorSpeed(FL, 0 );
+				setMotorSpeed(FR, 0 );
+				drive_override = false;
+			}
+			else
+			{
+				claw_to_release = true;
+			}
+			claw_working = true;
 		}
 
 		if (! drive_override)
