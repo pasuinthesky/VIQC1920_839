@@ -370,11 +370,11 @@ void land_riser()
 
 void right_side_3_3_3_stable()
 {
-	strafePID(1, 57, 90, 0.18, 0, 0, 1);
+	strafePID(1, 59, 90, 0.18, 0, 0, 1);
 	strafePID(1, -5, 90, 0.18, 0, 0, 1);
 	turnTo(-90, 10);
-	strafePID(1, -31, 90, 0.18, 0, 0, 1);
-	strafePID(3, 13, 90, 0.18, 0, 0, 1);
+	strafePID(1, -32, 90, 0.18, 0, 0, 1);
+	strafePID(3, 8, 90, 0.18, 0, 0, 1);
 	claw_grab = true;
 	waitUntil( !claw_grab );
 
@@ -457,7 +457,7 @@ void right_side_3_3_3_stable()
 	turnTo(-118, 3);
 	waitUntilMotorStop(armMotor);
 
-	strafePID(3, 17.5, 40, 0.15, 0, 0, 2);
+	strafePID(3, 15, 40, 0.15, 0, 0, 2);
 
 	claw_grab = true;
 	//setMotorTarget(armMotor, ARM_CARRY, 100);
