@@ -28,13 +28,15 @@ float output;
 float delta = 10;
 int artificial_ChC_Reading = 0;
 float desired_heading;
+
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {10, 440, 540};
-int in_between_level = 355;
+int iArmLevel[LIFT_LEVELS] = {75, 490, 590};
+int in_between_level = 410;
+
 bool drive_override = false;
-bool slow_drive = false
+bool slow_drive = false;
 
 int iChC_filtered;
 int iChA_filtered;
@@ -43,6 +45,11 @@ int iChB_filtered;
 #define GYRO_SAMPLING_SECONDS 10000
 #define ACCEPTABLE_DRIFT_RANGE 0.08
 float fGyroDriftRate;
+
+float timestamp;
+
+bool orientation_maintenance;
+
 /*
 int iDriveMapping[101] = {
 0,0,0,0,0,0,0,0,0,0,
@@ -67,7 +74,7 @@ int iStrafeMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,40,40,60,60,60,60,60,
-	60,60,60,60,60,80,80,80,80,80,80}; // Max not to 100 to allow room for PID.
+	60,60,60,80,80,95,95,95,95,95,95}; // Max not to 100 to allow room for PID.
 
 int iSlowStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -92,6 +99,18 @@ int iTurnMapping[101] = {
 	30,30,30,30,30,30,30,30,30,30,
 	30,30,30,30,30,30,30,30,30,30,
 	40,40,40,40,40,40,40,60,60,60,60};
+
+int iSlowTurnMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	5,5,5,5,5,5,5,5,5,5,
+	5,5,5,5,5,5,5,5,5,5,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	15,15,15,15,15,15,15,15,15,15,
+	15,15,15,15,15,15,15,15,15,15,
+	15,15,15,15,15,15,15,15,15,15,
+	20,20,20,20,20,20,20,30,30,30,30};
 
 void setGyroStable()
 {
@@ -137,6 +156,21 @@ void resetGyroStable()
 {
 	resetGyro(gyro);
 	clearTimer(T4);
+}
+
+float PIDControl (float setpoint, float measured_value, float Kp, float Ki, float Kd, int delta)
+{
+	error = measured_value - setpoint;
+
+	if ( abs(error) < delta )
+		error = 0;
+
+	integral = integral + error * dt;
+	float derivative = ( error - prev_error ) / dt;
+	output = Kp * error + Ki * integral + Kd * derivative;
+	prev_error = error;
+
+	return output;
 }
 
 void eightDirectionalLimitedJoystick()
@@ -257,6 +291,40 @@ wait1Msec(dt);
 }
 */
 
+void stopDrivetrain()
+{
+	setMotorSpeed(BL, 0);
+	setMotorSpeed(BR, 0);
+	setMotorSpeed(FL, 0);
+	setMotorSpeed(FR, 0);
+}
+
+/*
+void manual_45degreeTurn()
+{
+bool turn45 = false;
+
+if ( getJoystickValue(BtnFDown) == 1)
+{
+desired_heading = desired_heading - 45;
+turn45 = true;
+}
+else if ( getJoystickValue(BtnEDown) )
+{
+desired_heading = desired_heading + 45;
+turn45 = true;
+}
+if(turn45)
+{
+drive_override = true;
+stopDrivetrain();
+waitUntil( abs( getGyroStable() - desired_heading ) < delta);
+drive_override = false;
+turn45 = false;
+}
+
+}*/
+
 task claw_preset()
 {
 	int claw_position, prev_claw = -1000;
@@ -264,25 +332,6 @@ task claw_preset()
 
 	while (true)
 	{
-		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
-		{
-			if (claw_to_release)
-			{
-				claw_to_release = false;
-			}
-			else
-			{
-				claw_to_release = true;
-			}
-			claw_working = true;
-		}
-
-		if ( getJoystickValue(BtnFUp)==1 && !claw_working && !claw_to_release)
-		{
-			claw_working = true;
-			claw_to_release = true;
-		}
-
 		if (claw_working)
 		{
 			if (claw_to_release)
@@ -290,10 +339,7 @@ task claw_preset()
 				if ( abs(getMotorEncoder(armMotor)) >= iArmLevel[1] - ARM_DELTA )
 				{
 					drive_override = true;
-					setMotorSpeed(BL, 0 );
-					setMotorSpeed(BR, 0 );
-					setMotorSpeed(FL, 0 );
-					setMotorSpeed(FR, 0 );
+					stopDrivetrain();
 					setMotorTarget(armMotor, in_between_level, 100);
 					wait1Msec(150);
 				}
@@ -310,14 +356,11 @@ task claw_preset()
 					setMotorSpeed(FL, -50 );
 					setMotorSpeed(FR, 50 );
 					wait1Msec(375);
-					setMotorSpeed(BL, 0 );
-					setMotorSpeed(BR, 0 );
-					setMotorSpeed(FL, 0 );
-					setMotorSpeed(FR, 0 );
+					stopDrivetrain();
 					setMotorTarget(armMotor, iArmLevel[0], 100);
 					drive_override = false;
 				}
-				claw_working = false
+				claw_working = false;
 
 			}
 			else
@@ -342,36 +385,22 @@ task claw_preset()
 	}
 }
 
-float PIDControl (float setpoint, float measured_value, float Kp, float Ki, float Kd, int delta)
-{
-	error = measured_value - setpoint;
-
-	if ( abs(error) < delta )
-		error = 0;
-
-	integral = integral + error * dt;
-	float derivative = ( error - prev_error ) / dt;
-	output = Kp * error + Ki * integral + Kd * derivative;
-	prev_error = error;
-
-	return output;
-}
-
 void lift_preset()
 {
 	if (getJoystickValue(BtnRUp)== 1)
-	{
-		setMotorSpeed(BL, 0 );
-		setMotorSpeed(BR, 0 );
-		setMotorSpeed(FL, 0 );
-		setMotorSpeed(FR, 0 );
+	{/*
+		drive_override = true;
+		stopDrivetrain();*/
 
 		for (int i=0;i<LIFT_LEVELS-1;i=i+1)
 		{
 			if ( getMotorEncoder(armMotor) < ( iArmLevel[i+1] - ARM_DELTA ) )
 			{
 				setMotorTarget(armMotor, iArmLevel[i+1], 100);
-				wait1Msec( ( iArmLevel[i+1] - iArmLevel[i] ) * MS_PER_ENCODER_UNIT );
+				//wait1Msec( ( iArmLevel[i+1] - iArmLevel[i] ) * MS_PER_ENCODER_UNIT );
+				/*				wait1Msec(100);
+				waitUntilMotorStop(armMotor);
+				drive_override = false;*/
 				break;
 			}
 		}
@@ -383,7 +412,7 @@ void lift_preset()
 			if ( getMotorEncoder(armMotor) > ( iArmLevel[i-1] + ARM_DELTA ) )
 			{
 				setMotorTarget(armMotor, iArmLevel[i-1],100);
-				wait1Msec( ( iArmLevel[i] - iArmLevel[i-1] ) * MS_PER_ENCODER_UNIT + 100 );
+				//				wait1Msec( ( iArmLevel[i] - iArmLevel[i-1] ) * MS_PER_ENCODER_UNIT + 100 );
 				break;
 			}
 		}
@@ -418,16 +447,13 @@ task flashLED ()
 	}
 }
 
-
-
-
 task main()
 {
 	setMotorBrakeMode(FL, motorHold);
 	setMotorBrakeMode(FR, motorHold);
 	setMotorBrakeMode(BR, motorHold);
 	setMotorBrakeMode(BL, motorHold);
-//	setMotorBrakeMode(clawMotor, motorCoast);
+	//setMotorBrakeMode(clawMotor, motorCoast);
 	setMotorBrakeMode(clawMotor, motorHold);
 	setMotorBrakeMode( armMotor, motorHold );
 
@@ -449,6 +475,8 @@ task main()
 	setGyroStable();
 	resetGyroStable();
 
+	timestamp = getTimerValue(T1);
+
 	desired_heading = 0;
 
 	//startTask( flashLED );
@@ -459,23 +487,37 @@ task main()
 
 	while(true)
 	{
+		if(getJoystickValue(BtnLDown) == 1)
+		{
+			drive_override = false;
+		}
 		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
-		iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 
+		if(slow_drive)
+		{
+			iChC_filtered = iSlowTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
+		}
+		else
+		{
+			iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
+		}
 		eightDirectionalLimitedJoystick();
 
-		if (getJoystickValue(BtnLDown))
+		if (getJoystickValue(BtnFUp) && getTimerValue(T1) > (500 + timestamp))
 		{
+			timestamp = getTimerValue(T1);
+
 			if(slow_drive)
 			{
-				slow_drive = false
+				slow_drive = false;
 			}
 			else
 			{
-				slow_drive = true
+				slow_drive = true;
 			}
 		}
+
 		if ( abs(getJoystickValue(ChC)) <= 5 )
 		{
 			if ( getTimerValue(T2) > INERTIA_DIE_DOWN )
@@ -500,7 +542,45 @@ task main()
 
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
+		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
+		{
+			if (claw_to_release)
+			{
+				claw_to_release = false;
+			}
+			else
+			{
+				claw_to_release = true;
+			}
+			claw_working = true;
+		}
+
 		lift_preset();
+
+		if(getJoystickValue(BtnLDown) == 1 && !claw_working)
+		{
+			if (claw_to_release)
+			{
+				drive_override = true;
+				setMotorSpeed(BL, 35 );
+				setMotorSpeed(BR, -15 );
+				setMotorSpeed(FL, 35 );
+				setMotorSpeed(FR, -15 );
+				wait1Msec(100);
+				claw_to_release = false;
+				wait1Msec(200);
+				setMotorSpeed(BL, 0 );
+				setMotorSpeed(BR, 0 );
+				setMotorSpeed(FL, 0 );
+				setMotorSpeed(FR, 0 );
+				drive_override = false;
+			}
+			else
+			{
+				claw_to_release = true;
+			}
+			claw_working = true;
+		}
 
 		if (! drive_override)
 		{
@@ -509,6 +589,9 @@ task main()
 			setMotorSpeed(FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
 			setMotorSpeed(FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
 		}
+
+
+		//		manual_45degreeTurn();
 
 		wait1Msec(dt);
 	}
