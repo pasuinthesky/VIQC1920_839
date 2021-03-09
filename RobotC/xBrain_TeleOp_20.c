@@ -176,7 +176,7 @@ float PIDControl (float setpoint, float measured_value, float Kp, float Ki, floa
 void eightDirectionalLimitedJoystick()
 {
 	int x = -getJoystickValue(ChB);
-	int y = getJoystickValue(ChA);
+	int y = -getJoystickValue(ChA);
 
 	int strafeSpeed = sqrt(x*x + y*y); //this is the hypotenuse
 
