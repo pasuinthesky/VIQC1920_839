@@ -279,10 +279,10 @@ task claw_preset()
 				if ( drive_override  )
 				{
 					desired_heading += 3;
-					setMotorSpeed(BL, 50 );
-					setMotorSpeed(BR, -50 );
-					setMotorSpeed(FL, 50 );
-					setMotorSpeed(FR, -50 );
+					setMotorSpeed(BL, -50 );
+					setMotorSpeed(BR, 50 );
+					setMotorSpeed(FL, -50 );
+					setMotorSpeed(FR, 50 );
 					wait1Msec(375);
 					stopDrivetrain();
 					setMotorTarget(armMotor, iArmLevel[0], 100);
@@ -490,10 +490,10 @@ task main()
 			if (claw_to_release)
 			{
 				drive_override = true;
-				setMotorSpeed(BL, -35 );
-				setMotorSpeed(BR, 15 );
-				setMotorSpeed(FL, -35 );
-				setMotorSpeed(FR, 15 );
+				setMotorSpeed(BL, 35 );
+				setMotorSpeed(BR, -15 );
+				setMotorSpeed(FL, 35 );
+				setMotorSpeed(FR, -15 );
 				wait1Msec(100);
 				claw_to_release = false;
 				wait1Msec(200);
