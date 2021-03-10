@@ -160,7 +160,7 @@ void resetGyroStable()
 
 float PIDControl (float setpoint, float measured_value, float Kp, float Ki, float Kd, int delta)
 {
-	error = measured_value - setpoint;
+	error = setpoint - measured_value;
 
 	if ( abs(error) < delta )
 		error = 0;
@@ -175,8 +175,8 @@ float PIDControl (float setpoint, float measured_value, float Kp, float Ki, floa
 
 void eightDirectionalLimitedJoystick()
 {
-	int x = -getJoystickValue(ChB);
-	int y = -getJoystickValue(ChA);
+	int x = getJoystickValue(ChB);
+	int y = getJoystickValue(ChA);
 
 	int strafeSpeed = sqrt(x*x + y*y); //this is the hypotenuse
 
