@@ -218,78 +218,6 @@ void eightDirectionalLimitedJoystick()
 		}
 	}
 }
-/*
-task claw_preset()
-{
-int claw_position, prev_claw = 0;
-
-while (true)
-{
-if (getJoystickValue(BtnLUp)==1 && claw_working == false)
-{
-if (claw_to_release)
-{
-claw_to_release = false
-}
-else
-{
-claw_to_release = true
-}
-claw_working = true
-}
-
-if (claw_working)
-{
-if (claw_to_release)
-{
-if ( abs(getMotorEncoder(armMotor)) >= iArmLevel[1] - ARM_DELTA )
-{
-drive_override = true;
-setMotorTarget(armMotor, in_between_level, 100);
-wait1Msec(150);
-}
-setMotorBrakeMode(clawMotor, motorCoast);
-setMotorTarget(clawMotor,CLAW_CLOSED,100);
-wait1Msec( abs( CLAW_CLOSED - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
-setMotorSpeed(clawMotor, 0);
-if ( drive_override  )
-{
-setMotorSpeed(BL, -50 );
-setMotorSpeed(BR, 50 );
-setMotorSpeed(FL, -50 );
-setMotorSpeed(FR, 50 );
-wait1Msec(500);
-setMotorSpeed(BL, 0 );
-setMotorSpeed(BR, 0 );
-setMotorSpeed(FL, 0 );
-setMotorSpeed(FR, 0 );
-setMotorTarget(armMotor, iArmLevel[0], 100);
-drive_override = false;
-}
-claw_working = false
-}
-else
-{
-setMotorBrakeMode(clawMotor, motorHold);
-claw_position = getMotorEncoder(clawMotor);
-if (prev_claw == claw_position)
-{
-setMotorSpeed(clawMotor, 0);
-claw_working = false;
-prev_claw = 0;
-}
-else
-{
-setMotorSpeed(clawMotor, 100);
-wait1Msec(100);
-}
-prev_claw = claw_position;
-}
-}
-wait1Msec(dt);
-}
-}
-*/
 
 void stopDrivetrain()
 {
@@ -351,10 +279,10 @@ task claw_preset()
 				if ( drive_override  )
 				{
 					desired_heading += 3;
-					setMotorSpeed(BL, -50 );
-					setMotorSpeed(BR, 50 );
-					setMotorSpeed(FL, -50 );
-					setMotorSpeed(FR, 50 );
+					setMotorSpeed(BL, 50 );
+					setMotorSpeed(BR, -50 );
+					setMotorSpeed(FL, 50 );
+					setMotorSpeed(FR, -50 );
 					wait1Msec(375);
 					stopDrivetrain();
 					setMotorTarget(armMotor, iArmLevel[0], 100);
@@ -496,11 +424,11 @@ task main()
 
 		if(slow_drive)
 		{
-			iChC_filtered = iSlowTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
+			iChC_filtered = -iSlowTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 		}
 		else
 		{
-			iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
+			iChC_filtered = -iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 		}
 		eightDirectionalLimitedJoystick();
 
@@ -562,10 +490,10 @@ task main()
 			if (claw_to_release)
 			{
 				drive_override = true;
-				setMotorSpeed(BL, 35 );
-				setMotorSpeed(BR, -15 );
-				setMotorSpeed(FL, 35 );
-				setMotorSpeed(FR, -15 );
+				setMotorSpeed(BL, -35 );
+				setMotorSpeed(BR, 15 );
+				setMotorSpeed(FL, -35 );
+				setMotorSpeed(FR, 15 );
 				wait1Msec(100);
 				claw_to_release = false;
 				wait1Msec(200);
