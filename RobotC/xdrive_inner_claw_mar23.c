@@ -20,8 +20,8 @@ float desired_heading = 0.0;
 bool drive_override = false;
 bool task_running = false;
 
-#define GYRO_SAMPLING_SECONDS 10000
-#define ACCEPTABLE_DRIFT_RANGE 0.08
+#define GYRO_SAMPLING_SECONDS 10
+#define ACCEPTABLE_DRIFT_RANGE 0.05
 float fGyroDriftRate;
 
 #define COUNT_PER_ROUND 960
@@ -33,11 +33,12 @@ float fGyroDriftRate;
 int iArmLevel[LIFT_LEVELS] = {150, 1360, 1630};
 #define ARM_LAND 1100
 #define ARM_CARRY 220
+#define ARM_PUSH 20
 
 bool claw_grab = false;
-#define CLAW_GRAB 0
-#define CLAW_RELEASE 370
-#define CLAW_PUSH 175
+#define CLAW_HOLD 0
+#define CLAW_RELEASE 390
+#define CLAW_PUSH 230
 
 float cmToEncoderUnit(float distance)
 {
@@ -80,7 +81,7 @@ void setGyroStable()
 
 		resetGyro(gyro);
 		clearTimer(T4);
-		wait1Msec(GYRO_SAMPLING_SECONDS);
+		wait(GYRO_SAMPLING_SECONDS);
 
 		fGyroDriftRate = getGyroDegreesFloat(gyro) / GYRO_SAMPLING_SECONDS;
 
@@ -274,7 +275,7 @@ task claw_move()
 			claw_position = getMotorEncoder(clawMotor);
 			if (prev_claw == claw_position)
 			{
-				setMotorSpeed(clawMotor, 0);
+				setMotorTarget(clawMotor, CLAW_HOLD, 100);
 				prev_claw = 0;
 				claw_grab = false;
 			}
@@ -422,6 +423,7 @@ void right_side_3_3_3_stable()
 	strafePID(3, -22, 40, 0.18, 0, 0, 2);
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	waitUntil(getMotorEncoder(armMotor) < iArmLevel[0] + 40 );
+	setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 	strafePID(3, 30, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
@@ -431,45 +433,32 @@ void right_side_3_3_3_stable()
 	strafePID(1, 7, 40, 0.18, 0, 0, 2);
 	waitUntilMotorStop(armMotor);
 
-	turnTo(-140, 10);
+	turnTo(-140, 2);
 	strafePID(3, 10, 40, 0.18, 0, 0, 2);
 	land_riser();
 	//waitUntil(getTouchLEDValue(LED));
 
 	desired_heading = -130;
-	strafePID(3, -80, 90, 0.18, 0, 0, 10);
-
-	setMotorTarget(armMotor, 40, 100);
-	setMotorTarget(clawMotor, CLAW_PUSH, 100);
+	strafePID(3, -30, 90, 0.18, 0, 0, 10);
+	setMotorTarget(armMotor, iArmLevel[0], 100);
+	turnTo( -130, 3);
+	strafePID(3, -60, 90, 0.18, 0, 0, 10);
 
 	desired_heading = -90;
 	strafePID(3, -47, 90, 0.18, 0, 0, 2);
 
-	//waitUntil(getTouchLEDValue(LED));
-
-	//strafePID(3, -27, 90, 0.18, 0, 0, 2);
-
 	strafePID(3, 52, 90, 0.18, 0, 0, 2);
 
-	setMotorTarget(armMotor, iArmLevel[0], 100);
-	setMotorTarget(clawMotor, CLAW_RELEASE, 100);
-	//waitUntil(getTouchLEDValue(LED));
-	//strafePID(3, -6, 40, 0.18, 0, 0, 1);
-
-
-	strafePID(1, 22, 40, 0.18, 0, 0, 2);
-	//waitUntil(getTouchLEDValue(LED));
-
-	strafePID(3, 12, 40, 0.18, 0, 0, 2);
-	//waitUntil(getTouchLEDValue(LED));
+	strafePID(1, 12, 40, 0.18, 0, 0, 2);
+	strafePID(3, 12, 90, 0.18, 0, 0, 2);
 
 	claw_grab = true;
 	waitUntil( !claw_grab );
 	setMotorTarget(armMotor, iArmLevel[1], 100);
-	strafePID(3, -5, 90, 0.18, 0, 0, 1);
-	//waitUntil(getTouchLEDValue(LED));
+	waitUntilMotorStop(armMotor);
 
-	turnTo( -45, 3);
+	turnTo(-45, 10);
+	strafePID(3, 7, 90, 0.18, 0, 0, 2);
 	land_riser();
 
 	strafePID(3, -32, 90, 0.18, 0, 0, 10);
