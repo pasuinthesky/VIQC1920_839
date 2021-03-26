@@ -160,7 +160,7 @@ void resetGyroStable()
 
 float PIDControl (float setpoint, float measured_value, float Kp, float Ki, float Kd, int delta)
 {
-	error = measured_value - setpoint;
+	error = setpoint - measured_value;
 
 	if ( abs(error) < delta )
 		error = 0;
