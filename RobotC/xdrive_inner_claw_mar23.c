@@ -1,5 +1,3 @@
-#pragma config(Sensor, port3,  colorLeft,      sensorVexIQ_ColorGrayscale)
-#pragma config(Sensor, port9,  colorRight,     sensorVexIQ_ColorGrayscale)
 #pragma config(Sensor, port10, LED,            sensorVexIQ_LED)
 #pragma config(Sensor, port12, gyro,           sensorVexIQ_Gyro)
 #pragma config(Motor,  motor1,          BR,            tmotorVexIQ, PIDControl, encoder)
@@ -476,78 +474,6 @@ void right_side_3_3_3_stable()
 
 void left_side_3_1_3()
 {
-	strafePID(1, -55, 90, 0.22, 0, 0, 1);
-	turnTo(90, 10);
-	strafePID(1, 29, 90, 0.18, 0, 0, 1);
-	strafePID(3, 11, 90, 0.14, 0, 0, 1);
-	claw_grab = true;
-	waitUntil( !claw_grab );
-
-	setMotorTarget(armMotor, iArmLevel[1], 100);
-	wait1Msec(300);
-	waitUntilMotorStop(armMotor);
-
-	turnTo(130, 10);
-
-	strafePID(3, 5, 40, 0.18, 0, 0, 1);
-
-	land_riser();
-
-	strafePID(3, -81, 90, 0.18, 0, 0, 2);
-
-	setMotorTarget(armMotor, iArmLevel[0], 100);
-
-	//wait1Msec(300;
-
-	turnTo(90, 3);
-
-	//strafePID(3, 5, 60, 0.18, 0, 0, 1);
-	setMotorTarget(clawMotor, CLAW_PUSH, 100);
-
-	//waitUntil(getTouchLEDValue(LED));
-
-	while (getColorGrayscale(colorLeft)>150)
-	{
-		iChB_filtered = 20;
-	}
-	iChB_filtered = 0;
-	strafePID(1, 4, 40, 0.18, 0, 0, 1);
-	wait1Msec(300);
-
-	strafePID(3, 46, 90, 0.18, 0, 0, 1);
-
-	strafePID(3, -40, 60, 0.18, 0, 0, 1);
-
-	strafePID(1, 100, 60, 0.18, 0, 0, 1);
-
-	wait1Msec(300);
-
-	strafePID(1, -6, 40, 0.18, 0, 0, 1);
-	strafePID(3, 32, 90, 0.18, 0, 0, 1);
-
-	setMotorTarget(clawMotor, CLAW_RELEASE, 100);
-	//strafePID(3, -3, 40, 0.18, 0, 0, 1);
-
-	strafePID(1, -23, 40, 0.18, 0, 0, 1);
-	//waitUntil(getTouchLEDValue(LED));
-
-	strafePID(3, 10, 30, 0.14, 0, 0, 1);
-	claw_grab = true;
-	waitUntil( !claw_grab );
-
-	setMotorTarget(armMotor, iArmLevel[1], 100);
-	wait1Msec(300);
-	waitUntilMotorStop(armMotor);
-
-	turnTo(55, 10);
-
-	strafePID(3, 4, 40, 0.18, 0, 0, 1);
-
-	wait1Msec(200);
-	land_riser();
-
-	strafePID(3, -40, 90, 0.18, 0, 0, 1);
-
 }
 
 void bonus()
