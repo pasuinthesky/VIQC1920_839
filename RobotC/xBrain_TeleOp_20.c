@@ -10,7 +10,7 @@
 
 #define INERTIA_DIE_DOWN 300
 
-#define RELEASED 244
+#define RELEASED 150
 #define HOOKED 35
 
 #define ARM_DELTA 5
@@ -370,7 +370,7 @@ task claw_preset()
 				claw_position = getMotorEncoder(clawMotor);
 				if (prev_claw == claw_position)
 				{
-					setMotorSpeed(clawMotor, 0);
+					//setMotorSpeed(clawMotor, 0);
 					claw_working = false;
 					prev_claw = 0;
 				}
