@@ -10,11 +10,11 @@
 
 #define INERTIA_DIE_DOWN 300
 
-#define RELEASED 275
+#define RELEASED 140
 #define HOOKED 35
 
 #define ARM_DELTA 5
-#define CLAW_DELTA 15
+#define CLAW_DELTA 30
 #define MS_PER_ENCODER_UNIT 2
 
 #define LIFT_LEVELS 3
@@ -32,7 +32,7 @@ float desired_heading;
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {75, 490, 590};
+int iArmLevel[LIFT_LEVELS] = {55, 510, 610};
 int in_between_level = 410;
 
 bool drive_override = false;
@@ -278,15 +278,15 @@ task claw_preset()
 				setMotorSpeed(clawMotor, 0);
 				if ( drive_override  )
 				{
-					desired_heading += 3;
-					setMotorSpeed(BL, -50 );
-					setMotorSpeed(BR, 50 );
-					setMotorSpeed(FL, -50 );
-					setMotorSpeed(FR, 50 );
-					wait1Msec(375);
+					//desired_heading += 3;
+					setMotorSpeed(BL, -100 );
+					setMotorSpeed(BR, 100 );
+					setMotorSpeed(FL, -100 );
+					setMotorSpeed(FR, 100 );
+					wait1Msec(400);
 					stopDrivetrain();
-					setMotorTarget(armMotor, iArmLevel[0], 100);
 					drive_override = false;
+					setMotorTarget(armMotor, iArmLevel[0], 100);
 				}
 				claw_working = false;
 
