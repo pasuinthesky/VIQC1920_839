@@ -10,7 +10,7 @@
 
 #define INERTIA_DIE_DOWN 300
 
-#define RELEASED 140
+#define RELEASED 244
 #define HOOKED 35
 
 #define ARM_DELTA 5
@@ -492,6 +492,7 @@ task main()
 		{
 			drive_override = false;
 		}
+
 		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
 
