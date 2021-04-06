@@ -438,26 +438,27 @@ void right_side_3_3_3_stable()
 
 	strafePID(3, -30, 90, 0.18, 0, 0, 10);
 	setMotorTarget(armMotor, iArmLevel[0], 100);
-	turnTo( -130, 3);
-	strafePID(3, -78, 90, 0.18, 0, 0, 10);
-
+	turnTo( -135, 3);
+	strafePID(3, -72, 90, 0.18, 0, 0, 2);
+/*
 	desired_heading = -90;
 	strafePID(3, -23, 90, 0.18, 0, 0, 2);
+*/
+	turnTo( -87, 2);
 
-	//turnTo( -90, 1);
-
-	strafePID(3, 57, 90, 0.18, 0, 0, 2);
+	strafePID(3, 42, 90, 0.18, 0, 0, 2);
 
 	strafePID(1, 12, 40, 0.18, 0, 0, 2);
-	strafePID(3, 17, 90, 0.18, 0, 0, 2);
+	strafePID(3, 13, 90, 0.18, 0, 0, 2);
 
 	claw_grab = true;
 	waitUntil( !claw_grab );
 	setMotorTarget(armMotor, iArmLevel[1], 100);
+	strafePID(3, -7, 90, 0.18, 0, 0, 2);
 	waitUntilMotorStop(armMotor);
 
-	turnTo(-45, 10);
-	strafePID(3, 7, 90, 0.18, 0, 0, 2);
+	turnTo(-50, 10);
+	strafePID(3, 5, 90, 0.18, 0, 0, 2);
 	land_riser();
 
 	strafePID(3, -32, 90, 0.18, 0, 0, 10);
@@ -551,7 +552,7 @@ void left_side_3_3_3()
 
 // 	waitUntil(getTouchLEDValue(LED));
 
- 	turnTo( 92, 3);
+ 	turnTo( 84, 2);
 
 	strafePID(3, 42, 90, 0.18, 0, 0, 2);
 
@@ -595,11 +596,9 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-	/*
 	right_side_3_3_3_stable();
 	displayTextLine(3, "%f", getTimerValue(T2));
 	intermission_reset_gyro();
-	*/
 
 	left_side_3_3_3();
 	displayTextLine(3, "%f", getTimerValue(T2));
