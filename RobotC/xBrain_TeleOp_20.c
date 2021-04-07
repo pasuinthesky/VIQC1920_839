@@ -10,7 +10,7 @@
 
 #define INERTIA_DIE_DOWN 300
 
-#define RELEASED 150
+#define RELEASED 145
 #define HOOKED 35
 
 #define ARM_DELTA 5
@@ -274,7 +274,7 @@ task claw_preset()
 
 
 				setMotorTarget(clawMotor,RELEASED,100);
-				wait1Msec( abs( getMotorEncoder(clawMotor) - RELEASED ) * MS_PER_ENCODER_UNIT );
+				waitUntilMotorStop(clawMotor);
 				setMotorSpeed(clawMotor, 0);
 				if ( drive_override  )
 				{
@@ -419,6 +419,7 @@ task main()
 		{
 			drive_override = false;
 		}
+
 		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
 
@@ -469,7 +470,7 @@ task main()
 		//writeDebugStreamLine("%f %f %f %f %f %f %f", getTimerValue(T1), getTimerValue(T2), getJoystickValue(ChC), iChC_filtered, desired_heading, getGyroStable(), getTouchLEDBlue(LED));
 
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
-
+/*
 		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
 		{
 			if (claw_to_release)
@@ -482,18 +483,18 @@ task main()
 			}
 			claw_working = true;
 		}
-
+*/
 		lift_preset();
 
-		if(getJoystickValue(BtnLDown) == 1 && !claw_working)
+		if( (getJoystickValue(BtnLUp)==1 || getJoystickValue(BtnLDown) == 1) && !claw_working)
 		{
 			if (claw_to_release)
 			{
 				drive_override = true;
 				setMotorSpeed(BL, 35 );
-				setMotorSpeed(BR, -15 );
+				setMotorSpeed(BR, -35 );
 				setMotorSpeed(FL, 35 );
-				setMotorSpeed(FR, -15 );
+				setMotorSpeed(FR, -35 );
 				wait1Msec(100);
 				claw_to_release = false;
 				wait1Msec(200);
