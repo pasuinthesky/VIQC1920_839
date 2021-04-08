@@ -488,10 +488,12 @@ task main()
 
 	while(true)
 	{
+		/*
 		if(getJoystickValue(BtnLDown) == 1)
 		{
 			drive_override = false;
 		}
+		*/
 
 		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
 		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
@@ -543,7 +545,7 @@ task main()
 		//writeDebugStreamLine("%f %f %f %f %f %f %f", getTimerValue(T1), getTimerValue(T2), getJoystickValue(ChC), iChC_filtered, desired_heading, getGyroStable(), getTouchLEDBlue(LED));
 
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
-/*
+
 		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
 		{
 			if (claw_to_release)
@@ -556,9 +558,9 @@ task main()
 			}
 			claw_working = true;
 		}
-*/
-		lift_preset();
 
+		lift_preset();
+/*
 		if( (getJoystickValue(BtnLUp)==1 || getJoystickValue(BtnLDown) == 1) && !claw_working)
 		{
 			if (claw_to_release)
@@ -583,7 +585,7 @@ task main()
 			}
 			claw_working = true;
 		}
-
+*/
 		if (! drive_override)
 		{
 			setMotorSpeed(BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );

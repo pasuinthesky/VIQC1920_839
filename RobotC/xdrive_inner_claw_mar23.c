@@ -367,7 +367,7 @@ void land_riser()
 	waitUntilMotorStop(clawMotor);
 }
 
-void right_side_3_3_3_stable()
+void right_side_3_3_3_1_1_stable()
 {
 	strafePID(1, 60, 90, 0.18, 0, 0, 2);
 	strafePID(1, -6, 90, 0.18, 0, 0, 2);
@@ -403,12 +403,14 @@ void right_side_3_3_3_stable()
 	setMotorTarget(armMotor, iArmLevel[1], 100);
 	waitUntil( !claw_grab );
 
-	strafePID(3, -32, 90, 0.18, 0, 0, 2);
+	strafePID(3, -52, 90, 0.18, 0, 0, 2);
 	strafePID(1, -42, 40, 0.18, 0, 0, 2);
 
+	strafePID(3, -45, 90, 0.18, 0, 0, 10);
+	//wait1Msec(200);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 34, 90, 0.18, 0, 0, 2);
+	strafePID(3, 64, 90, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, -12, 40, 0.18, 0, 0, 2);
@@ -422,7 +424,7 @@ void right_side_3_3_3_stable()
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	waitUntil(getMotorEncoder(armMotor) < iArmLevel[0] + 40 );
 	setMotorTarget(clawMotor, CLAW_RELEASE, 100);
-	strafePID(3, 27, 40, 0.18, 0, 0, 2);
+	strafePID(3, 30, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
 	claw_grab = true;
@@ -439,14 +441,15 @@ void right_side_3_3_3_stable()
 	strafePID(3, -30, 90, 0.18, 0, 0, 10);
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	turnTo( -135, 3);
-	strafePID(3, -72, 90, 0.18, 0, 0, 2);
-/*
-	desired_heading = -90;
-	strafePID(3, -23, 90, 0.18, 0, 0, 2);
-*/
-	turnTo( -87, 2);
+	strafePID(3, -80, 90, 0.18, 0, 0, 20);
 
-	strafePID(3, 42, 90, 0.18, 0, 0, 2);
+	desired_heading = -90;
+	strafePID(3, -28, 90, 0.18, 0, 0, 2);
+
+	//turnTo( -87, 2);
+
+	desired_heading = -92;
+	strafePID(3, 55, 90, 0.18, 0, 0, 2);
 
 	strafePID(1, 12, 40, 0.18, 0, 0, 2);
 	strafePID(3, 13, 90, 0.18, 0, 0, 2);
@@ -509,7 +512,7 @@ void left_side_3_3_3()
 	waitUntil( !claw_grab );
 
 	strafePID(3, -37, 40, 0.18, 0, 0, 2);
-	strafePID(1, 40, 40, 0.18, 0, 0, 2);
+	strafePID(1, 35, 40, 0.18, 0, 0, 2);
 
 	//waitUntil(getTouchLEDValue(LED));
 
@@ -596,7 +599,7 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-	right_side_3_3_3_stable();
+	right_side_3_3_3_1_1_stable();
 	displayTextLine(3, "%f", getTimerValue(T2));
 	intermission_reset_gyro();
 
