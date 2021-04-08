@@ -367,6 +367,106 @@ void land_riser()
 	waitUntilMotorStop(clawMotor);
 }
 
+void right_side_3_3_3_stable()
+{
+	strafePID(1, 60, 90, 0.18, 0, 0, 2);
+	strafePID(1, -6, 90, 0.18, 0, 0, 2);
+	turnTo(-90, 10);
+	strafePID(1, -33, 90, 0.18, 0, 0, 2);
+	strafePID(3, 14, 90, 0.18, 0, 0, 2);
+
+	claw_grab = true;
+	waitUntil( !claw_grab );
+
+	setMotorTarget(armMotor, iArmLevel[1], 100);
+	wait1Msec(300);
+	waitUntilMotorStop(armMotor);
+
+	turnTo(-130, 10);
+
+	strafePID(3, 6, 40, 0.18, 0, 0, 2);
+
+	land_riser();
+
+	strafePID(3, -26, 90, 0.18, 0, 0, 2);
+
+	setMotorTarget(armMotor, iArmLevel[0], 100);
+	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
+
+	waitUntil(getMotorEncoder(armMotor) < iArmLevel[1] * 0.5);
+	desired_heading = -90;
+	strafePID(1, -18, 40, 0.18, 0, 0, 2);
+
+	strafePID(3, 9, 40, 0.18, 0, 0, 2);
+
+	claw_grab = true;
+	setMotorTarget(armMotor, iArmLevel[1], 100);
+	waitUntil( !claw_grab );
+
+	strafePID(3, -32, 90, 0.18, 0, 0, 2);
+	strafePID(1, -42, 40, 0.18, 0, 0, 2);
+
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(3, 37, 90, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(3, -12, 90, 0.18, 0, 0, 2);
+	strafePID(1, -47, 40, 0.18, 0, 0, 2);
+	strafePID(3, 5, 40, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
+
+	land_riser();
+
+	strafePID(3, -22, 40, 0.18, 0, 0, 2);
+	setMotorTarget(armMotor, iArmLevel[0], 100);
+	waitUntil(getMotorEncoder(armMotor) < iArmLevel[0] + 40 );
+	strafePID(3, 30, 40, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
+
+	claw_grab = true;
+	waitUntil( !claw_grab );
+	setMotorTarget(armMotor, iArmLevel[1], 100);
+	strafePID(1, 7, 40, 0.18, 0, 0, 2);
+	waitUntilMotorStop(armMotor);
+
+	turnTo(-140, 10);
+	strafePID(3, 10, 40, 0.18, 0, 0, 2);
+	land_riser();
+	strafePID(3, -27, 40, 0.18, 0, 0, 2);
+	setMotorTarget(armMotor, iArmLevel[0], 100);
+	turnTo( -90, 10);
+	waitUntil(getMotorEncoder(armMotor) < iArmLevel[0] + 80 );
+
+	strafePID(1, -17, 40, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(3, 12, 40, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
+
+	claw_grab = true;
+	waitUntil( !claw_grab );
+	setMotorTarget(armMotor, iArmLevel[1], 100);
+	strafePID(3, -37, 90, 0.18, 0, 0, 2);
+	strafePID(1, -35, 40, 0.18, 0, 0, 1);
+
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(3, 32, 90, 0.18, 0, 0, 2);
+	strafePID(3, -10, 90, 0.18, 0, 0, 2);
+	land_riser();
+	strafePID(3, -16, 90, 0.18, 0, 0, 2);
+	setMotorTarget(armMotor, iArmLevel[0], 100);
+
+	setMotorBrakeMode(FL, motorCoast);
+	setMotorBrakeMode(FR, motorCoast);
+	setMotorBrakeMode(BR, motorCoast);
+	setMotorBrakeMode(BL, motorCoast);
+	desired_heading = 0;
+	strafePID(3, -150, 90, 0.18, 0, 0, 2);
+
+}
+
 void right_side_3_3_3_1_1_stable()
 {
 	strafePID(1, 60, 90, 0.18, 0, 0, 2);
@@ -544,35 +644,29 @@ void left_side_3_3_3()
 	land_riser();
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, -30, 90, 0.18, 0, 0, 10);
+	strafePID(3, -27, 40, 0.18, 0, 0, 2);
 	setMotorTarget(armMotor, iArmLevel[0], 100);
-	turnTo( 135, 3);
-	strafePID(3, -72, 90, 0.18, 0, 0, 2);
-/*
-	desired_heading = 90;
-	strafePID(3, -23, 90, 0.18, 0, 0, 2);
-*/
+	turnTo( 90, 10);
+	waitUntil(getMotorEncoder(armMotor) < iArmLevel[0] + 80 );
 
-// 	waitUntil(getTouchLEDValue(LED));
+	strafePID(1, 17, 40, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
 
- 	turnTo( 84, 2);
-
-	strafePID(3, 42, 90, 0.18, 0, 0, 2);
-
-	strafePID(1, -12, 40, 0.18, 0, 0, 2);
-	strafePID(3, 13, 90, 0.18, 0, 0, 2);
+	strafePID(3, 12, 40, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
 
 	claw_grab = true;
 	waitUntil( !claw_grab );
 	setMotorTarget(armMotor, iArmLevel[1], 100);
-	strafePID(3, -7, 90, 0.18, 0, 0, 2);
-	waitUntilMotorStop(armMotor);
+	strafePID(3, -37, 90, 0.18, 0, 0, 2);
+	strafePID(1, 35, 40, 0.18, 0, 0, 1);
 
-	turnTo(50, 10);
-	strafePID(3, 5, 90, 0.18, 0, 0, 2);
+	//waitUntil(getTouchLEDValue(LED));
+
+	strafePID(3, 27, 90, 0.18, 0, 0, 2);
+	strafePID(3, -10, 90, 0.18, 0, 0, 2);
 	land_riser();
-
-	strafePID(3, -52, 90, 0.18, 0, 0, 2);
+	strafePID(3, -72, 90, 0.18, 0, 0, 2);
 
 }
 
@@ -599,7 +693,7 @@ task main()
 	startTask(drive);
 	startTask(claw_move);
 
-	right_side_3_3_3_1_1_stable();
+	right_side_3_3_3_stable();
 	displayTextLine(3, "%f", getTimerValue(T2));
 	intermission_reset_gyro();
 
