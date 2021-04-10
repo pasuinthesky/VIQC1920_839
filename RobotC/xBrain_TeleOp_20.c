@@ -162,7 +162,7 @@ void eightDirectionalLimitedJoystick()
 
 	int strafeSpeed = sqrt(x*x + y*y); //this is the hypotenuse
 
-	if (strafeSpeed == 0)
+	if ( strafeSpeed == 0 )
 	{
 		iChA_filtered = 0;
 		iChB_filtered = 0;
@@ -253,17 +253,13 @@ task claw_preset()
 					wait1Msec(150);
 				}
 
-
 				setMotorTarget(clawMotor,CLAW_RELEASE,100);
 				waitUntilMotorStop(clawMotor);
 				setMotorSpeed(clawMotor, 0);
 				if ( drive_override  )
 				{
 					//desired_heading += 3;
-					setMotorSpeed(BL, -100 );
-					setMotorSpeed(BR, 100 );
-					setMotorSpeed(FL, -100 );
-					setMotorSpeed(FR, 100 );
+					iChA_filtered = -90;
 					wait1Msec(400);
 					stopDrivetrain();
 					drive_override = false;
@@ -326,7 +322,6 @@ void lift_preset()
 	}
 }
 
-
 task flashLED ()
 {
 	while (true)
@@ -382,6 +377,30 @@ void initialize()
 	setMotorBrakeMode(BL, motorHold);
 }
 
+task drive()
+{
+	while (true)
+	{
+		if ( getTimerValue(T2) > INERTIA_DIE_DOWN || drive_override )
+		{
+			iChC_filtered = PIDControl( desired_heading, getGyroStable(), 1, 0.00001, 0.0001, 0.6 );
+			setTouchLEDColor(LED, colorBlue);
+		}
+		else
+		{
+			desired_heading = getGyroStable();
+			setTouchLEDColor(LED, colorYellow);
+		}
+
+		setMotorSpeed( FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
+		setMotorSpeed( BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
+		setMotorSpeed( FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
+		setMotorSpeed( BR, 0 - iChA_filtered - iChB_filtered - iChC_filtered );
+
+		wait1Msec(dt);
+	}
+}
+
 task main()
 {
 	initialize();
@@ -393,7 +412,7 @@ task main()
 
 	desired_heading = 0;
 
-	//startTask( flashLED );
+	startTask(drive);
 	startTask(claw_preset);
 
 	resetTimer(T2);
@@ -401,62 +420,40 @@ task main()
 
 	while(true)
 	{
-		/*
-		if(getJoystickValue(BtnLDown) == 1)
+		if ( !drive_override )
 		{
-			drive_override = false;
-		}
-		*/
+			if (getJoystickValue(BtnFUp) && getTimerValue(T1) > (500 + timestamp))
+			{
+				timestamp = getTimerValue(T1);
 
-		//		iChA_filtered = iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
-		//		iChB_filtered = iDriveMapping[abs(getJoystickValue(ChB))]*sgn(getJoystickValue(ChB));
-
-		if(slow_drive)
-		{
-			iChC_filtered = iSlowTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
-		}
-		else
-		{
-			iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
-		}
-		eightDirectionalLimitedJoystick();
-
-		if (getJoystickValue(BtnFUp) && getTimerValue(T1) > (500 + timestamp))
-		{
-			timestamp = getTimerValue(T1);
+				if(slow_drive)
+				{
+					slow_drive = false;
+				}
+				else
+				{
+					slow_drive = true;
+				}
+			}
 
 			if(slow_drive)
 			{
-				slow_drive = false;
+				iChC_filtered = iSlowTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 			}
 			else
 			{
-				slow_drive = true;
+				iChC_filtered = iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 			}
-		}
 
-		if ( abs(getJoystickValue(ChC)) <= 5 )
-		{
-			if ( getTimerValue(T2) > INERTIA_DIE_DOWN )
+			if ( abs(getJoystickValue(ChC)) > 5 )
 			{
-				iChC_filtered = PIDControl( desired_heading, getGyroStable(), 1, 0.00001, 0.0001, 0.6 );
-				setTouchLEDColor(LED, colorBlue);
+				clearTimer(T2);
 			}
-			else
-			{
-				desired_heading = getGyroStable();
-				setTouchLEDColor(LED, colorYellow);
-			}
-		}
-		else
-		{
-			desired_heading = getGyroStable();
-			setTouchLEDColor(LED, colorYellow);
-			clearTimer(T2);
+
+			eightDirectionalLimitedJoystick();
 		}
 
 		//writeDebugStreamLine("%f %f %f %f %f %f %f", getTimerValue(T1), getTimerValue(T2), getJoystickValue(ChC), iChC_filtered, desired_heading, getGyroStable(), getTouchLEDBlue(LED));
-
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
 		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
@@ -473,42 +470,6 @@ task main()
 		}
 
 		lift_preset();
-/*
-		if( (getJoystickValue(BtnLUp)==1 || getJoystickValue(BtnLDown) == 1) && !claw_working)
-		{
-			if (claw_to_release)
-			{
-				drive_override = true;
-				setMotorSpeed(BL, 35 );
-				setMotorSpeed(BR, -35 );
-				setMotorSpeed(FL, 35 );
-				setMotorSpeed(FR, -35 );
-				wait1Msec(100);
-				claw_to_release = false;
-				wait1Msec(200);
-				setMotorSpeed(BL, 0 );
-				setMotorSpeed(BR, 0 );
-				setMotorSpeed(FL, 0 );
-				setMotorSpeed(FR, 0 );
-				drive_override = false;
-			}
-			else
-			{
-				claw_to_release = true;
-			}
-			claw_working = true;
-		}
-*/
-		if (! drive_override)
-		{
-			setMotorSpeed(BL, 0 + iChA_filtered - iChB_filtered - iChC_filtered );
-			setMotorSpeed(BR, 0 - iChA_filtered - iChB_filtered - iChC_filtered );
-			setMotorSpeed(FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
-			setMotorSpeed(FR, 0 - iChA_filtered + iChB_filtered - iChC_filtered );
-		}
-
-
-		//		manual_45degreeTurn();
 
 		wait1Msec(dt);
 	}
