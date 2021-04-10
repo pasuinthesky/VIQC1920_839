@@ -10,11 +10,11 @@
 
 #define INERTIA_DIE_DOWN 300
 
-#define RELEASED 145
-#define HOOKED 35
+#define CLAW_RELEASE 390
+#define CLAW_HOOKED 90
 
-#define ARM_DELTA 5
-#define CLAW_DELTA 30
+#define ARM_DELTA 15
+#define CLAW_DELTA 80
 #define MS_PER_ENCODER_UNIT 2
 
 #define LIFT_LEVELS 3
@@ -23,17 +23,14 @@ int error;
 float integral = 0;
 float dt = 25;
 float prev_error = 0;
-float allowed_time = 7.5;
 float output;
-float delta = 10;
-int artificial_ChC_Reading = 0;
 float desired_heading;
 
 bool claw_working = false;
 bool claw_to_release = false;
 
-int iArmLevel[LIFT_LEVELS] = {55, 510, 610};
-int in_between_level = 410;
+int iArmLevel[LIFT_LEVELS] = {150, 1360, 1630};
+int in_between_level = 1090;
 
 bool drive_override = false;
 bool slow_drive = false;
@@ -43,27 +40,11 @@ int iChA_filtered;
 int iChB_filtered;
 
 #define GYRO_SAMPLING_SECONDS 10000
-#define ACCEPTABLE_DRIFT_RANGE 0.08
+#define ACCEPTABLE_DRIFT_RANGE 0.05
 float fGyroDriftRate;
 
 float timestamp;
 
-bool orientation_maintenance;
-
-/*
-int iDriveMapping[101] = {
-0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,
-10,10,10,10,10,10,10,10,10,10,
-10,10,10,10,10,10,10,10,10,10,
-20,20,20,20,20,20,20,20,20,20,
-30,30,30,30,30,30,30,30,30,30,
-40,40,40,40,40,40,40,40,40,40,
-50,50,50,50,50,50,50,50,50,50,
-60,62,64,66,68,70,72,74,76,78,
-84,88,92,96,100,100,100,100,100,100,100};
-
-*/
 int iStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,
@@ -219,78 +200,6 @@ void eightDirectionalLimitedJoystick()
 		}
 	}
 }
-/*
-task claw_preset()
-{
-int claw_position, prev_claw = 0;
-
-while (true)
-{
-if (getJoystickValue(BtnLUp)==1 && claw_working == false)
-{
-if (claw_to_release)
-{
-claw_to_release = false
-}
-else
-{
-claw_to_release = true
-}
-claw_working = true
-}
-
-if (claw_working)
-{
-if (claw_to_release)
-{
-if ( abs(getMotorEncoder(armMotor)) >= iArmLevel[1] - ARM_DELTA )
-{
-drive_override = true;
-setMotorTarget(armMotor, in_between_level, 100);
-wait1Msec(150);
-}
-setMotorBrakeMode(clawMotor, motorCoast);
-setMotorTarget(clawMotor,CLAW_CLOSED,100);
-wait1Msec( abs( CLAW_CLOSED - CLAW_OPEN ) * MS_PER_ENCODER_UNIT );
-setMotorSpeed(clawMotor, 0);
-if ( drive_override  )
-{
-setMotorSpeed(BL, -50 );
-setMotorSpeed(BR, 50 );
-setMotorSpeed(FL, -50 );
-setMotorSpeed(FR, 50 );
-wait1Msec(500);
-setMotorSpeed(BL, 0 );
-setMotorSpeed(BR, 0 );
-setMotorSpeed(FL, 0 );
-setMotorSpeed(FR, 0 );
-setMotorTarget(armMotor, iArmLevel[0], 100);
-drive_override = false;
-}
-claw_working = false
-}
-else
-{
-setMotorBrakeMode(clawMotor, motorHold);
-claw_position = getMotorEncoder(clawMotor);
-if (prev_claw == claw_position)
-{
-setMotorSpeed(clawMotor, 0);
-claw_working = false;
-prev_claw = 0;
-}
-else
-{
-setMotorSpeed(clawMotor, 100);
-wait1Msec(100);
-}
-prev_claw = claw_position;
-}
-}
-wait1Msec(dt);
-}
-}
-*/
 
 void stopDrivetrain()
 {
@@ -329,7 +238,6 @@ turn45 = false;
 task claw_preset()
 {
 	int claw_position, prev_claw = -1000;
-	bool grab_again = false;
 
 	while (true)
 	{
@@ -346,7 +254,7 @@ task claw_preset()
 				}
 
 
-				setMotorTarget(clawMotor,RELEASED,100);
+				setMotorTarget(clawMotor,CLAW_RELEASE,100);
 				waitUntilMotorStop(clawMotor);
 				setMotorSpeed(clawMotor, 0);
 				if ( drive_override  )
@@ -398,8 +306,7 @@ void lift_preset()
 			if ( getMotorEncoder(armMotor) < ( iArmLevel[i+1] - ARM_DELTA ) )
 			{
 				setMotorTarget(armMotor, iArmLevel[i+1], 100);
-				//wait1Msec( ( iArmLevel[i+1] - iArmLevel[i] ) * MS_PER_ENCODER_UNIT );
-				/*				wait1Msec(100);
+				/*wait1Msec(100);
 				waitUntilMotorStop(armMotor);
 				drive_override = false;*/
 				break;
@@ -413,23 +320,13 @@ void lift_preset()
 			if ( getMotorEncoder(armMotor) > ( iArmLevel[i-1] + ARM_DELTA ) )
 			{
 				setMotorTarget(armMotor, iArmLevel[i-1],100);
-				//				wait1Msec( ( iArmLevel[i] - iArmLevel[i-1] ) * MS_PER_ENCODER_UNIT + 100 );
 				break;
 			}
 		}
 	}
 }
-/*
-task flashLED()
-{
-while( true )
-{
-setTouchLEDRGB(LED, 0, 255, 0);
-sleep( 500 );
-setTouchLEDRGB(LED, 0, 255, 255);
-sleep( 500 );
-}
-}*/
+
+
 task flashLED ()
 {
 	while (true)
@@ -448,13 +345,14 @@ task flashLED ()
 	}
 }
 
-task main()
+void initialize()
 {
-	setMotorBrakeMode(FL, motorHold);
-	setMotorBrakeMode(FR, motorHold);
-	setMotorBrakeMode(BR, motorHold);
-	setMotorBrakeMode(BL, motorHold);
-	//setMotorBrakeMode(clawMotor, motorCoast);
+	setMotorEncoderUnits(encoderCounts);
+
+	setMotorBrakeMode(FL, motorCoast);
+	setMotorBrakeMode(FR, motorCoast);
+	setMotorBrakeMode(BR, motorCoast);
+	setMotorBrakeMode(BL, motorCoast);
 	setMotorBrakeMode(clawMotor, motorHold);
 	setMotorBrakeMode( armMotor, motorHold );
 
@@ -468,10 +366,25 @@ task main()
 	setMotorSpeed(clawMotor, 0);
 	setMotorSpeed(armMotor, 0);
 
-	setMotorTarget(clawMotor, RELEASED, 60);
+	setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 	setMotorTarget(armMotor, iArmLevel[0], 100);
-	wait1Msec(1000);
+	wait1Msec(100);
+	waitUntilMotorStop(clawMotor);
+	waitUntilMotorStop(armMotor);
 	setMotorSpeed(clawMotor, 0);
+
+	setTouchLEDColor(LED,colorYellow);
+	waitUntil(getTouchLEDValue(LED));
+
+	setMotorBrakeMode(FL, motorHold);
+	setMotorBrakeMode(FR, motorHold);
+	setMotorBrakeMode(BR, motorHold);
+	setMotorBrakeMode(BL, motorHold);
+}
+
+task main()
+{
+	initialize();
 
 	setGyroStable();
 	resetGyroStable();
