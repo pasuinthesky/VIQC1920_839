@@ -13,6 +13,7 @@
 #define CLAW_RELEASE 390
 #define CLAW_HOOKED 90
 
+#define ARM_CARRY 220
 #define ARM_DELTA 15
 #define CLAW_DELTA 80
 #define MS_PER_ENCODER_UNIT 2
@@ -43,7 +44,8 @@ int iChB_filtered;
 #define ACCEPTABLE_DRIFT_RANGE 0.05
 float fGyroDriftRate;
 
-float timestamp;
+float timestamp1, timestamp2;
+int macroName = 0;
 
 int iStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -238,6 +240,7 @@ turn45 = false;
 task claw_preset()
 {
 	int claw_position, prev_claw = -1000;
+	bool land_riser = false;
 
 	while (true)
 	{
@@ -247,7 +250,7 @@ task claw_preset()
 			{
 				if ( abs(getMotorEncoder(armMotor)) >= iArmLevel[1] - ARM_DELTA )
 				{
-					drive_override = true;
+					land_riser = true;
 					stopDrivetrain();
 					setMotorTarget(armMotor, in_between_level, 100);
 					wait1Msec(150);
@@ -256,13 +259,14 @@ task claw_preset()
 				setMotorTarget(clawMotor,CLAW_RELEASE,100);
 				waitUntilMotorStop(clawMotor);
 				setMotorSpeed(clawMotor, 0);
-				if ( drive_override  )
+				if ( land_riser  )
 				{
-					//desired_heading += 3;
+					drive_override = true;
 					iChA_filtered = -90;
 					wait1Msec(400);
 					stopDrivetrain();
 					drive_override = false;
+					land_riser = false;
 					setMotorTarget(armMotor, iArmLevel[0], 100);
 				}
 				claw_working = false;
@@ -401,6 +405,72 @@ task drive()
 	}
 }
 
+void macro(int name)
+{
+	drive_override = true;
+
+	switch (name)
+	{
+	case 0:
+		iChA_filtered = 60;
+		iChB_filtered = 10;
+		wait1Msec(400);
+		iChA_filtered = 0;
+		iChB_filtered = 0;
+
+		desired_heading = 90;
+		waitUntil( abs( getGyroStable() - desired_heading ) < 10);
+
+		iChA_filtered = 60;
+		iChB_filtered = -10;
+		wait1Msec(300);
+		iChA_filtered = 0;
+		iChB_filtered = 0;
+
+		setMotorSpeed(clawMotor, -100);
+		setMotorTarget(armMotor, ARM_CARRY, 100);
+		waitUntilMotorStop(clawMotor);
+		waitUntilMotorStop(armMotor);
+
+
+		iChA_filtered = 0;
+		iChB_filtered = -90;
+		wait1Msec(460);
+		iChA_filtered = 0;
+		iChB_filtered = 0;
+
+		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
+		setMotorTarget(armMotor, iArmLevel[0], 100);
+		waitUntilMotorStop(clawMotor);
+
+		iChA_filtered = -90;
+		iChB_filtered = 0;
+		wait1Msec(700);
+		iChA_filtered = 0;
+		iChB_filtered = 0;
+
+		wait1Msec(100);
+
+		iChA_filtered = 60;
+		iChB_filtered = 0;
+		wait1Msec(200);
+		iChA_filtered = 0;
+		iChB_filtered = 0;
+
+		desired_heading = -70;
+		waitUntil( abs( getGyroStable() - desired_heading ) < 20);
+
+		break;
+
+	case 1:
+		iChA_filtered = 0;
+		iChB_filtered = 90;
+		wait1Msec(900);
+		break;
+	}
+	drive_override = false;
+}
+
 task main()
 {
 	initialize();
@@ -408,7 +478,8 @@ task main()
 	setGyroStable();
 	resetGyroStable();
 
-	timestamp = getTimerValue(T1);
+	timestamp1 = getTimerValue(T1);
+	timestamp2 = getTimerValue(T1);
 
 	desired_heading = 0;
 
@@ -422,9 +493,9 @@ task main()
 	{
 		if ( !drive_override )
 		{
-			if (getJoystickValue(BtnFUp) && getTimerValue(T1) > (500 + timestamp))
+			if (getJoystickValue(BtnFUp) && getTimerValue(T1) > (500 + timestamp1))
 			{
-				timestamp = getTimerValue(T1);
+				timestamp1 = getTimerValue(T1);
 
 				if(slow_drive)
 				{
@@ -456,7 +527,7 @@ task main()
 		//writeDebugStreamLine("%f %f %f %f %f %f %f", getTimerValue(T1), getTimerValue(T2), getJoystickValue(ChC), iChC_filtered, desired_heading, getGyroStable(), getTouchLEDBlue(LED));
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
-		if ( getJoystickValue(BtnLUp)==1 && claw_working == false )
+		if ( getJoystickValue(BtnLUp) && !claw_working )
 		{
 			if (claw_to_release)
 			{
@@ -470,6 +541,13 @@ task main()
 		}
 
 		lift_preset();
+
+		if (getJoystickValue(BtnEDown) && getTimerValue(T1) > (500 + timestamp2) )
+		{
+			timestamp2 = getTimerValue(T1);
+			macro(macroName);
+			macroName += 1;
+		}
 
 		wait1Msec(dt);
 	}
