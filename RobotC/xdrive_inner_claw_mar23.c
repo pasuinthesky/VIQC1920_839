@@ -18,7 +18,7 @@ float desired_heading = 0.0;
 bool drive_override = false;
 bool task_running = false;
 
-#define GYRO_SAMPLING_SECONDS 10
+#define GYRO_SAMPLING_SECONDS 5
 #define ACCEPTABLE_DRIFT_RANGE 0.05
 float fGyroDriftRate;
 
@@ -42,8 +42,6 @@ float cmToEncoderUnit(float distance)
 {
 	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
 }
-
-float tempDelta;
 
 typedef struct {
 	float setpoint;
@@ -69,8 +67,8 @@ void setGyroStable()
 	{
 		// Let the LDH flashing to remind people do not move the robot.
 		setTouchLEDColor(LED,colorRed);
-		setTouchLEDBlinkTime(LED, 14,6);
-		wait1Msec(3000);
+		//setTouchLEDBlinkTime(LED, 14,6);
+		//wait1Msec(3000);
 		setTouchLEDBlinkTime(LED, 0,1);
 		wait1Msec(2000);
 
@@ -79,7 +77,7 @@ void setGyroStable()
 
 		resetGyro(gyro);
 		clearTimer(T4);
-		wait(GYRO_SAMPLING_SECONDS);
+		wait1Msec(GYRO_SAMPLING_SECONDS*1000);
 
 		fGyroDriftRate = getGyroDegreesFloat(gyro) / GYRO_SAMPLING_SECONDS;
 
@@ -122,7 +120,7 @@ float PIDControl (structPID &pid)
 	return output;
 }
 
-void strafePID(float direction, int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
+void strafePID(int direction, int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
 {
 	int tmpJoyStick, motor_a, motor_b, ChA_selector, ChB_selector;
 
@@ -231,7 +229,7 @@ void strafePID(float direction, int distance, int maxJoyStick, float Kp, float K
 
 void turnTo(float heading, float delta)
 {
-	tempDelta = pidOrientation.delta;
+	float tempDelta = pidOrientation.delta;
 	pidOrientation.delta = delta;
 	pidOrientation.integral = 0;
 	pidOrientation.prev_error = 0;
