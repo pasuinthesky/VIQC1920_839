@@ -555,7 +555,7 @@ void macro(int name)
 	switch (name)
 	{
 	case 0:
-		strafePID(3, 20, 60, 0.18, 0, 0, 12);
+		strafePID(3, 13, 60, 0.18, 0, 0, 2);
 		//waitUntil(getTouchLEDValue(LED));
 		turnTo(55,10);
 		//waitUntil(getTouchLEDValue(LED));
@@ -564,18 +564,20 @@ void macro(int name)
 		setMotorSpeed(clawMotor, -100);
 		setMotorTarget(armMotor, ARM_CARRY, 100);
 		waitUntilMotorStop(armMotor);
+		strafePID(3, -15, 90, 0.18, 0, 0, 2);
 
 		desired_heading = 90;
-		strafePID(1, -13, 90, 0.18, 0, 0, 2);
-		strafePID(3, -20, 90, 0.18, 0, 0, 10);
+		strafePID(1, -10, 90, 0.18, 0, 0, 2);
+		wait1Msec(100);
+		//strafePID(3, -15, 90, 0.18, 0, 0, 10);
 
 		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
 
-		strafePID(3, -60, 90, 0.18, 0, 0, 2);
+		strafePID(3, -65, 90, 0.18, 0, 0, 2);
 		strafePID(2, 8, 90, 0.18, 0, 0, 2);
-		turnTo(-80,10);
-		desired_heading = -70;
+		turnTo(-90,10);
+		desired_heading = -80;
 
 		break;
 
