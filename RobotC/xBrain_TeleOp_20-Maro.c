@@ -44,7 +44,7 @@ float fGyroDriftRate;
 #define RATE 1
 
 float timestamp1, timestamp2;
-int macroName = 1;
+int macroName = 0;
 
 float dt = 25;
 
@@ -555,50 +555,27 @@ void macro(int name)
 	switch (name)
 	{
 	case 0:
-		iChA_filtered = 60;
-		iChB_filtered = 10;
-		wait1Msec(400);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
-
-		desired_heading += 90;
-		waitUntil( abs( getGyroStable() - desired_heading ) < 10);
-
-		iChA_filtered = 60;
-		iChB_filtered = -10;
-		wait1Msec(100);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
+		strafePID(3, 20, 60, 0.18, 0, 0, 12);
+		//waitUntil(getTouchLEDValue(LED));
+		turnTo(55,10);
+		//waitUntil(getTouchLEDValue(LED));
+		strafePID(3, 15, 90, 0.18, 0, 0, 2);
 
 		setMotorSpeed(clawMotor, -100);
 		setMotorTarget(armMotor, ARM_CARRY, 100);
-		waitUntilMotorStop(clawMotor);
 		waitUntilMotorStop(armMotor);
-		wait1Msec(100);
 
-		iChA_filtered = 0;
-		iChB_filtered = -90;
-		wait1Msec(460);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
-		wait1Msec(100);
+		desired_heading = 90;
+		strafePID(1, -13, 90, 0.18, 0, 0, 2);
+		strafePID(3, -20, 90, 0.18, 0, 0, 10);
 
 		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
 
-		iChA_filtered = -90;
-		iChB_filtered = 0;
-		wait1Msec(700);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
-
-		wait1Msec(100);
-
-		iChA_filtered = 60;
-		iChB_filtered = 0;
-		wait1Msec(200);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
+		strafePID(3, -60, 90, 0.18, 0, 0, 2);
+		strafePID(2, 8, 90, 0.18, 0, 0, 2);
+		turnTo(-80,10);
+		desired_heading = -70;
 
 		break;
 
