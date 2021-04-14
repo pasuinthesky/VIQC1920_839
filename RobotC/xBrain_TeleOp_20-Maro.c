@@ -555,29 +555,60 @@ void macro(int name)
 	switch (name)
 	{
 	case 0:
-		strafePID(3, 13, 60, 0.18, 0, 0, 2);
+		turnTo(90,10);
 		//waitUntil(getTouchLEDValue(LED));
-		turnTo(55,10);
-		//waitUntil(getTouchLEDValue(LED));
-		strafePID(3, 15, 90, 0.18, 0, 0, 2);
+		strafePID(1, 42, 90, 0.18, 0, 0, 2);
+		strafePID(3, 8, 90, 0.18, 0, 0, 2);
 
 		setMotorSpeed(clawMotor, -100);
 		setMotorTarget(armMotor, ARM_CARRY, 100);
 		waitUntilMotorStop(armMotor);
-		strafePID(3, -15, 90, 0.18, 0, 0, 2);
 
 		desired_heading = 90;
-		strafePID(1, -10, 90, 0.18, 0, 0, 2);
+		strafePID(1, -38, 90, 0.18, 0, 0, 2);
 		wait1Msec(100);
-		//strafePID(3, -15, 90, 0.18, 0, 0, 10);
 
+		strafePID(3, -15, 90, 0.18, 0, 0, 10);
 		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
 
 		strafePID(3, -65, 90, 0.18, 0, 0, 2);
-		strafePID(2, 8, 90, 0.18, 0, 0, 2);
+		strafePID(1, 34, 90, 0.18, 0, 0, 2);
+		strafePID(3, 10, 90, 0.18, 0, 0, 2);
 		turnTo(-90,10);
-		desired_heading = -85;
+		//desired_heading = -80;
+
+		strafePID(3, 18, 90, 0.18, 0, 0, 2);
+
+		setMotorSpeed(clawMotor, -100);
+		waitUntilMotorStop(clawMotor);
+
+		setMotorTarget(armMotor, iArmLevel[1], 100);
+		wait1Msec(300);
+		waitUntilMotorStop(armMotor);
+
+		turnTo(-130, 10);
+
+		strafePID(3, 6, 40, 0.18, 0, 0, 2);
+
+		setMotorTarget(armMotor,in_between_level,100);
+		waitUntilMotorStop(armMotor);
+		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
+		waitUntilMotorStop(clawMotor);
+
+		strafePID(3, -26, 90, 0.18, 0, 0, 2);
+
+		setMotorTarget(armMotor, iArmLevel[0], 100);
+		//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
+
+		waitUntil(getMotorEncoder(armMotor) < iArmLevel[1] * 0.5);
+		desired_heading = -90;
+		strafePID(1, -20, 40, 0.18, 0, 0, 2);
+
+		strafePID(3, 14, 40, 0.18, 0, 0, 2);
+
+		setMotorSpeed(clawMotor, -100);
+		waitUntilMotorStop(clawMotor);
 
 		break;
 	}
