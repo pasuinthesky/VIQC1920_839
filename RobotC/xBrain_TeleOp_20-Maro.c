@@ -577,14 +577,8 @@ void macro(int name)
 		strafePID(3, -65, 90, 0.18, 0, 0, 2);
 		strafePID(2, 8, 90, 0.18, 0, 0, 2);
 		turnTo(-90,10);
-		desired_heading = -80;
+		desired_heading = -85;
 
-		break;
-
-	case 1:
-		iChA_filtered = 0;
-		iChB_filtered = 90;
-		wait1Msec(900);
 		break;
 	}
 	drive_override = false;
@@ -651,7 +645,7 @@ task main()
 		//writeDebugStreamLine("%f %f %f %f %f %f %f", getTimerValue(T1), getTimerValue(T2), getJoystickValue(ChC), iChC_filtered, desired_heading, getGyroStable(), getTouchLEDBlue(LED));
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
-		if ( getJoystickValue(BtnLUp) && !claw_working )
+		if ( (getJoystickValue(BtnLUp) || getJoystickValue(BtnLDown)) && !claw_working )
 		{
 			if (claw_to_release)
 			{
@@ -670,7 +664,7 @@ task main()
 		{
 			timestamp2 = getTimerValue(T1);
 			macro(macroName);
-			//macroName += 1;
+			macroName += 1;
 		}
 
 		wait1Msec(dt);
