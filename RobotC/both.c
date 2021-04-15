@@ -371,6 +371,7 @@ void right_side_3_3_3_stable()
 	strafePID(1, -6, 90, 0.18, 0, 0, 2);
 	turnTo(-90, 10);
 	strafePID(1, -33, 90, 0.18, 0, 0, 2);
+	setMotorTarget(clawMotor, CLAW_RELEASE-20, 100);
 	strafePID(3, 14, 90, 0.18, 0, 0, 2);
 
 	claw_grab = true;
@@ -464,7 +465,7 @@ void right_side_3_3_3_stable()
 	setMotorBrakeMode(BR, motorCoast);
 	setMotorBrakeMode(BL, motorCoast);
 	desired_heading = 0;
-	strafePID(3, -150, 90, 0.18, 0, 0, 2);
+	strafePID(3, -175, 90, 0.18, 0, 0, 2);
 
 }
 
@@ -582,6 +583,7 @@ void left_side_3_3_3()
 	strafePID(1, 6, 90, 0.18, 0, 0, 2);
 	turnTo(90, 10);
 	strafePID(1, 30, 90, 0.18, 0, 0, 2);
+	setMotorTarget(clawMotor, CLAW_RELEASE-20, 100);
 	strafePID(3, 14, 90, 0.18, 0, 0, 2);
 
 	claw_grab = true;
