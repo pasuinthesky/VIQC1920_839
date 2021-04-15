@@ -401,11 +401,9 @@ task claw_preset()
 				setMotorSpeed(clawMotor, 0);
 				if ( land_riser  )
 				{
-					drive_override = true;
 					iChA_filtered = -90;
 					wait1Msec(350);
 					stopDrivetrain();
-					drive_override = false;
 					land_riser = false;
 					setMotorTarget(armMotor, iArmLevel[0], 100);
 				}
