@@ -387,7 +387,7 @@ void right_side_3_3_3_stable()
 
 	land_riser();
 
-	strafePID(3, -26, 90, 0.18, 0, 0, 2);
+	strafePID(3, -27, 90, 0.18, 0, 0, 2);
 
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	//strafePID(3, -17, 40, 0.18, 0, 0, 1); this comment pairs with the fancy drift thing
@@ -397,13 +397,13 @@ void right_side_3_3_3_stable()
 	desired_heading = -90;
 	strafePID(1, -18, 40, 0.18, 0, 0, 2);
 
-	strafePID(3, 9, 40, 0.18, 0, 0, 2);
+	strafePID(3, 11, 40, 0.18, 0, 0, 2);
 
 	claw_grab = true;
 	setMotorTarget(armMotor, iArmLevel[1], 100);
 	waitUntil( !claw_grab );
 
-	strafePID(3, -32, 90, 0.18, 0, 0, 2);
+	strafePID(3, -36, 90, 0.18, 0, 0, 2);
 	strafePID(1, -42, 40, 0.18, 0, 0, 2);
 
 	//waitUntil(getTouchLEDValue(LED));
@@ -412,7 +412,7 @@ void right_side_3_3_3_stable()
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, -12, 90, 0.18, 0, 0, 2);
-	strafePID(1, -47, 40, 0.18, 0, 0, 2);
+	strafePID(1, -49, 40, 0.18, 0, 0, 2);
 	strafePID(3, 5, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
@@ -422,7 +422,7 @@ void right_side_3_3_3_stable()
 	setMotorTarget(armMotor, iArmLevel[0], 100);
 	waitUntil(getMotorEncoder(armMotor) < iArmLevel[0] + 40 );
 	setMotorTarget(clawMotor, CLAW_RELEASE+20, 100);
-	strafePID(3, 30, 40, 0.18, 0, 0, 2);
+	strafePID(3, 28, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
 	claw_grab = true;
@@ -440,7 +440,7 @@ void right_side_3_3_3_stable()
 	turnTo( -90, 10);
 	waitUntil(getMotorEncoder(armMotor) < iArmLevel[0] + 80 );
 
-	strafePID(1, -17, 40, 0.18, 0, 0, 2);
+	strafePID(1, -19, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, 12, 40, 0.18, 0, 0, 2);
@@ -449,12 +449,14 @@ void right_side_3_3_3_stable()
 	claw_grab = true;
 	waitUntil( !claw_grab );
 	setMotorTarget(armMotor, iArmLevel[1], 100);
-	strafePID(3, -37, 90, 0.18, 0, 0, 2);
-	strafePID(1, -35, 40, 0.18, 0, 0, 1);
+	strafePID(3, -39, 90, 0.18, 0, 0, 2);
+	strafePID(1, -36, 40, 0.18, 0, 0, 1);
 
 	//waitUntil(getTouchLEDValue(LED));
 
+	desired_heading = -92;
 	strafePID(3, 32, 90, 0.18, 0, 0, 2);
+	desired_heading = -88;
 	strafePID(3, -10, 90, 0.18, 0, 0, 2);
 	land_riser();
 	strafePID(3, -16, 90, 0.18, 0, 0, 2);
@@ -465,7 +467,8 @@ void right_side_3_3_3_stable()
 	setMotorBrakeMode(BR, motorCoast);
 	setMotorBrakeMode(BL, motorCoast);
 	desired_heading = 0;
-	strafePID(3, -175, 90, 0.18, 0, 0, 2);
+	strafePID(3, -50, 80, 0.18, 0, 0, 20);
+	strafePID(3, -135, 90, 0.18, 0, 0, 2);
 
 }
 
@@ -663,15 +666,17 @@ void left_side_3_3_3()
 	claw_grab = true;
 	waitUntil( !claw_grab );
 	setMotorTarget(armMotor, iArmLevel[1], 100);
-	strafePID(3, -39, 90, 0.18, 0, 0, 2);
+	strafePID(3, -41, 90, 0.18, 0, 0, 2);
 	strafePID(1, 35, 40, 0.18, 0, 0, 1);
 
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 27, 90, 0.18, 0, 0, 2);
-	strafePID(3, -10, 90, 0.18, 0, 0, 2);
+	desired_heading = 93;
+	strafePID(3, 30, 90, 0.18, 0, 0, 2);
+	desired_heading = 90;
+	strafePID(3, -12, 90, 0.18, 0, 0, 2);
 	land_riser();
-	strafePID(3, -72, 90, 0.18, 0, 0, 2);
+	strafePID(3, -70, 90, 0.18, 0, 0, 2);
 
 }
 
