@@ -576,7 +576,7 @@ void macro(int name)
 		turnTo(-98,10);
 		//desired_heading = -95;
 		claw_working = false;
-		claw_to_release = false;
+		claw_to_release = true;
 
 		break;
 	}
