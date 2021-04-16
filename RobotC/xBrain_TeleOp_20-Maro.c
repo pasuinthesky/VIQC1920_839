@@ -559,11 +559,11 @@ void macro(int name)
 		strafePID(3, 8, 90, 0.18, 0, 0, 2);
 
 		setMotorSpeed(clawMotor, -100);
-		setMotorTarget(armMotor, ARM_CARRY, 100);
+		setMotorTarget(armMotor, ARM_CARRY+20, 100);
 		waitUntilMotorStop(armMotor);
 
 		desired_heading = 90;
-		strafePID(1, -38, 90, 0.18, 0, 0, 2);
+		strafePID(1, -43, 90, 0.18, 0, 0, 2);
 		wait1Msec(100);
 
 		strafePID(3, -15, 90, 0.18, 0, 0, 10);
