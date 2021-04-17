@@ -412,7 +412,7 @@ void right_side_3_3_3_stable()
 	//waitUntil(getTouchLEDValue(LED));
 
 	strafePID(3, -10, 90, 0.18, 0, 0, 2);
-	strafePID(1, -47, 40, 0.18, 0, 0, 2);
+	strafePID(1, -45, 40, 0.18, 0, 0, 2);
 	strafePID(3, 5, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
@@ -445,13 +445,13 @@ void right_side_3_3_3_stable()
 	strafePID(1, -21, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(3, 12, 40, 0.18, 0, 0, 2);
+	strafePID(3, 13, 40, 0.18, 0, 0, 2);
 	//waitUntil(getTouchLEDValue(LED));
 
 	claw_grab = true;
 	waitUntil( !claw_grab );
 	setMotorTarget(armMotor, iArmLevel[1], 100);
-	strafePID(3, -39, 90, 0.18, 0, 0, 2);
+	strafePID(3, -40, 90, 0.18, 0, 0, 2);
 	strafePID(1, -34, 40, 0.18, 0, 0, 1);
 
 	//waitUntil(getTouchLEDValue(LED));
