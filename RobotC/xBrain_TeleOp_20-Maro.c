@@ -43,6 +43,8 @@ float fGyroDriftRate;
 #define GEAR_RATIO 2
 #define RATE 1
 
+float min_batt_level = 8000;
+
 float timestamp1, timestamp2;
 int macroName = 0;
 
@@ -384,6 +386,12 @@ task claw_preset()
 
 	while (true)
 	{
+		if (getBumperValue(port2) && !claw_working)
+		{
+			claw_working = true;
+			claw_to_release = false;
+		}
+
 		if (claw_working)
 		{
 			if (claw_to_release)
@@ -466,6 +474,7 @@ void lift_preset()
 	}
 }
 
+/*
 task flashLED ()
 {
 	while (true)
@@ -483,6 +492,7 @@ task flashLED ()
 		setTouchLEDColor(LED, colorViolet);
 	}
 }
+*/
 
 void initialize()
 {
@@ -496,7 +506,7 @@ void initialize()
 	setMotorBrakeMode( armMotor, motorHold );
 
 	setMotorSpeed(clawMotor, -100);
-	setMotorSpeed(armMotor, -50);
+	setMotorSpeed(armMotor, -100);
 	wait1Msec(3000);
 
 	resetMotorEncoder(clawMotor);
@@ -531,12 +541,10 @@ task drive()
 			pidOrientation.setpoint = desired_heading;
 
 			iChC_filtered = -PIDControl(pidOrientation);
-			setTouchLEDColor(LED, colorBlue);
 		}
 		else
 		{
 			desired_heading = getGyroStable();
-			setTouchLEDColor(LED, colorYellow);
 		}
 
 		setMotorSpeed( FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
@@ -666,6 +674,15 @@ task main()
 			timestamp2 = getTimerValue(T1);
 			macro(macroName);
 			macroName += 1;
+		}
+
+		if(nImmediateBatteryLevel <= min_batt_level)
+		{
+			setTouchLEDColor(LED, colorRed)
+		}
+		else
+		{
+			setTouchLEDRGB(LED, 0, 150, 255)
 		}
 
 		wait1Msec(dt);
