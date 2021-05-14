@@ -577,16 +577,16 @@ void macro(int name)
 		//wait1Msec(100);
 
 		strafePID(3, -7, 90, 0.18, 0, 0, 2);
-		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
+		setMotorTarget(armMotor, iArmLevel[0], 100);
+/*		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
 
 		strafePID(3, -65, 90, 0.18, 0, 0, 2);
 		strafePID(1, 48, 90, 0.18, 0, 0, 20);
 		strafePID(3, 35, 90, 0.18, 0, 0, 20);
-		turnTo(-95,10);
+		turnTo(-95,10);*/
 		//desired_heading = -95;
 		claw_working = false;
-		claw_to_release = true;
 
 		break;
 	}
@@ -678,11 +678,11 @@ task main()
 
 		if(nImmediateBatteryLevel <= min_batt_level)
 		{
-			setTouchLEDColor(LED, colorRed)
+			setTouchLEDColor(LED, colorRed);
 		}
 		else
 		{
-			setTouchLEDRGB(LED, 0, 150, 255)
+			setTouchLEDRGB(LED, 0, 150, 255);
 		}
 
 		wait1Msec(dt);

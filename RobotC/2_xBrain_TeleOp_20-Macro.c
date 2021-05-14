@@ -13,19 +13,12 @@
 #define CLAW_RELEASE 390
 #define CLAW_HOOKED 90
 
-#define ARM_CARRY 220
+#define ARM_CARRY 240
 #define ARM_DELTA 15
 #define CLAW_DELTA 80
 #define MS_PER_ENCODER_UNIT 2
 
 #define LIFT_LEVELS 3
-
-int error;
-float integral = 0;
-float dt = 25;
-float prev_error = 0;
-float output;
-float desired_heading;
 
 bool claw_working = false;
 bool claw_to_release = false;
@@ -39,13 +32,38 @@ bool slow_drive = false;
 int iChC_filtered;
 int iChA_filtered;
 int iChB_filtered;
+float desired_heading = 0.0;
 
-#define GYRO_SAMPLING_SECONDS 10000
+#define GYRO_SAMPLING_SECONDS 5
 #define ACCEPTABLE_DRIFT_RANGE 0.05
 float fGyroDriftRate;
 
+#define COUNT_PER_ROUND 960
+#define WHEEL_TRAVEL 20.0
+#define GEAR_RATIO 2
+#define RATE 1
+
+float min_batt_level = 8000;
+
 float timestamp1, timestamp2;
 int macroName = 0;
+
+float dt = 25;
+
+typedef struct {
+	float setpoint;
+	float measured_value;
+	float integral;
+	float prev_error;
+	float kp;
+	float ki;
+	float kd;
+	float delta;
+}structPID
+
+structPID pidStrafe;
+structPID pidOrientation;
+structPID pidEncoder;
 
 int iStrafeMapping[101] = {
 	0,0,0,0,0,0,0,0,0,0,
@@ -96,6 +114,11 @@ int iSlowTurnMapping[101] = {
 	15,15,15,15,15,15,15,15,15,15,
 	20,20,20,20,20,20,20,30,30,30,30};
 
+float cmToEncoderUnit(float distance)
+{
+	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
+}
+
 void setGyroStable()
 {
 	fGyroDriftRate = 100;
@@ -104,17 +127,17 @@ void setGyroStable()
 	{
 		// Let the LDH flashing to remind people do not move the robot.
 		setTouchLEDColor(LED,colorRed);
-		setTouchLEDBlinkTime(LED, 14,6);
-		wait1Msec(3);
+		//setTouchLEDBlinkTime(LED, 14,6);
+		//wait1Msec(3000);
 		setTouchLEDBlinkTime(LED, 0,1);
-		wait1Msec(2);
+		wait1Msec(2000);
 
 		setTouchLEDColor(LED,colorGreen);
 		setTouchLEDBlinkTime(LED, 8, 12);
 
 		resetGyro(gyro);
 		clearTimer(T4);
-		wait1Msec(GYRO_SAMPLING_SECONDS);
+		wait1Msec(GYRO_SAMPLING_SECONDS*1000);
 
 		fGyroDriftRate = getGyroDegreesFloat(gyro) / GYRO_SAMPLING_SECONDS;
 
@@ -142,19 +165,138 @@ void resetGyroStable()
 	clearTimer(T4);
 }
 
-float PIDControl (float setpoint, float measured_value, float Kp, float Ki, float Kd, int delta)
+float PIDControl (structPID &pid)
 {
-	error = measured_value - setpoint;
+	float error = pid.setpoint - pid.measured_value;
 
-	if ( abs(error) < delta )
+	if ( abs(error) < pid.delta )
 		error = 0;
 
-	integral = integral + error * dt;
-	float derivative = ( error - prev_error ) / dt;
-	output = Kp * error + Ki * integral + Kd * derivative;
-	prev_error = error;
+	pid.integral = pid.integral + error * dt;
+	float derivative = ( error - pid.prev_error ) / dt;
+	float output = pid.kp * error + pid.ki * pid.integral + pid.kd * derivative;
+	pid.prev_error = error;
 
 	return output;
+}
+
+void strafePID(int direction, int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
+{
+	int tmpJoyStick, motor_a, motor_b, ChA_selector, ChB_selector;
+
+	pidStrafe.setpoint = cmToEncoderUnit(distance) / sqrt(2);
+	pidStrafe.measured_value = 0;
+	pidStrafe.kp = Kp;
+	pidStrafe.ki = Ki;
+	pidStrafe.kd = Kd;
+	pidStrafe.delta = cmToEncoderUnit(delta);
+	pidStrafe.integral = 0;
+	pidStrafe.prev_error = 0;
+
+	pidEncoder.setpoint = 0;
+	pidEncoder.measured_value = 0;
+	pidEncoder.kp = 0.015;
+	pidEncoder.ki = 0.000002;
+	pidEncoder.kd = 0.005;
+	pidEncoder.delta = 30;
+	pidEncoder.integral = 0;
+	pidEncoder.prev_error = 0;
+
+	resetMotorEncoder(FL);
+	resetMotorEncoder(FR);
+	resetMotorEncoder(BL);
+	resetMotorEncoder(BR);
+
+	switch(direction)
+	{
+	case 1:
+		if(distance > 0)
+		{
+			motor_a = FL;
+			motor_b = BL;
+		}
+		else
+		{
+			motor_a = FR;
+			motor_b = BR;
+		}
+		ChA_selector = 0;
+		ChB_selector = 1;
+		break;
+
+	case 2:
+		motor_a = FL;
+		motor_b = BR;
+		ChA_selector = 1;
+		ChB_selector = 1;
+		break;
+
+	case 3:
+		if(distance > 0)
+		{
+			motor_a = BR;
+			motor_b = BL;
+		}
+		else
+		{
+			motor_a = FR;
+			motor_b = FL;
+		}
+		ChA_selector = 1;
+		ChB_selector = 0;
+		break;
+
+	case 4:
+		motor_a = FR;
+		motor_b = BL;
+		ChA_selector = 1;
+		ChB_selector = -1;
+		break;
+	}
+
+	while ( abs(pidStrafe.setpoint - pidStrafe.measured_value) > pidStrafe.delta )
+	{
+		pidStrafe.measured_value = sgn(pidStrafe.setpoint) * (abs(getMotorEncoder(motor_a)) + abs(getMotorEncoder(motor_b))) / 2;
+
+		tmpJoyStick = PIDControl(pidStrafe);
+		if (abs(tmpJoyStick) > maxJoyStick)
+			tmpJoyStick = maxJoyStick * sgn(tmpJoyStick);
+
+		iChA_filtered = tmpJoyStick * ChA_selector;
+		iChB_filtered = tmpJoyStick * ChB_selector;
+
+		pidEncoder.measured_value = abs(getMotorEncoder(motor_b))-abs(getMotorEncoder(motor_a));
+		switch (direction)
+		{
+		case 1:
+			iChA_filtered = PIDControl(pidEncoder);
+			break;
+		case 3:
+			iChB_filtered = PIDControl(pidEncoder);
+			break;
+		}
+
+		writeDebugStreamLine( "%f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChB_filtered, abs(getMotorEncoder(motor_a)), abs(getMotorEncoder(motor_b)), pidEncoder.measured_value );
+
+		//writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading, pidStrafe.setpoint, pidStrafe.measured_value );
+		//writeDebugStreamLine( "%f %f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, abs(getMotorEncoder(FL))-pre_FL, abs(getMotorEncoder(FR))-pre_FR, abs(getMotorEncoder(BL))-pre_BL, abs(getMotorEncoder(BR))-pre_BR, abs(getMotorEncoder(FL))+abs(getMotorEncoder(FR)), abs(getMotorEncoder(BL))+abs(getMotorEncoder(BR)), pidLight.measured_value );
+
+		wait1Msec(dt);
+	}
+	iChA_filtered = 0;
+	iChB_filtered = 0;
+}
+
+void turnTo(float heading, float delta)
+{
+	float tempDelta = pidOrientation.delta;
+	pidOrientation.delta = delta;
+	pidOrientation.integral = 0;
+	pidOrientation.prev_error = 0;
+
+	desired_heading = heading;
+	waitUntil( abs(getGyroStable() - desired_heading) <= pidOrientation.delta );
+	pidOrientation.delta = tempDelta;
 }
 
 void eightDirectionalLimitedJoystick()
@@ -244,6 +386,12 @@ task claw_preset()
 
 	while (true)
 	{
+		if (getBumperValue(port2) && !claw_working)
+		{
+			claw_working = true;
+			claw_to_release = false;
+		}
+
 		if (claw_working)
 		{
 			if (claw_to_release)
@@ -263,8 +411,8 @@ task claw_preset()
 				{
 					drive_override = true;
 					iChA_filtered = -90;
-					wait1Msec(400);
-					stopDrivetrain();
+					wait1Msec(350);
+					//stopDrivetrain();
 					drive_override = false;
 					land_riser = false;
 					setMotorTarget(armMotor, iArmLevel[0], 100);
@@ -326,6 +474,7 @@ void lift_preset()
 	}
 }
 
+/*
 task flashLED ()
 {
 	while (true)
@@ -343,6 +492,7 @@ task flashLED ()
 		setTouchLEDColor(LED, colorViolet);
 	}
 }
+*/
 
 void initialize()
 {
@@ -356,7 +506,7 @@ void initialize()
 	setMotorBrakeMode( armMotor, motorHold );
 
 	setMotorSpeed(clawMotor, -100);
-	setMotorSpeed(armMotor, -50);
+	setMotorSpeed(armMotor, -100);
 	wait1Msec(3000);
 
 	resetMotorEncoder(clawMotor);
@@ -387,13 +537,14 @@ task drive()
 	{
 		if ( getTimerValue(T2) > INERTIA_DIE_DOWN || drive_override )
 		{
-			iChC_filtered = PIDControl( desired_heading, getGyroStable(), 1, 0.00001, 0.0001, 0.6 );
-			setTouchLEDColor(LED, colorBlue);
+			pidOrientation.measured_value = getGyroStable();
+			pidOrientation.setpoint = desired_heading;
+
+			iChC_filtered = -PIDControl(pidOrientation);
 		}
 		else
 		{
 			desired_heading = getGyroStable();
-			setTouchLEDColor(LED, colorYellow);
 		}
 
 		setMotorSpeed( FL, 0 + iChA_filtered + iChB_filtered - iChC_filtered );
@@ -414,48 +565,12 @@ void macro(int name)
 	case 0:
 		iChA_filtered = 60;
 		iChB_filtered = 10;
-		wait1Msec(400);
+		wait1Msec(200);
 		iChA_filtered = 0;
 		iChB_filtered = 0;
+		wait1Msec(100);
 
-		desired_heading = 90;
-		waitUntil( abs( getGyroStable() - desired_heading ) < 10);
-
-		iChA_filtered = 60;
-		iChB_filtered = -10;
-		wait1Msec(300);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
-
-		setMotorSpeed(clawMotor, -100);
-		setMotorTarget(armMotor, ARM_CARRY, 100);
-		waitUntilMotorStop(clawMotor);
-		waitUntilMotorStop(armMotor);
-
-
-		iChA_filtered = 0;
-		iChB_filtered = -90;
-		wait1Msec(460);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
-
-		break;
-
-	case 1:
-		iChA_filtered = 0;
-		iChB_filtered = 90;
-		wait1Msec(900);
-		break;
-
-	case 2:
-		iChA_filtered = 60;
-		iChB_filtered = 10;
-		wait1Msec(250);
-		iChA_filtered = 0;
-		iChB_filtered = 0;
-		waitUntil(getTouchLEDValue(LED) == 1 );
-
-		desired_heading = 45;
+		desired_heading = 55;
 		waitUntil( abs( getGyroStable() - desired_heading ) < 10);
 
 		iChA_filtered = 60;
@@ -466,14 +581,18 @@ void macro(int name)
 
 		setMotorSpeed(clawMotor, -100);
 		setMotorTarget(armMotor, ARM_CARRY, 100);
-		waitUntilMotorStop(clawMotor);
 		waitUntilMotorStop(armMotor);
+
+
+		desired_heading = 125;
+		waitUntil( abs( getGyroStable() - desired_heading ) < 20);
 
 		iChA_filtered = 0;
 		iChB_filtered = 0;
 
-		desired_heading = -135;
-		waitUntil( abs( getGyroStable() - desired_heading ) < 20);
+		setMotorTarget(armMotor, iArmLevel[0], 100);
+
+		claw_working = false;
 
 		break;
 	}
@@ -491,6 +610,11 @@ task main()
 	timestamp2 = getTimerValue(T1);
 
 	desired_heading = 0;
+
+	pidOrientation.delta = 0.6;
+	pidOrientation.kp = 1;
+	pidOrientation.ki = 0.00001;
+	pidOrientation.kd = 0.0001;
 
 	startTask(drive);
 	startTask(claw_preset);
@@ -536,7 +660,7 @@ task main()
 		//writeDebugStreamLine("%f %f %f %f %f %f %f", getTimerValue(T1), getTimerValue(T2), getJoystickValue(ChC), iChC_filtered, desired_heading, getGyroStable(), getTouchLEDBlue(LED));
 		//displayCenteredTextLine(3, "%d, %d, %d", getGyroStable(), desired_heading, getMotorBrakeMode(clawMotor));
 
-		if ( getJoystickValue(BtnLUp) && !claw_working )
+		if ( (getJoystickValue(BtnLUp) || getJoystickValue(BtnLDown)) && !claw_working )
 		{
 			if (claw_to_release)
 			{
@@ -556,6 +680,15 @@ task main()
 			timestamp2 = getTimerValue(T1);
 			macro(macroName);
 			macroName += 1;
+		}
+
+		if(nImmediateBatteryLevel <= min_batt_level)
+		{
+			setTouchLEDColor(LED, colorRed);
+		}
+		else
+		{
+			setTouchLEDRGB(LED, 0, 150, 255);
 		}
 
 		wait1Msec(dt);
