@@ -565,7 +565,7 @@ void macro(int name)
 	case 0:
 		turnTo(90,10);
 		//waitUntil(getTouchLEDValue(LED));
-		strafePID(1, 34, 60, 0.18, 0, 0, 2);
+		strafePID(1, 35, 60, 0.18, 0, 0, 2);
 		strafePID(3, 26, 60, 0.18, 0, 0, 12);
 
 		setMotorSpeed(clawMotor, -100);
@@ -573,19 +573,20 @@ void macro(int name)
 		waitUntilMotorStop(armMotor);
 
 		desired_heading = 90;
-		strafePID(1, -45, 60, 0.18, 0, 0, 2);
+		strafePID(1, -42, 60, 0.18, 0, 0, 2);
 		//wait1Msec(100);
 
-		strafePID(3, -7, 90, 0.18, 0, 0, 2);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
-/*		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
+		strafePID(3, -5.5, 90, 0.18, 0, 0, 2);
+
+		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
 
 		strafePID(3, -65, 90, 0.18, 0, 0, 2);
-		strafePID(1, 48, 90, 0.18, 0, 0, 20);
-		strafePID(3, 35, 90, 0.18, 0, 0, 20);
-		turnTo(-95,10);*/
-		//desired_heading = -95;
+		strafePID(1, 50, 90, 0.18, 0, 0, 20);
+		strafePID(3, 37, 90, 0.18, 0, 0, 20);
+		turnTo(-105,10);
+		desired_heading = getGyroStable();
 		claw_working = false;
 
 		break;
