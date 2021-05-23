@@ -43,7 +43,7 @@ float fGyroDriftRate;
 #define GEAR_RATIO 2
 #define RATE 1
 
-float min_batt_level = 8000;
+float min_batt_level = 7800;
 
 float timestamp1, timestamp2;
 int macroName = 0;
@@ -588,6 +588,7 @@ void macro(int name)
 		turnTo(-105,10);
 		desired_heading = getGyroStable();
 		claw_working = false;
+		claw_to_release = false;
 
 		break;
 	}
