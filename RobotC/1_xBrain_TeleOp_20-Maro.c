@@ -565,19 +565,20 @@ void macro(int name)
 	case 0:
 		turnTo(90,10);
 		//waitUntil(getTouchLEDValue(LED));
-		strafePID(1, 34, 60, 0.18, 0, 0, 2);
-		strafePID(3, 28, 60, 0.18, 0, 0, 12);
+		strafePID(1, 36, 60, 0.18, 0, 0, 2);
+		strafePID(3, 28, 90, 0.18, 0, 0, 12);
 
 		setMotorSpeed(clawMotor, -100);
 		setMotorTarget(armMotor, ARM_CARRY+20, 100);
 		waitUntilMotorStop(armMotor);
 
 		desired_heading = 90;
-		strafePID(1, -45, 60, 0.18, 0, 0, 2);
+		strafePID(1, -50, 60, 0.18, 0, 0, 12);
 		//wait1Msec(100);
 
-		strafePID(3, -7, 90, 0.18, 0, 0, 2);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
+		strafePID(3, -7, 90, 0.18, 0, 0, 2);
+
 /*		setMotorTarget(clawMotor, CLAW_RELEASE, 100);
 		setMotorTarget(armMotor, iArmLevel[0], 100);
 
