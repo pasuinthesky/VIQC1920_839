@@ -82,12 +82,12 @@ void goStraightDecel(int distance, int maxSpeed, float Ki, float Kp, int slowZon
 
 	clearTimer( T2 );
 
-	while ( currentCount < targetCount && time1[T2] < ( targetCount * MS_PER_ENCODER_UNIT * 100 / MIN_SPEED ) )
+	while ( currentCount < targetCount && time1[T2] < ( targetCount * MS_PER_ENCODER_UNIT * 100 / MIN_SPEED ) )//second requirement is multiplying the time taken to get to targetCount at speed 100 with the ratio of speed 100 to MIN_SPEED (100/MIN_SPEED), because MS_PER_ENCODER was recorded at speed 100
 	{
 		error = getGyroDegreesFloat(Gyro) - targetHeading;
 		integral = integral + error;
 		output = error * Kp + integral * Ki;
-
+//idk
     if ( currentCount < ( targetCount - slowZone ) )
 		{
 			motorSpeed = maxSpeed;
