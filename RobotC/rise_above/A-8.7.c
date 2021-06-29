@@ -43,6 +43,7 @@ float cmToEncoderUnit(float distance)
 	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
 }
 
+//47 to 56 creates a new type of struct and names it structPID
 typedef struct {
 	float setpoint;
 	float measured_value;
@@ -65,7 +66,7 @@ void setGyroStable()
 
 	while (fGyroDriftRate > ACCEPTABLE_DRIFT_RANGE)
 	{
-		// Let the LDH flashing to remind people do not move the robot.
+		// Let the LED flashing to remind people do not move the robot.
 		setTouchLEDColor(LED,colorRed);
 		//setTouchLEDBlinkTime(LED, 14,6);
 		//wait1Msec(3000);
