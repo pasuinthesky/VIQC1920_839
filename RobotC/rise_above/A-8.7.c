@@ -40,7 +40,7 @@ bool claw_grab = false;
 
 float cmToEncoderUnit(float distance)
 {
-	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
+	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;	
 }
 
 //47 to 56 creates a new type of struct and names it structPID
