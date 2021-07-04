@@ -205,8 +205,8 @@ void strafePID(int direction, int distance, int maxJoyStick, float Kp, float Ki,
 
 		iChA_filtered = tmpJoyStick * ChA_selector;
 		iChB_filtered = tmpJoyStick * ChB_selector;
-
-		pidEncoder.measured_value = abs(getMotorEncoder(motor_b))-abs(getMotorEncoder(motor_a));
+a
+		pidEncoder.measured_value = bs(getMotorEncoder(motor_b))-abs(getMotorEncoder(motor_a));//this is just bad naming. instead of measured value, it is more like an error, to counter act skidding
 		switch (direction)
 		{
 		case 1:
