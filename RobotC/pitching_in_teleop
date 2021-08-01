@@ -1,4 +1,4 @@
-#pragma config(Sensor, port8,  Gyro,           sensorVexIQ_Gyro)
+	#pragma config(Sensor, port8,  Gyro,           sensorVexIQ_Gyro)
 #pragma config(Sensor, port9,  LED,            sensorVexIQ_LED)
 #pragma config(Motor,  motor1,          leftMotor,     tmotorVexIQ, PIDControl, driveLeft, encoder)
 #pragma config(Motor,  motor7,          rightMotor,    tmotorVexIQ, PIDControl, reversed, driveRight, encoder)
@@ -21,6 +21,30 @@ float fGyroDriftRate;
 #define WHEEL_TRAVEL 20
 #define GEAR_RATIO 2
 #define RATE 1
+
+int iStrafeMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	40,40,40,40,40,60,60,60,60,60,
+	60,60,60,80,80,95,95,95,95,95,95}; // Max not to 100 to allow room for PID.
+
+int iTurnMapping[101] = {
+	0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,
+	10,10,10,10,10,10,10,10,10,10,
+	10,10,10,10,10,10,10,10,10,10,
+	20,20,20,20,20,20,20,20,20,20,
+	20,20,20,20,20,20,20,20,20,20,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	30,30,30,30,30,30,30,30,30,30,
+	40,40,40,40,40,40,40,60,60,60,60};
 
 float cmToEncoderUnit(float distance)
 {
@@ -156,7 +180,6 @@ void turnTo(float heading, float delta)
 
 	desired_heading = heading;
 	waitUntil( abs(getGyroStable() - desired_heading) <= pidOrientation.delta );
-	setTouchLEDRGB(LED, 255, 0, 0);
 	pidOrientation.delta = tempDelta;
 }
 
@@ -164,6 +187,8 @@ task drive()
 {
 	while (true)
 	{
+        iChA_filtered=iDriveMapping[abs(getJoystickValue(ChA))]*sgn(getJoystickValue(ChA));
+		iChC_filtered=iTurnMapping[abs(getJoystickValue(ChC))]*sgn(getJoystickValue(ChC));
 		pidOrientation.measured_value = getGyroStable();
 		pidOrientation.setpoint = desired_heading;
 
@@ -232,19 +257,10 @@ task main()
 	desired_heading = 0;
 	resetTimer(T2);
 
-	pidOrientation.delta = 3;
+	pidOrientation.delta = 5;
 	pidOrientation.kp = 0.75;
 	pidOrientation.ki = 0;
-	pidOrientation.kd = 1;
+	pidOrientation.kd = 1.1;
 
 	startTask(drive);
-	int i;
-	for (i = 1; i<=8; i++)
-	{
-		strafePID(15, 90, 5, 0, 1, 2);
-		turnTo(90*i, 10);
-	}
-	setTouchLEDRGB(LED, 0, 255, 50);
-	// for speed 90 use 5, 0, 1
-	// for speed 30 use 5, 2, 1
 }
