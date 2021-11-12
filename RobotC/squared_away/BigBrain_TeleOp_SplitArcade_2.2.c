@@ -1,4 +1,4 @@
-#pragma config(Motor,  motor8,           leftMotor,     tmotorVexIQ, PIDControl, encoder)
+	#pragma config(Motor,  motor8,           leftMotor,     tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor2,           rightMotor,    tmotorVexIQ, PIDControl, reversed, encoder)
 #pragma config(Motor,  motor12,          scoopMotor,    tmotorVexIQ, PIDControl, encoder)
 #pragma config(Motor,  motor11,          liftMotorL,    tmotorVexIQ, PIDControl, encoder)
