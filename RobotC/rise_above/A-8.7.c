@@ -40,7 +40,7 @@ bool claw_grab = false;
 
 float cmToEncoderUnit(float distance)
 {
-	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;	
+	return distance * COUNT_PER_ROUND / WHEEL_TRAVEL / GEAR_RATIO / RATE;
 }
 
 //47 to 56 creates a new type of struct and names it structPID
@@ -205,8 +205,8 @@ void strafePID(int direction, int distance, int maxJoyStick, float Kp, float Ki,
 
 		iChA_filtered = tmpJoyStick * ChA_selector;
 		iChB_filtered = tmpJoyStick * ChB_selector;
-a
-		pidEncoder.measured_value = bs(getMotorEncoder(motor_b))-abs(getMotorEncoder(motor_a));//this is just bad naming. instead of measured value, it is more like an error, to counter act skidding
+
+		pidEncoder.measured_value = abs(getMotorEncoder(motor_b))-abs(getMotorEncoder(motor_a));//this is just bad naming. instead of measured value, it is more like an error, to counter act skidding
 		switch (direction)
 		{
 		case 1:

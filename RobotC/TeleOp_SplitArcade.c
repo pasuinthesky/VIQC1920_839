@@ -44,6 +44,7 @@ task intake
 			if(getJoystickValue(BtnLUp) == 1)
 			{
 				setMotorSpeed(intakeMotor, 0)
+				wait1Msec(200)
 			}
 		}
 	}
