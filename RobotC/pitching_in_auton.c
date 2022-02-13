@@ -32,13 +32,10 @@ float fGyroDriftRate;
 float dt = 25;
 float allowed_time = 7.5;
 float iChC_filtered = 0.0;
-float iChB_filtered = 0.0;
 float iChA_filtered = 0.0;
 float desired_heading = 0.0;
 float min_ChC = 0.0;
 
-bool drive_override = false;
-bool task_running = false;
 
 float cmToEncoderUnit(float distance)
 {
@@ -123,15 +120,15 @@ float PIDControl (structPID &pid)
 	float output = pid.kp * error + pid.ki * pid.integral + pid.kd * derivative;
 	pid.prev_error = error;
 
-	//writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), output, error, pid.integral, derivative, pid.kp, pid.ki, pid.kd );
+	writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), output, error, pid.integral, derivative, pid.kp, pid.ki, pid.kd );
 
 	return output;
 }
 
-void strafePID(int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
+void goStraight(int distance, int maxJoyStick, float Kp, float Ki, float Kd, int delta)
 {
-	int tmpJoyStick, motor_a, motor_b, ChA_selector, ChB_selector;
 
+	pidOrientation.setpoint = desired_heading;
 	pidOrientation.delta = 10;
 	pidOrientation.kp = 0.55;
 	pidOrientation.ki = 0.001;
@@ -152,104 +149,66 @@ void strafePID(int distance, int maxJoyStick, float Kp, float Ki, float Kd, int 
 	resetMotorEncoder(leftMotor);
 	resetMotorEncoder(rightMotor);
 
-	motor_a = leftMotor;
-	motor_b = rightMotor;
-	ChA_selector = 1;
-	//ChB_selector = 0;
-	//desired_heading += 25;
+
 	while ( abs(pidDrive.setpoint - pidDrive.measured_value) > pidDrive.delta )
 	{
-		pidDrive.measured_value = sgn(pidDrive.setpoint) * (abs(getMotorEncoder(motor_a)) + abs(getMotorEncoder(motor_b))) / 2;
+		pidDrive.measured_value = sgn(pidDrive.setpoint) * (abs(getMotorEncoder(leftMotor)) + abs(getMotorEncoder(rightMotor))) / 2;
+		iChA_filtered = PIDControl(pidDrive);
+		if (abs(iChA_filtered) > maxJoyStick)
+			iChA_filtered = maxJoyStick * sgn(iChA_filtered);
 
-		tmpJoyStick = PIDControl(pidDrive);
-		if (abs(tmpJoyStick) > maxJoyStick)
-			tmpJoyStick = maxJoyStick * sgn(tmpJoyStick);
-
-		iChA_filtered = tmpJoyStick * ChA_selector;
-
+		pidOrientation.measured_value = getGyroStable();
+		iChC_filtered = -PIDControl(pidOrientation);
+		if ( abs(iChC_filtered) < min_ChC && iChC_filtered != 0 )
+		{
+			iChC_filtered = sgn(iChC_filtered) * min_ChC;
+		}
 		//writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading, pidDrive.setpoint, pidDrive.measured_value );
+
+
+		setMotorSpeed(leftMotor,iChA_filtered+iChC_filtered);
+		setMotorSpeed(rightMotor,iChA_filtered-iChC_filtered);
 
 		wait1Msec(dt);
 	}
-	iChA_filtered = 0;
-	//desired_heading -= 25;
+	setMotorSpeed(leftMotor,0);
+	setMotorSpeed(rightMotor,0);
 }
 
-void turnTo(float heading, float delta)
+void turnTo(float heading, float speed, float Kp, float Ki, float Kd, float delta)
 {
+	desired_heading = heading;
+	iChA_filtered = speed;
+
+	pidOrientation.setpoint = desired_heading;
 	pidOrientation.delta = delta;
-	pidOrientation.kp = 0.55;
-	pidOrientation.ki = 0;
-	pidOrientation.kd = 0;
+	pidOrientation.kp = Kp;
+	pidOrientation.ki = Ki;
+	pidOrientation.kd = Kd;
 	pidOrientation.integral = 0;
 	pidOrientation.prev_error = 0;
 
 	min_ChC = MIN_TURNING_CHC;
 
-	desired_heading = heading;
-	waitUntil( abs(getGyroStable() - desired_heading) <= pidOrientation.delta );
-}
-
-task drive()
-{
-	while (true)
+	while ( abs(getGyroStable() - desired_heading) > pidOrientation.delta )
 	{
 		pidOrientation.measured_value = getGyroStable();
-		pidOrientation.setpoint = desired_heading;
-
 		iChC_filtered = -PIDControl(pidOrientation);
 		if ( abs(iChC_filtered) < min_ChC && iChC_filtered != 0 )
 		{
 			iChC_filtered = sgn(iChC_filtered) * min_ChC;
 		}
 
-		writeDebugStreamLine( "%f %f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, pidOrientation.integral, getGyroDegrees(gyro), getGyroStable(), desired_heading );
-		if(! drive_override)
-		{
-			setMotorSpeed(leftMotor,(iChA_filtered+iChC_filtered)/1);
-			setMotorSpeed(rightMotor,(iChA_filtered-iChC_filtered)/1);
-		}
+		writeDebugStreamLine( "%f %f %f %f %f %f %f %f", getTimerValue(T2), iChA_filtered, iChC_filtered, getGyroDegrees(gyro), getGyroStable(), desired_heading, pidDrive.setpoint, pidDrive.measured_value );
+
+		setMotorSpeed(leftMotor,iChA_filtered+iChC_filtered);
+		setMotorSpeed(rightMotor,iChA_filtered-iChC_filtered);
+
 		wait1Msec(dt);
 	}
+	setMotorSpeed(leftMotor,0);
+	setMotorSpeed(rightMotor,0);
 }
-
-void initialize()
-{
-	setMotorEncoderUnits(encoderCounts);
-
-	setMotorBrakeMode(rightMotor, motorCoast);
-	setMotorBrakeMode(leftMotor, motorCoast);
-
-	setTouchLEDColor(LED,colorYellow);
-	waitUntil(getTouchLEDValue(LED));
-
-	setMotorBrakeMode(rightMotor, motorHold);
-	setMotorBrakeMode(leftMotor, motorHold);
-}
-/*
-void LEDBusiness(int colour, int blinkTimeOn, int blinkTimeOff, int blinkColour, int blink)
-{
-
-timeStamp = time1[T1];
-displayCenteredTextLine( 3, "%f", timeStamp );
-
-if (blink == 0)
-{
-setTouchLEDColor(LED, colour);
-waitUntil( getTouchLEDValue(LED) == 1 );
-}
-else if (blink ==1)
-{
-setTouchLEDColor(LED,colour);
-waitUntil(getTouchLEDValue(LED) == 1);
-setTouchLEDColor(LED,blinkColour);
-setTouchLEDBlinkTime(LED, blinkTimeOn, blinkTimeOff);
-}
-
-wait(0.3);
-resetGyro(Gyro);
-targetHeading = 0;
-}*/
 
 void set_catapult()
 {
@@ -272,33 +231,49 @@ void fire_catapult()
 	}
 }
 
+void initialize()
+{
+	setMotorEncoderUnits(encoderCounts);
+
+	setMotorBrakeMode(rightMotor, motorCoast);
+	setMotorBrakeMode(leftMotor, motorCoast);
+
+	set_catapult();
+
+	setTouchLEDColor(LED,colorYellow);
+	waitUntil(getTouchLEDValue(LED));
+
+	setMotorBrakeMode(rightMotor, motorHold);
+	setMotorBrakeMode(leftMotor, motorHold);
+}
+
 void eight_ball()
 {
-	turnTo(15, 8);
+	turnTo(15, 0, 0.55, 0, 0, 8);
 	setMotorSpeed(intakeMotor, 100);
-	strafePID(20, 90, 5, 0, 1, 3);
-	//strafePID(-20, 90, 5, 0, 1, 3);
-	turnTo(-50, 10);
+	goStraight(20, 90, 5, 0, 1, 3);
+	//goStraight(-20, 90, 5, 0, 1, 3);
+	turnTo(-50, 0, 0.55, 0, 0, 10);
 	//intake on midway
-	strafePID(20, 90, 5, 0, 1, 3);
-	//strafePID(-5, 90, 5, 0, 1, 3);
-	turnTo(-90, 5);
+	goStraight(20, 90, 5, 0, 1, 3);
+	//goStraight(-5, 90, 5, 0, 1, 3);
+	turnTo(-90, 0, 0.55, 0, 0, 5);
 	desired_heading = -90;
 	//waitUntil(getTouchLEDValue(LED) == 1);
 
-	strafePID(70, 90, 5, 2, 1, 5);
-	strafePID(20, 60, 5, 2, 1, 5);
-	turnTo(-30, 3);
-	strafePID(40, 90, 5, 2, 1, 15);
+	goStraight(70, 90, 5, 2, 1, 5);
+	goStraight(20, 60, 5, 2, 1, 5);
+	turnTo(-30, 0, 0.55, 0, 0, 3);
+	goStraight(40, 90, 5, 2, 1, 15);
 	desired_heading = -10;
-	strafePID(100, 90, 5, 2, 1, 5);
+	goStraight(100, 90, 5, 2, 1, 5);
 
-	turnTo(70, 3);
-	strafePID(40, 90, 5, 2, 1, 5);//68 5
-	strafePID(-10, 30, 5, 0, 1, 2);
-	turnTo(180, 10);
-	strafePID(68, 90, 5, 2, 1, 5);
-	turnTo(270, 5);
+	turnTo(70, 0, 0.55, 0, 0, 3);
+	goStraight(40, 90, 5, 2, 1, 5);//68 5
+	goStraight(-10, 30, 5, 0, 1, 2);
+	turnTo(180, 0, 0.55, 0, 0, 10);
+	goStraight(68, 90, 5, 2, 1, 5);
+	turnTo(270, 0, 0.55, 0, 0, 5);
 
 	setTouchLEDRGB(LED, 0, 255, 50);
 	// for speed 90 use 5, 0, 1
@@ -308,45 +283,48 @@ void eight_ball()
 
 void four_ball()
 {
-	turnTo(15, 8);
+	turnTo(15, 0, 0.55, 0, 0, 8);
 	setMotorSpeed(intakeMotor, 100);
-	strafePID(20, 90, 5, 0, 1, 3);
-	turnTo(-50, 10);
-	strafePID(20, 90, 5, 0, 1, 3);
-	turnTo(-90, 5);
+	goStraight(20, 90, 5, 0, 1, 3);
+	turnTo(-50, 0, 0.55, 0, 0, 10);
+	goStraight(20, 90, 5, 0, 1, 3);
+	turnTo(-90, 0, 0.55, 0, 0, 5);
 	setMotorSpeed(intakeMotor, 0);
 	desired_heading = -90;
 	//waitUntil(getTouchLEDValue(LED));
 
-	strafePID(70, 90, 5, 2, 1, 5);
+	goStraight(70, 90, 5, 2, 1, 5);
 	setMotorSpeed(intakeMotor, 100);
-	strafePID(20, 60, 5, 2, 1, 5);
-	turnTo(-30, 3);
+	goStraight(20, 60, 5, 2, 1, 5);
+	turnTo(-40, 0, 0.55, 0, 0, 3);
 	desired_heading = -10;
 	setMotorSpeed(intakeMotor, 50);
-	strafePID(40, 60, 5, 2, 1, 15);
-	turnTo(-10, 3);
-	strafePID(20, 60, 5, 2, 1, 15);
+	goStraight(40, 60, 5, 2, 1, 15);
+	turnTo(-10, 0, 0.55, 0, 0, 3);
+	goStraight(20, 60, 5, 2, 1, 15);
 	setMotorSpeed(intakeMotor, 50);
-//	waitUntil(getTouchLEDValue(LED));
-	strafePID(-5, 60, 5, 2, 1, 2);
-//	waitUntil(getTouchLEDValue(LED));
-	turnTo(20, 3);
-//	waitUntil(getTouchLEDValue(LED));
-	strafePID(25, 60, 5, 2, 1, 3);
+	//waitUntil(getTouchLEDValue(LED));
+	goStraight(-5, 60, 5, 2, 1, 2);
+	//waitUntil(getTouchLEDValue(LED));
+	turnTo(20, 0, 0.55, 0, 0, 3);
+	//waitUntil(getTouchLEDValue(LED));
+	goStraight(35, 60, 5, 2, 1, 3);
 	setMotorSpeed(intakeMotor, 0);
-//	waitUntil(getTouchLEDValue(LED));
-	turnTo(-90, 3);
-	strafePID(-40, 60, 5, 2, 1, 2);
-	strafePID(-7, 30, 5, 2, 1, 2);
-	min_ChC = 0;
+	//waitUntil(getTouchLEDValue(LED));
+	turnTo(-90, 0, 0.55, 0, 0, 3);
+	goStraight(-30, 60, 5, 2, 1, 2);
+	setMotorSpeed(leftMotor, -40);
+	setMotorSpeed(rightMotor, -40);
+	wait1Msec(200);
 	setMotorSpeed(intakeMotor, -50);
 	wait1Msec(300);
 	setMotorSpeed(intakeMotor, 0);
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
 	fire_catapult();
 	set_catapult();
 	setMotorSpeed(intakeMotor, 100);
-	wait1Msec(600);
+	wait1Msec(800);
 	setMotorSpeed(intakeMotor, 0);
 	fire_catapult();
 
@@ -355,7 +333,6 @@ void four_ball()
 task main()
 {
 	initialize();
-	set_catapult();
 
 	setGyroStable();
 	setTouchLEDColor(LED,colorBlue);
@@ -368,16 +345,11 @@ task main()
 	desired_heading = 0;
 	resetTimer(T2);
 
-	startTask(drive);// testing 1m drivestraight and 90 degree turn and intake
 
-	/*
-	intake(1);
-	waitUntil(getTouchLEDValue(LED) == 1);
-	strafePID(100, 60, 5, 2, 1, 3);
-	waitUntil(getTouchLEDValue(LED) == 1);
-	turnTo(-90, 3);
-	waitUntil(getTouchLEDValue(LED) == 1);
-	*/
+	//goStraight(100, 60, 5, 2, 1, 3);
+	//waitUntil(getTouchLEDValue(LED) == 1);
+	//turnTo(-90, 40, 0.2, 0, 0, 5);
+	//waitUntil(getTouchLEDValue(LED) == 1);
 
 	//eight_ball();
 	four_ball();
