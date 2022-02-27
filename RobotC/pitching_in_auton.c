@@ -269,38 +269,56 @@ task outlet_task()
 
 void eight_ball()
 {
+	// --- Ball 1/2 ---
+
+  // Ball 1
 	turnTo(22, 0, 0.55, 0, 0, 8);
 	setMotorSpeed(intakeMotor, 100);
 	goStraight(25, 90, 5, 0, 1, 13);
+
+	// Ball 2
 	turnTo(-50, 0, 0.55, 0, 0, 10);
 	goStraight(30, 90, 5, 0, 1, 13);
+
+	// --- Ball 3 ---
+
+	// aimming
 	turnTo(-90, 0, 0.55, 0, 0, 8);
 	setMotorSpeed(intakeMotor, 0);
 	//waitUntil(getTouchLEDValue(LED));
 
+	// pick  up
 	desired_heading = -100;
 	goStraight(90, 90, 5, 2, 1, 15);
 	setMotorSpeed(intakeMotor, 100);
-	goStraight(20, 60, 5, 2, 1, 5);
-	turnTo(-40, 0, 0.55, 0, 0, 3);
+	goStraight(20, 60, 5, 2, 1, 5); // slowing when close to wall
 
+	// --- Ball 4/5/6 ---
+
+	// amming
+	turnTo(-40, 0, 0.55, 0, 0, 3);
 	desired_heading = -10;
 	goStraight(40, 60, 5, 2, 1, 15);
 	turnTo(-5, 20, 0.55, 0, 0, 3);
 
+	// pick up
 	goStraight(70, 80, 5, 2, 1, 2);
 	setMotorSpeed(intakeMotor, 30);
 	//waitUntil(getTouchLEDValue(LED));
+
+	// --- Ball 7 ---
 
 	goStraight(15, 60, 5, 2, 1, 2);
 	setMotorSpeed(intakeMotor, 100);
 	wait1Msec(300);
 	setMotorSpeed(intakeMotor, 50);
 
+	// aiming for ball 8
 	goStraight(-65, 60, 5, 2, 1, 13);
 	startTask(outlet_task);
 	turnTo(60, 0, 0.55, 0, 0, 3);
 
+	// --- Ball 8 ---
 	setMotorSpeed(intakeMotor, 40);
 	goStraight(60, 60, 5, 2, 1, 23);
 	setMotorSpeed(intakeMotor, 100);
@@ -315,27 +333,39 @@ void eight_ball()
 	turnTo(270, 0, 0.35, 0, 0, 30);
 	//waitUntil(getTouchLEDValue(LED));
 
+	// --- Shooting ---
+
 	setMotorSpeed(intakeMotor, 50);
+
+	// align robot to the wall
 	setMotorSpeed(leftMotor, -60);
 	setMotorSpeed(rightMotor, -60);
 	wait1Msec(600);
 	setMotorSpeed(leftMotor, 0);
 	setMotorSpeed(rightMotor, 0);
+
+	// first shot
 	outlet();
 	fire_catapult();
 	setMotorSpeed(intakeMotor, 100);
 	set_catapult();
-	wait1Msec(500);
+	wait1Msec(500); // for the intakeMortor to work a bit more
+
+	// second shot
 	outlet();
 	setMotorSpeed(intakeMotor, 100);
 	fire_catapult();
 	set_catapult();
 	wait1Msec(500);
+
+	// third shot
 	outlet();
 	setMotorSpeed(intakeMotor, 100);
 	fire_catapult();
 	set_catapult();
 	//wait1Msec(500);
+
+	// fourth shot
 	//outlet();
 	fire_catapult();
 	setMotorSpeed(intakeMotor, 0);
