@@ -254,16 +254,18 @@ void initialize()
 	setMotorBrakeMode(gateMotor, motorHold);
 }
 
-void outlet()
+void outtake()
 {
+	setMotorSpeed(intakeMotor, 0);
+	wait1Msec(100);
 	setMotorSpeed(intakeMotor, -100);
-	wait1Msec(300);
+	wait1Msec(500);
 	setMotorSpeed(intakeMotor, 0);
 }
 
-task outlet_task()
+task outtake_task()
 {
-	outlet();
+	outtake();
 }
 
 
@@ -289,56 +291,53 @@ void eight_ball()
 	turnTo(-5, 20, 0.55, 0, 0, 3);
 
 	goStraight(70, 80, 5, 2, 1, 2);
-	setMotorSpeed(intakeMotor, 30);
-	//waitUntil(getTouchLEDValue(LED));
-
-	goStraight(15, 60, 5, 2, 1, 2);
-	setMotorSpeed(intakeMotor, 100);
-	wait1Msec(300);
-	setMotorSpeed(intakeMotor, 50);
-
-	goStraight(-65, 60, 5, 2, 1, 13);
-	startTask(outlet_task);
-	turnTo(60, 0, 0.55, 0, 0, 3);
-
-	setMotorSpeed(intakeMotor, 40);
-	goStraight(60, 60, 5, 2, 1, 23);
-	setMotorSpeed(intakeMotor, 100);
-	wait1Msec(300);
 	setMotorSpeed(intakeMotor, 0);
 	//waitUntil(getTouchLEDValue(LED));
 
-	goStraight(-10, 40, 5, 2, 1, 3);
+	goStraight(8, 60, 5, 2, 1, 2);
+	setMotorSpeed(intakeMotor, 100);
+	wait1Msec(400);
+	setMotorSpeed(intakeMotor, 0);
+
+	turnTo(120, 0, 0.55, 0, 0, 3);
+	goStraight(80, 60, 5, 2, 1, 23);
+	//waitUntil(getTouchLEDValue(LED));
+
+	setMotorSpeed(intakeMotor, 100);
+	goStraight(10, 40, 5, 2, 1, 3);
+	wait1Msec(200);
+	setMotorSpeed(intakeMotor, 0);
+	//turnTo(54, 35, 0.55, 0, 0, 3);
+	//goStraight(10, 90, 5, 2, 1, 3);
 	//waitUntil(getTouchLEDValue(LED));
 
 
-	turnTo(270, 0, 0.35, 0, 0, 30);
+	turnTo(240, 0, 0.55, 0, 0, 3);
 	//waitUntil(getTouchLEDValue(LED));
 
-	setMotorSpeed(intakeMotor, 50);
-	setMotorSpeed(leftMotor, -60);
-	setMotorSpeed(rightMotor, -60);
-	wait1Msec(600);
+	setMotorSpeed(leftMotor, -100);
+	setMotorSpeed(rightMotor, -100);
+	wait1Msec(500);
 	setMotorSpeed(leftMotor, 0);
 	setMotorSpeed(rightMotor, 0);
-	outlet();
+	outtake();
 	fire_catapult();
 	setMotorSpeed(intakeMotor, 100);
 	set_catapult();
 	wait1Msec(500);
-	outlet();
+	outtake();
 	setMotorSpeed(intakeMotor, 100);
 	fire_catapult();
 	set_catapult();
 	wait1Msec(500);
-	outlet();
+	outtake();
 	setMotorSpeed(intakeMotor, 100);
 	fire_catapult();
 	set_catapult();
 	//wait1Msec(500);
-	//outlet();
+	//outtake();
+	//setMotorSpeed(intakeMotor, 100);
 	fire_catapult();
-	setMotorSpeed(intakeMotor, 0);
 	set_catapult();
 }
 
@@ -400,13 +399,13 @@ void eight_ball_tmp()
 	wait1Msec(500);
 	setMotorSpeed(leftMotor, 0);
 	setMotorSpeed(rightMotor, 0);
-	outlet();
+	outtake();
 	fire_catapult();
 	setMotorSpeed(intakeMotor, 100);
 	set_catapult();
 	wait1Msec(500);
 	setMotorSpeed(intakeMotor, 0);
-	outlet();
+	outtake();
 	fire_catapult();
 	setMotorSpeed(intakeMotor, 100);
 	set_catapult();
@@ -466,13 +465,13 @@ void six_ball()
 	wait1Msec(500);
 	setMotorSpeed(leftMotor, 0);
 	setMotorSpeed(rightMotor, 0);
-	outlet();
+	outtake();
 	fire_catapult();
 	setMotorSpeed(intakeMotor, 100);
 	set_catapult();
 	wait1Msec(500);
 	setMotorSpeed(intakeMotor, 0);
-	outlet();
+	outtake();
 	fire_catapult();
 	setMotorSpeed(intakeMotor, 100);
 	set_catapult();
@@ -635,12 +634,6 @@ task main()
 	//waitUntil(getTouchLEDValue(LED));
 	next_four();
 */
-
-/*
-turnTo(270, 0, 0.35, 0, 0, 60);
-waitUntil(getTouchLEDValue(LED));
-*/
-
 	eight_ball();
 	displayTextLine(3, "%f", getTimerValue(T2));
 	waitUntil(getTouchLEDValue(LED));
