@@ -221,7 +221,7 @@ void fire_catapult()
 		setMotorSpeed(gateMotor, 0);
 
 		setMotorSpeed(catapultMotor, -100);
-		wait1Msec(500);
+		wait1Msec(1000);
 		setMotorTarget(gateMotor, -500, 100);
 		wait1Msec(800);
 	}
