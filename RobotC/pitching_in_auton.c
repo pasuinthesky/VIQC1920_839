@@ -245,80 +245,108 @@ void initialize()
 	setMotorTarget(gateMotor, -500, 100);
 	set_catapult();
 
+	setMotorBrakeMode(rightMotor, motorHold);
+	setMotorBrakeMode(leftMotor, motorHold);
+
 	setTouchLEDColor(LED,colorYellow);
 	waitUntil(getTouchLEDValue(LED));
 
-	setMotorBrakeMode(rightMotor, motorHold);
-	setMotorBrakeMode(leftMotor, motorHold);
 	setMotorBrakeMode(gateMotor, motorHold);
 }
 
-void eight_ball()
+void six_ball()
 {
-	turnTo(15, 0, 0.55, 0, 0, 8);
+	turnTo(22, 0, 0.55, 0, 0, 8);
 	setMotorSpeed(intakeMotor, 100);
-	goStraight(20, 90, 5, 0, 1, 3);
-	//goStraight(-20, 90, 5, 0, 1, 3);
+	goStraight(15, 90, 5, 0, 1, 3);
 	turnTo(-50, 0, 0.55, 0, 0, 10);
-	//intake on midway
 	goStraight(20, 90, 5, 0, 1, 3);
-	//goStraight(-5, 90, 5, 0, 1, 3);
 	turnTo(-90, 0, 0.55, 0, 0, 5);
-	desired_heading = -90;
+	setMotorSpeed(intakeMotor, 0);
 	//waitUntil(getTouchLEDValue(LED));
 
-	goStraight(70, 90, 5, 2, 1, 5);
-	goStraight(20, 60, 5, 2, 1, 5);
-	turnTo(-30, 0, 0.55, 0, 0, 3);
-	goStraight(40, 90, 5, 2, 1, 15);
+	desired_heading = -100;
+	goStraight(80, 90, 5, 2, 1, 5);
+	setMotorSpeed(intakeMotor, 100);
+	goStraight(25, 60, 5, 2, 1, 5);
+	turnTo(-40, 0, 0.55, 0, 0, 3);
 	desired_heading = -10;
-	goStraight(100, 90, 5, 2, 1, 5);
+	setMotorSpeed(intakeMotor, 100);
+	goStraight(40, 60, 5, 2, 1, 15);
+	turnTo(-10, 20, 0.55, 0, 0, 3);
+	//goStraight(20, 30, 5, 2, 1, 15);
+	//waitUntil(getTouchLEDValue(LED));
 
-	turnTo(70, 0, 0.55, 0, 0, 3);
-	goStraight(40, 90, 5, 2, 1, 5);//68 5
-	goStraight(-10, 30, 5, 0, 1, 2);
-	turnTo(180, 0, 0.55, 0, 0, 10);
-	goStraight(68, 90, 5, 2, 1, 5);
-	turnTo(270, 0, 0.55, 0, 0, 5);
+	setMotorSpeed(intakeMotor, 100);
+	turnTo(58, 0, 0.55, 0, 0, 3);
+	//waitUntil(getTouchLEDValue(LED));
 
-	setTouchLEDRGB(LED, 0, 255, 50);
-	// for speed 90 use 5, 0, 1
-	// for speed 30 use 5, 2, 1
+	setMotorSpeed(intakeMotor, 100);
+	goStraight(30, 90, 5, 2, 1, 3);
+	//turnTo(53, 0, 0.55, 0, 0, 3);
+	//goStraight(10, 90, 5, 2, 1, 3);
+	//waitUntil(getTouchLEDValue(LED));
+
+	setMotorSpeed(intakeMotor, 0);
+	turnTo(30, 0, 0.55, 0, 0, 3);
+	//waitUntil(getTouchLEDValue(LED));
+
+	setMotorSpeed(intakeMotor, 100);
+	goStraight(20, 90, 5, 2, 1, 3);
+	waitUntil(getTouchLEDValue(LED));
+
+	turnTo(-90, 0, 0.55, 0, 0, 3);
+
+	setMotorSpeed(intakeMotor, 0);
+	setMotorSpeed(leftMotor, -40);
+	setMotorSpeed(rightMotor, -40);
+	wait1Msec(200);
+	setMotorSpeed(intakeMotor, -50);
+	wait1Msec(300);
+	setMotorSpeed(intakeMotor, 0);
+	setMotorSpeed(leftMotor, 0);
+	setMotorSpeed(rightMotor, 0);
+	fire_catapult();
+	set_catapult();
+	setMotorSpeed(intakeMotor, 100);
+	wait1Msec(1000);
+	setMotorSpeed(intakeMotor, 0);
+	fire_catapult();
+	set_catapult();
 }
-
 
 void four_ball()
 {
-	turnTo(15, 0, 0.55, 0, 0, 8);
+	turnTo(22, 0, 0.55, 0, 0, 8);
 	setMotorSpeed(intakeMotor, 100);
-	goStraight(20, 90, 5, 0, 1, 3);
+	goStraight(15, 90, 5, 0, 1, 3);
 	turnTo(-50, 0, 0.55, 0, 0, 10);
 	goStraight(20, 90, 5, 0, 1, 3);
 	turnTo(-90, 0, 0.55, 0, 0, 5);
 	setMotorSpeed(intakeMotor, 0);
-	desired_heading = -90;
 	//waitUntil(getTouchLEDValue(LED));
 
-	goStraight(70, 90, 5, 2, 1, 5);
+	desired_heading = -100;
+	goStraight(80, 90, 5, 2, 1, 5);
 	setMotorSpeed(intakeMotor, 100);
-	goStraight(20, 60, 5, 2, 1, 5);
+	goStraight(25, 60, 5, 2, 1, 5);
 	turnTo(-40, 0, 0.55, 0, 0, 3);
 	desired_heading = -10;
-	setMotorSpeed(intakeMotor, 50);
+	setMotorSpeed(intakeMotor, 100);
 	goStraight(40, 60, 5, 2, 1, 15);
-	turnTo(-10, 0, 0.55, 0, 0, 3);
-	goStraight(20, 60, 5, 2, 1, 15);
-	setMotorSpeed(intakeMotor, 50);
-	//waitUntil(getTouchLEDValue(LED));
+	turnTo(-10, 20, 0.55, 0, 0, 3);
+	goStraight(20, 30, 5, 2, 1, 15);
+	setMotorSpeed(intakeMotor, 100);
+	waitUntil(getTouchLEDValue(LED));
 	goStraight(-5, 60, 5, 2, 1, 2);
-	//waitUntil(getTouchLEDValue(LED));
+	waitUntil(getTouchLEDValue(LED));
 	turnTo(20, 0, 0.55, 0, 0, 3);
-	//waitUntil(getTouchLEDValue(LED));
-	goStraight(35, 60, 5, 2, 1, 3);
-	setMotorSpeed(intakeMotor, 0);
+	waitUntil(getTouchLEDValue(LED));
+	goStraight(20, 60, 5, 2, 1, 3);
 	//waitUntil(getTouchLEDValue(LED));
 	turnTo(-90, 0, 0.55, 0, 0, 3);
 	goStraight(-30, 60, 5, 2, 1, 2);
+	setMotorSpeed(intakeMotor, 0);
 	setMotorSpeed(leftMotor, -40);
 	setMotorSpeed(rightMotor, -40);
 	wait1Msec(200);
@@ -400,12 +428,16 @@ task main()
 	desired_heading = 0;
 	resetTimer(T2);
 
-
+/*
+	// Test Block - Drivechain
 	goStraight(100, 60, 5, 2, 1, 3);
 	waitUntil(getTouchLEDValue(LED));
 	turnTo(-90, 40, 0.2, 0, 0, 5);
 	waitUntil(getTouchLEDValue(LED));
+*/
+
 /*
+	// Test Block - Catapult
 	waitUntil(getTouchLEDValue(LED));
 	fire_catapult();
 	waitUntil(getTouchLEDValue(LED));
@@ -413,7 +445,8 @@ task main()
 	waitUntil(getTouchLEDValue(LED));
 	fire_catapult();
 */
-	//four_ball();
+
+	six_ball();
 	//next_four();
 	/*
 	set_catapult();
